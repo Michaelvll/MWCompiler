@@ -10,7 +10,7 @@
 grammar Mx;
 // Generate a header for the generated file indicating the package it belongs to.
 @header {
-package MxGram;
+package mx_gram;
 }
 import CommonMxLexer;
 

@@ -39,8 +39,8 @@
                     <goal>antlr4</goal>
                 </goals>
                 <configuration>
-                    <sourceDirectory>src/MxGram/src/Mx.g4</sourceDirectory>
-                    <outputDirectory>src/MxGram</outputDirectory>
+                    <sourceDirectory>src/mx_gram/src/Mx.g4</sourceDirectory>
+                    <outputDirectory>src/mx_gram</outputDirectory>
                 </configuration>
             </execution>
         </executions>
