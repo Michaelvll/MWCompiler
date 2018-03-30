@@ -12,7 +12,7 @@ package test;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-// import Compiler.*;
+// import compiler.*;
 
 public class testTest {
     @Test

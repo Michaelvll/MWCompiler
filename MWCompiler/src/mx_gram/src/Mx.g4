@@ -8,10 +8,7 @@
  */
 
 grammar Mx;
-// Generate a header for the generated file indicating the package it belongs to.
-@header {
-package mx_gram;
-}
+
 import CommonMxLexer;
 
 prog : stat+;
