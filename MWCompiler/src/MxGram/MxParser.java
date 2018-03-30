@@ -19,7 +19,7 @@ public class MxParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		ID=1, WS=2;
+		T__0=1, ID=2, WS=3;
 	public static final int
 		RULE_prog = 0, RULE_stat = 1;
 	public static final String[] ruleNames = {
@@ -27,9 +27,10 @@ public class MxParser extends Parser {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
+		null, "' '"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, "ID", "WS"
+		null, null, "ID", "WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -136,7 +137,10 @@ public class MxParser extends Parser {
 	}
 
 	public static class StatContext extends ParserRuleContext {
-		public TerminalNode ID() { return getToken(MxParser.ID, 0); }
+		public List<TerminalNode> ID() { return getTokens(MxParser.ID); }
+		public TerminalNode ID(int i) {
+			return getToken(MxParser.ID, i);
+		}
 		public StatContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -159,6 +163,10 @@ public class MxParser extends Parser {
 			{
 			setState(9);
 			match(ID);
+			setState(10);
+			match(T__0);
+			setState(11);
+			match(ID);
 			}
 		}
 		catch (RecognitionException re) {
@@ -173,10 +181,11 @@ public class MxParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\4\16\4\2\t\2\4\3"+
-		"\t\3\3\2\6\2\b\n\2\r\2\16\2\t\3\3\3\3\3\3\2\2\4\2\4\2\2\2\f\2\7\3\2\2"+
-		"\2\4\13\3\2\2\2\6\b\5\4\3\2\7\6\3\2\2\2\b\t\3\2\2\2\t\7\3\2\2\2\t\n\3"+
-		"\2\2\2\n\3\3\2\2\2\13\f\7\3\2\2\f\5\3\2\2\2\3\t";
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\5\20\4\2\t\2\4\3"+
+		"\t\3\3\2\6\2\b\n\2\r\2\16\2\t\3\3\3\3\3\3\3\3\3\3\2\2\4\2\4\2\2\2\16\2"+
+		"\7\3\2\2\2\4\13\3\2\2\2\6\b\5\4\3\2\7\6\3\2\2\2\b\t\3\2\2\2\t\7\3\2\2"+
+		"\2\t\n\3\2\2\2\n\3\3\2\2\2\13\f\7\4\2\2\f\r\7\3\2\2\r\16\7\4\2\2\16\5"+
+		"\3\2\2\2\3\t";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

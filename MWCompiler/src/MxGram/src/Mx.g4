@@ -8,16 +8,13 @@
  */
 
 grammar Mx;
-
 // Generate a header for the generated file indicating the package it belongs to.
 @header {
 package MxGram;
 }
+import CommonMxLexer;
 
 prog : stat+;
 
-stat : ID;
+stat : ID ' ' ID;
 
-ID : [a-zA-Z][0-9a-zA-Z_]*;
-
-WS : [ \t\r\n]+ -> skip;
