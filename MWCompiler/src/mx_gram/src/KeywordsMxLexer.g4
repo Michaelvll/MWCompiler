@@ -1,0 +1,17 @@
+lexer grammar KeywordsMxLexer;
+BOOL		: 'bool';
+INT			: 'int';
+STRING		: 'string';
+VOID		: 'void';
+NULL		: 'null';
+TRUE		: 'true';
+FALSE		: 'false';
+IF			: 'if';
+FOR			: 'for';
+WHILE		: 'while';
+BREAK		: 'break';
+CONTINUE	: 'continue';
+RETURN		: 'return';
+NEW			: 'new';
+CLASS		: 'class';
+THIS		: 'this';
