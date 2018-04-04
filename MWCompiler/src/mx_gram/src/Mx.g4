@@ -9,165 +9,130 @@
 
 grammar Mx;
 
-options {
-	tokenVocab = CommonMxLexer;
-}
+import CommonMxLexer;
+// options {
+// 	tokenVocab = CommonMxLexer;
+// }
 
-program : declarator+ EOF;
+program : declarator* EOF;
 
 declarator:
-	variableDeclarator
-	// | functionDeclarator
-	// | classDeclarator
+	variableDeclarator		# VARIABLEDECL
+	| functionDeclarator	# FUNCTIONDECL
+	| classDeclarator		# CLASSDECL
 	;
 
 // Declarators for the program
-variableDeclarator:
-	type fieldDeclarators ';'
-	;
-// functionDeclarator	:;
-// classDeclarator		:;
+variableDeclarator	: type variableField SEMI;
+functionDeclarator	: type functionField;
+classDeclarator		: CLASS classField;
 
 type:
-	ClassType ('[' ']')*
-	| PrimitiveType ('[' ']')*
-	;
-fieldDeclarators:
-	Identifier (
-		'=' variableInitializer
-	)?
-	;
-variableInitializer:
-	expression
-	// | arrayInitializer
+	primitiveType (LBRACK RBRACK)*	# PRIMITIVETYPE
+	| classType (LBRACK RBRACK)*	# CLASSTYPE
 	;
 
-expression:
-	conditionalExpression (
-		'=' expression
-	)?
-	;
-conditionalExpression:
-	conditionalOrExpression
+primitiveType	: BOOL | INT | STRING;
+classType		: Identifier;
+
+variableField:
+	Identifier (ASSIGN variableInitializer)?
 	;
 
-conditionalOrExpression:
-	conditionalAndExpression (
-		'||' conditionalAndExpression
-	)*
-	;
-conditionalAndExpression:
-	bitOrExpression (
-		'&&' bitOrExpression
-	)*
-	;
-bitOrExpression:
-	bitXorExpression (
-		'|' bitXorExpression
-	)*
+functionField:
+	Identifier paramExprField functionBody
 	;
 
-bitXorExpression:
-	bitAndExpression (
-		'^' bitAndExpression
-	)*
+paramExprField:
+	LPAREN paramExpr (COMMA paramExpr)* RPAREN
 	;
-bitAndExpression:
-	equalityExpression (
-		'&' equalityExpression
-	)*
+paramExpr : type Identifier;
+
+functionBody	: blockField;
+blockField		: LBRACE block RBRACE;
+block:
+	blockField
+	| variableDeclarator
+	| exprField
+	| conditionField
+	| loopField
+	| jump
 	;
-equalityExpression:
-	relationalExpression (
-		('==' | '!=') relationalExpression
-	)*
+
+body : blockField | exprField;
+conditionField:
+	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField
 	;
-relationalExpression:
-	shiftExpression (
-		relationalOP shiftExpression
-	)*
+elseifConditionField:
+	ELSE IF LPAREN cond = expr RPAREN body
 	;
-relationalOP:
-	'<'
-	| '>'
-	| '<='
-	| '>='
+elseConditionField	: ELSE body;
+loopField			: forField | whileField;
+jump				: RETURN | BREAK | CONTINUE;
+
+forField:
+	FOR LPAREN vardecl = variableDeclarator cond = expr? SEMI step = expr?
+		RPAREN body
 	;
-shiftExpression:
-	addSubExpression (
-		('<<' | '>>') addSubExpression
-	)*
+whileField : WHILE LPAREN cond = expr RPAREN body;
+
+exprField : expr SEMI;
+
+classField : Identifier classBody;
+
+classBody : LBRACE declarator* RBRACE SEMI;
+
+variableInitializer : expr;
+
+expr:
+	expr op = (INC | DEC)					# SUFFIXINCDEC
+	| expr LPAREN arguments RPAREN			# FUNCTIONCALL
+	| expr selector							# SELECTOR
+	| <assoc = right> op = (INC | DEC) expr	# PREFFIXINCDEC
+	| <assoc = right> op = (ADD | SUB) expr	# PREFFIXADDSUB
+	| <assoc = right> NOT expr				# NOTEXPR
+	| <assoc = right> BITNOT expr			# BITNOTEXPR
+	| NEW creator							# NEWCREATOR
+	| expr op = (MUL | DIV | MOD) expr		# MULDIVMOD
+	| expr op = (ADD | SUB) expr			# ADDSUB
+	| expr op = (LSFT | RSFT) expr			# SHIFT
+	| expr op = (LT | GT | LTE | GTE) expr	# RELATION
+	| expr op = (EQ | NEQ) expr				# EQNEQ
+	| expr BITAND expr						# BITANDEXPR
+	| expr BITXOR expr						# BITXOREXPR
+	| expr BITOR expr						# BITOREXPR
+	| expr AND expr							# ANDEXPR
+	| expr OR expr							# OREXPR
+	| <assoc = right> expr ASSIGN expr		# ASSIGNEXPR
+	| literal								# LITERAL
+	| Identifier							# ID
+	| LPAREN expr RPAREN					# PARENEXPR
 	;
-addSubExpression:
-	mulDivModExpression (
-		('+' | '-') mulDivModExpression
-	)*
-	;
-mulDivModExpression:
-	unaryExpression (
-		('*' | '/' | '%') unaryExpression
-	)*
-	;
-unaryExpression:
-	'++' unaryExpression
-	| '--' unaryExpression
-	| '+' unaryExpression
-	| '-' unaryExpression
-	| unaryNotPMExpression
-	;
-unaryNotPMExpression:
-	'~' unaryExpression
-	| '!' unaryExpression
-	| primary selector* (
-		'++'
-		| '--'
-	)
-	;
+
 selector:
-	'.' Identifier arguments?
-	| '[' expression ']'
+	DOT Identifier arguments?	# DOTMEM
+	| LBRACK expr RBRACK		# BRACKMEM
 	;
 
-primary:
-	parenExpression
-	| literal
-	| 'new' creator
-	| Identifier (
-		'.' Identifier
-	)* identifierSuffix?
-	;
-parenExpression:
-	'(' expression ')'
-	;
 literal:
 	BoolLiteral
 	| IntegerLiteral
 	| StringLiteral
-	| 'null'
+	| NULL
 	;
 
-arguments:
-	'(' expressionList? ')'
-	;
-expressionList:
-	expression (',' expression)
-	;
-creator:
-	createdName arrayCreatorRest
-	;
+arguments	: LPAREN exprList? RPAREN;
+exprList	: expr (COMMA expr)*;
+creator		: createdName arrayCreatorRest?;
 createdName:
-	Identifier ('.' Identifier)*
-	| PrimitiveType
+	Identifier (DOT Identifier)*
+	| primitiveType
 	;
 arrayCreatorRest:
-	'[' (
-		']'
-		| expression ']' (
-			'[' expression ']'
-		)* ('[' ']')*
+	LBRACK (
+		RBRACK
+		| expr RBRACK (LBRACK expr RBRACK)* (
+			LBRACK RBRACK
+		)*
 	)
-	;
-identifierSuffix:
-	'[' expression ']'
-	| arguments
 	;

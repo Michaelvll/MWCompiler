@@ -32,3 +32,6 @@ target/
 bin/
 .settings/
 tools/
+
+.idea/
+old_fashion/

@@ -8,32 +8,72 @@
  */
 
 lexer grammar CommonMxLexer;
-import KeywordsMxLexer, SignalsMxLexer;
-channels {
-	COMMENTS,
-	WHITESPACE
-}
+// channels {
+// 	COMMENTS,
+// 	WHITESPACE
+// }
 
-// Name of variables(including name of classes and functions)
-Identifier:
-	Alpha (Alpha | Digit | '_')*
-	;
-LINE_COMMENT:
-	'//' .*? '\n' -> channel(COMMENTS)
-	;
-MULTILINE_COMMENT:
-	'/*' .*? '*/' -> channel(COMMENTS)
-	;
-WS:
-	[ \t\r\n]+ -> channel(WHITESPACE)
-	;
+// Keywords
+BOOL			: 'bool';
+INT				: 'int';
+STRING			: 'string';
+VOID			: 'void';
+NULL			: 'null';
+IF				: 'if';
+ELSE			: 'else';
+FOR				: 'for';
+WHILE			: 'while';
+BREAK			: 'break';
+CONTINUE		: 'continue';
+RETURN			: 'return';
+NEW				: 'new';
+CLASS			: 'class';
+THIS			: 'this';
+fragment TRUE	: 'true';
+fragment FALSE	: 'false';
 
-PrimitiveType:
-	BOOL
-	| INT
-	| STRING
-	;
-ClassType : Identifier;
+// Seperator
+LPAREN	: '(';
+RPAREN	: ')';
+LBRACE	: '{';
+RBRACE	: '}';
+LBRACK	: '[';
+RBRACK	: ']';
+SEMI	: ';';
+COMMA	: ',';
+
+// Operators
+// Arithmatic
+ADD	: '+';
+SUB	: '-';
+MUL	: '*';
+DIV	: '/';
+MOD	: '%';
+// Relation
+GT	: '>';
+LT	: '<';
+EQ	: '==';
+NEQ	: '!=';
+LTE	: '<=';
+GTE	: '>=';
+// Logic
+NOT	: '!';
+AND	: '&&';
+OR	: '||';
+// Bit
+LSFT	: '<<';
+RSFT	: '>>';
+BITNOT	: '~';
+BITAND	: '&';
+BITOR	: '|';
+BITXOR	: '^';
+// Assign
+ASSIGN : '=';
+// Inc&dec
+INC	: '++';
+DEC	: '--';
+// Member
+DOT : '.';
 
 BoolLiteral : TRUE | FALSE;
 
@@ -44,37 +84,29 @@ IntegerLiteral:
 	| BinInteger
 	;
 
-StringLiteral:
-	'"' StringCharactors? '"'
-	;
+// Name of variables(including name of classes and functions)
+StringLiteral : '"' StringCharactors? '"';
+
+Identifier : [a-zA-Z][0-9a-zA-Z_]*;
 
 fragment DecimalInteger:
-	'0'
+	Zero
 	| NonZeroDigit Digit*
 	;
-fragment HexInteger:
-	'0' [xX] HexDigit+
-	;
-fragment OctInteger:
-	'0' OctDigit+
-	;
-fragment BinInteger:
-	'0' [bB] BinDigit+
-	;
-fragment Digit			: [0-9];
-fragment Alpha			: [a-zA-Z];
-fragment NonZeroDigit	: [1-9];
-fragment HexDigit		: [0-9a-fA-F];
-fragment OctDigit		: [0-7];
-fragment BinDigit		: [01];
+fragment HexInteger			: Zero [xX] HexDigit+;
+fragment OctInteger			: Zero OctDigit+;
+fragment BinInteger			: Zero [bB] BinDigit+;
+fragment Digit				: [0-9];
+fragment Alpha				: [a-zA-Z];
+fragment NonZeroDigit		: [1-9];
+fragment HexDigit			: [0-9a-fA-F];
+fragment OctDigit			: [0-7];
+fragment BinDigit			: [01];
+fragment Zero				: '0';
+fragment StringCharactors	: StringCharactor+;
+fragment StringCharactor	: ~["\\] | EscapeSequence;
+fragment EscapeSequence		: '\\' [btnfr"'\\];
 
-fragment StringCharactors:
-	StringCharactor+
-	;
-fragment StringCharactor:
-	~["\\]
-	| EscapeSequence
-	;
-fragment EscapeSequence:
-	'\\' [btnfr"'\\]
-	;
+LINE_COMMENT		: '//' .*? '\n' -> skip;
+MULTILINE_COMMENT	: '/*' .*? '*/' -> skip;
+WS					: [ \t\r\n]+ -> skip;
