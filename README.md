@@ -16,4 +16,4 @@ The language feature is shown in the [M_language_manual](./MxDescribe/M_language
 
 ### Lexer & Parser
 
-The Lexer and Parser is powered by antlr.v4, which can automatically write codes for generating AST(Abstract Syntax Tree) from the .g4 file. The .g4 file is contained in the folder [MxGram](./MWCompiler/src/MxGram)
+The Lexer and Parser is powered by [antlr.v4](www.antlr.com), which can automatically write codes for generating AST(Abstract Syntax Tree) from the .g4 file. The .g4 file is contained in the folder [MxGram](./MWCompiler/src/MxGram)
