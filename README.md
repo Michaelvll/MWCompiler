@@ -11,6 +11,7 @@ The language feature is shown in the [M_language_manual](./MxDescribe/M_language
 * Java SDK 1.8.0+ (hasn't been tested for the earilier version)
 * Maven 3.5.3+ (Ditto)
 * Other dependencies, which is written in [pom.xml](./MWCompiler/pom.xml), will be automatally fetched by maven
+* *The test-case can be downloaded from [compiler2017-testcases](https://bitbucket.org/acmcompiler/compiler2017-testcases.git)*
 
 ## Components of MWCompiler
 
