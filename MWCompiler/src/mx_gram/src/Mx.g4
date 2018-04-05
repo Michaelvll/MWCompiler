@@ -17,15 +17,18 @@ import CommonMxLexer;
 program : declarator* EOF;
 
 declarator:
-	variableDeclarator		# VARIABLEDECL
-	| functionDeclarator	# FUNCTIONDECL
-	| classDeclarator		# CLASSDECL
+	variableDeclField	# VARIABLEDECL
+	| functionDeclField	# FUNCTIONDECL
+	| classDeclField	# CLASSDECL
 	;
 
 // Declarators for the program
-variableDeclarator	: type variableField SEMI;
-functionDeclarator	: type functionField;
-classDeclarator		: CLASS classField;
+variableDeclField : type variableField SEMI;
+functionDeclField:
+	type functionField
+	| VOID functionField
+	;
+classDeclField : CLASS classField;
 
 type:
 	primitiveType (LBRACK RBRACK)*	# PRIMITIVETYPE
@@ -44,49 +47,50 @@ functionField:
 	;
 
 paramExprField:
-	LPAREN paramExpr (COMMA paramExpr)* RPAREN
+	LPAREN (paramExpr (COMMA paramExpr)*)? RPAREN
 	;
 paramExpr : type Identifier;
 
-functionBody	: blockField;
-blockField		: LBRACE block RBRACE;
-block:
-	blockField
-	| variableDeclarator
-	| exprField
-	| conditionField
-	| loopField
-	| jump
+functionBody	: block;
+block			: LBRACE statement* RBRACE;
+statement:
+	block				# BLOCKFIELD
+	| variableDeclField	# VARIABLEDECLField
+	| exprField			# EXPRFIELD
+	| conditionField	# CONDITIONFIELD
+	| loopField			# LOOPFIELD
+	| jumpField			# JUMPFIELD
 	;
 
-body : blockField | exprField;
+body : statement;
 conditionField:
-	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField
+	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField*
 	;
 elseifConditionField:
 	ELSE IF LPAREN cond = expr RPAREN body
 	;
 elseConditionField	: ELSE body;
 loopField			: forField | whileField;
-jump				: RETURN | BREAK | CONTINUE;
+jumpField			: jump SEMI;
+jump				: RETURN expr? | BREAK | CONTINUE;
 
 forField:
-	FOR LPAREN vardecl = variableDeclarator cond = expr? SEMI step = expr?
+	FOR LPAREN vardecl = variableField? SEMI cond = expr? SEMI step = expr?
 		RPAREN body
 	;
 whileField : WHILE LPAREN cond = expr RPAREN body;
 
-exprField : expr SEMI;
+exprField : expr? SEMI;
 
 classField : Identifier classBody;
 
-classBody : LBRACE declarator* RBRACE SEMI;
+classBody : LBRACE declarator* RBRACE;
 
 variableInitializer : expr;
 
 expr:
 	expr op = (INC | DEC)					# SUFFIXINCDEC
-	| expr LPAREN arguments RPAREN			# FUNCTIONCALL
+	| expr arguments						# FUNCTIONCALL
 	| expr selector							# SELECTOR
 	| <assoc = right> op = (INC | DEC) expr	# PREFFIXINCDEC
 	| <assoc = right> op = (ADD | SUB) expr	# PREFFIXADDSUB

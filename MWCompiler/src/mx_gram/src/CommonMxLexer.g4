@@ -14,21 +14,22 @@ lexer grammar CommonMxLexer;
 // }
 
 // Keywords
-BOOL			: 'bool';
-INT				: 'int';
-STRING			: 'string';
-VOID			: 'void';
-NULL			: 'null';
-IF				: 'if';
-ELSE			: 'else';
-FOR				: 'for';
-WHILE			: 'while';
-BREAK			: 'break';
-CONTINUE		: 'continue';
-RETURN			: 'return';
-NEW				: 'new';
-CLASS			: 'class';
-THIS			: 'this';
+BOOL		: 'bool';
+INT			: 'int';
+STRING		: 'string';
+VOID		: 'void';
+NULL		: 'null';
+IF			: 'if';
+ELSE		: 'else';
+FOR			: 'for';
+WHILE		: 'while';
+BREAK		: 'break';
+CONTINUE	: 'continue';
+RETURN		: 'return';
+NEW			: 'new';
+CLASS		: 'class';
+THIS		: 'this';
+
 fragment TRUE	: 'true';
 fragment FALSE	: 'false';
 
