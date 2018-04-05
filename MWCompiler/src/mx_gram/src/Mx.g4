@@ -17,9 +17,9 @@ import CommonMxLexer;
 program : declarator* EOF;
 
 declarator:
-	variableDeclField	# VARIABLEDECL
-	| functionDeclField	# FUNCTIONDECL
-	| classDeclField	# CLASSDECL
+	variableDeclField	# VariableDecl_
+	| functionDeclField	# FunctionDecl_
+	| classDeclField	# ClassDecl_
 	;
 
 // Declarators for the program
@@ -31,8 +31,8 @@ functionDeclField:
 classDeclField : CLASS classField;
 
 type:
-	primitiveType (LBRACK RBRACK)*	# PRIMITIVETYPE
-	| classType (LBRACK RBRACK)*	# CLASSTYPE
+	primitiveType (LBRACK RBRACK)*	# PrimitiveType_
+	| classType (LBRACK RBRACK)*	# ClassType_
 	;
 
 primitiveType	: BOOL | INT | STRING;
@@ -54,17 +54,17 @@ paramExpr : type Identifier;
 functionBody	: block;
 block			: LBRACE statement* RBRACE;
 statement:
-	block				# BLOCKFIELD
-	| variableDeclField	# VARIABLEDECLField
-	| exprField			# EXPRFIELD
-	| conditionField	# CONDITIONFIELD
-	| loopField			# LOOPFIELD
-	| jumpField			# JUMPFIELD
+	block				# BlockField_
+	| variableDeclField	# VariableField_
+	| exprField			# ExprField_
+	| conditionField	# ConditionField_
+	| loopField			# LoopField_
+	| jumpField			# JumpField_
 	;
 
 body : statement;
 conditionField:
-	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField*
+	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField?
 	;
 elseifConditionField:
 	ELSE IF LPAREN cond = expr RPAREN body
@@ -89,33 +89,33 @@ classBody : LBRACE declarator* RBRACE;
 variableInitializer : expr;
 
 expr:
-	expr op = (INC | DEC)					# SUFFIXINCDEC
-	| expr arguments						# FUNCTIONCALL
-	| expr selector							# SELECTOR
-	| <assoc = right> op = (INC | DEC) expr	# PREFFIXINCDEC
-	| <assoc = right> op = (ADD | SUB) expr	# PREFFIXADDSUB
-	| <assoc = right> NOT expr				# NOTEXPR
-	| <assoc = right> BITNOT expr			# BITNOTEXPR
-	| NEW creator							# NEWCREATOR
-	| expr op = (MUL | DIV | MOD) expr		# MULDIVMOD
-	| expr op = (ADD | SUB) expr			# ADDSUB
-	| expr op = (LSFT | RSFT) expr			# SHIFT
-	| expr op = (LT | GT | LTE | GTE) expr	# RELATION
-	| expr op = (EQ | NEQ) expr				# EQNEQ
-	| expr BITAND expr						# BITANDEXPR
-	| expr BITXOR expr						# BITXOREXPR
-	| expr BITOR expr						# BITOREXPR
-	| expr AND expr							# ANDEXPR
-	| expr OR expr							# OREXPR
-	| <assoc = right> expr ASSIGN expr		# ASSIGNEXPR
-	| literal								# LITERAL
-	| Identifier							# ID
-	| LPAREN expr RPAREN					# PARENEXPR
+	expr op = (INC | DEC)					# SuffixIncDec_
+	| expr arguments						# FunctionCall_
+	| expr selector							# Selector_
+	| <assoc = right> op = (INC | DEC) expr	# PreffixIncDec_
+	| <assoc = right> op = (ADD | SUB) expr	# PreffixAddSub_
+	| <assoc = right> NOT expr				# NotExpr_
+	| <assoc = right> BITNOT expr			# BitNotExpr_
+	| NEW creator							# NewCreator_
+	| expr op = (MUL | DIV | MOD) expr		# MulDivExpr_
+	| expr op = (ADD | SUB) expr			# AddSubExpr_
+	| expr op = (LSFT | RSFT) expr			# ShiftExpr_
+	| expr op = (LT | GT | LTE | GTE) expr	# CompareExpr_
+	| expr op = (EQ | NEQ) expr				# EqNeqExpr_
+	| expr BITAND expr						# BitAndExpr_
+	| expr BITXOR expr						# BitXorExpr_
+	| expr BITOR expr						# BitOrExpr_
+	| expr AND expr							# AndExpr_
+	| expr OR expr							# OrExpr_
+	| <assoc = right> expr ASSIGN expr		# AssignExpr_
+	| literal								# Literal_
+	| Identifier							# Identifier_
+	| LPAREN expr RPAREN					# ParenExpr_
 	;
 
 selector:
-	DOT Identifier arguments?	# DOTMEM
-	| LBRACK expr RBRACK		# BRACKMEM
+	DOT Identifier arguments?	# DotMember_
+	| LBRACK expr RBRACK		# BrackMember_
 	;
 
 literal:
