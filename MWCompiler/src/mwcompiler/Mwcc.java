@@ -1,5 +1,5 @@
 /**
- * mwcc
+ * Mwcc.java
  * The main class of mwcompiler for Mx language
  * 
  * @author Michael Wu
@@ -8,20 +8,29 @@
  */
 package mwcompiler;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
 import org.apache.commons.cli.*;
 
+import mx_gram.tools.*;
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+
 public class Mwcc {
     private static InputStream in = System.in;
     private static PrintStream out = System.out;
 
-    public static void main(String[] args) throws Exception {
+    /**
+     * @param args
+     *
+     * The entry of Mwcc
+     */
+    public static void main(String[] args) {
         compilerArgSolve(args);
         buildAst();
     }
@@ -92,6 +101,17 @@ public class Mwcc {
     }
 
     private static void buildAst() {
+        try {
+            CharStream input = CharStreams.fromStream(in);
+            MxLexer lexer = new MxLexer(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            MxParser parser = new MxParser(tokens);
+            ParseTree tree = parser.program();
+        } catch (IOException e) {
+            System.out.println("Can't read from the input file: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
     }
 
 }

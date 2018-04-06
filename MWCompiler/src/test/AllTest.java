@@ -14,7 +14,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ testTest.class, testPrint.class, testLangVariDecl.class
+@SuiteClasses({ TestTest.class, TestPrint.class, TestParser.class
         /*Add test class name here, e.g. testA.class*/
 })
 

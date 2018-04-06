@@ -26,6 +26,8 @@
                         <argument>-package</argument>
                         <argument>mx_gram.tools</argument>
                     </arguments>
+                    <listener>false</listener>
+                    <visitor>true</visitor>
                     <sourceDirectory>src/mx_gram/src/</sourceDirectory>
                     <outputDirectory>src/mx_gram/tools</outputDirectory>
                 </configuration>

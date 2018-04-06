@@ -1,8 +1,0 @@
-int a = 123;
-int m = 321;
-int c = (a +m)*m+a/m;
-string[] b = new string[3];
-string s = "hello,world!";
-myclass[][] c = new myclass[5][4];
-bool d = true;
-string b = null;

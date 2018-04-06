@@ -25,14 +25,15 @@ declarator:
 // Declarators for the program
 variableDeclField : type variableField SEMI;
 functionDeclField:
-	type functionField
-	| VOID functionField
+	type functionField		# TypeFunction_
+	| VOID functionField	# VoidFunction_
 	;
 classDeclField : CLASS classField;
 
 type:
-	primitiveType (LBRACK RBRACK)*	# PrimitiveType_
-	| classType (LBRACK RBRACK)*	# ClassType_
+	type LBRACK RBRACK	# ArrayType_
+	| primitiveType			# PrimitiveType_
+	| classType				# ClassType_
 	;
 
 primitiveType	: BOOL | INT | STRING;
@@ -75,8 +76,7 @@ jumpField			: jump SEMI;
 jump				: RETURN expr? | BREAK | CONTINUE;
 
 forField:
-	FOR LPAREN vardecl = variableField? SEMI cond = expr? SEMI step = expr?
-		RPAREN body
+	FOR LPAREN vardecl = expr? SEMI cond = expr? SEMI step = expr? RPAREN body
 	;
 whileField : WHILE LPAREN cond = expr RPAREN body;
 
@@ -109,6 +109,7 @@ expr:
 	| expr OR expr							# OrExpr_
 	| <assoc = right> expr ASSIGN expr		# AssignExpr_
 	| literal								# Literal_
+	| THIS									# This_
 	| Identifier							# Identifier_
 	| LPAREN expr RPAREN					# ParenExpr_
 	;

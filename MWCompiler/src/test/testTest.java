@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 // import compiler.*;
 
-public class testTest {
+public class TestTest {
     @Test
     public void test() {
         assertEquals(1, 1);
