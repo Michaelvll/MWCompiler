@@ -11,10 +11,10 @@ import mwcompiler.ast.tools.AstVisitor;
 
 public class BinaryExprNode extends ExprNode {
     //TODO
-    public String operator;
+    public OPs operator;
     public ExprNode left, right;
 
-    public BinaryExprNode(ExprNode left, String op, ExprNode right) {
+    public BinaryExprNode(ExprNode left, OPs op, ExprNode right) {
         super();
         this.operator = op;
         this.left = left;

@@ -26,7 +26,7 @@ public class ProgramNode extends  Node {
     }
 
     @Override
-    void accept(AstVisitor visitor) {
+    public void accept(AstVisitor visitor) {
         visitor.visit(this);
     }
 }

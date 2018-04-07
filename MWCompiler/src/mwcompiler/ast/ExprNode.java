@@ -10,13 +10,11 @@ package mwcompiler.ast;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
-public class ExprNode extends Node {
+public abstract class ExprNode extends Node {
     //TODO
 
     protected Location location;
-
-    @Override
-    public void accept(AstVisitor visitor) {
-        visitor.visit(this);
+    public enum OPs{
+        ASSIGN
     }
 }

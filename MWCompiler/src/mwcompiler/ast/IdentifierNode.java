@@ -1,21 +1,18 @@
-/**
- * IdentifierNode.java
- * Identifier extends from ExprNode
- *
- * @author Michael Wu
- * @since 2018-04-06
- */
 package mwcompiler.ast;
 
-import mwcompiler.ast.tools.Location;
+import mwcompiler.ast.tools.AstVisitor;
 
-public class IdentifierNode extends ExprNode {
-    //TODO
-
+public class IdentifierNode extends Node {
     public String name;
-    Location pos;
-    public IdentifierNode(String name, Location pos) {
-        this.name = name;
-        this.pos = pos;
+
+    public IdentifierNode(String s) {
+        this.name = s;
+    }
+
+    public String getName() {return this.name;}
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -78,25 +78,17 @@ DOT : '.';
 
 BoolLiteral : TRUE | FALSE;
 
-IntegerLiteral:
-	DecimalInteger
-	| HexInteger
-	| OctInteger
-	| BinInteger
-	;
+IntLiteral : DecimalInt | HexInt | OctInt | BinInt;
 
 // Name of variables(including name of classes and functions)
 StringLiteral : '"' StringCharactors? '"';
 
 Identifier : [a-zA-Z][0-9a-zA-Z_]*;
 
-fragment DecimalInteger:
-	Zero
-	| NonZeroDigit Digit*
-	;
-fragment HexInteger			: Zero [xX] HexDigit+;
-fragment OctInteger			: Zero OctDigit+;
-fragment BinInteger			: Zero [bB] BinDigit+;
+fragment DecimalInt			: Zero | NonZeroDigit Digit*;
+fragment HexInt				: Zero [xX] HexDigit+;
+fragment OctInt				: Zero OctDigit+;
+fragment BinInt				: Zero [bB] BinDigit+;
 fragment Digit				: [0-9];
 fragment Alpha				: [a-zA-Z];
 fragment NonZeroDigit		: [1-9];

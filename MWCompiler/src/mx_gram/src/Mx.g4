@@ -17,9 +17,9 @@ import CommonMxLexer;
 program : declarator* EOF;
 
 declarator:
-	variableDeclField	# VariableDecl_
-	| functionDeclField	# FunctionDecl_
-	| classDeclField	# ClassDecl_
+	variableDeclField
+	| functionDeclField
+	| classDeclField
 	;
 
 // Declarators for the program
@@ -32,8 +32,8 @@ classDeclField : CLASS classField;
 
 type:
 	type LBRACK RBRACK	# ArrayType_
-	| primitiveType			# PrimitiveType_
-	| classType				# ClassType_
+	| primitiveType		# PrimitiveType_
+	| classType			# ClassType_
 	;
 
 primitiveType	: BOOL | INT | STRING;
@@ -42,6 +42,8 @@ classType		: Identifier;
 variableField:
 	Identifier (ASSIGN variableInitializer)?
 	;
+
+variableInitializer : expr;
 
 functionField:
 	Identifier paramExprField functionBody
@@ -55,12 +57,12 @@ paramExpr : type Identifier;
 functionBody	: block;
 block			: LBRACE statement* RBRACE;
 statement:
-	block				# BlockField_
-	| variableDeclField	# VariableField_
-	| exprField			# ExprField_
-	| conditionField	# ConditionField_
-	| loopField			# LoopField_
-	| jumpField			# JumpField_
+	block
+	| variableDeclField
+	| exprField
+	| conditionField
+	| loopField
+	| jumpField
 	;
 
 body : statement;
@@ -85,8 +87,6 @@ exprField : expr? SEMI;
 classField : Identifier classBody;
 
 classBody : LBRACE declarator* RBRACE;
-
-variableInitializer : expr;
 
 expr:
 	expr op = (INC | DEC)					# SuffixIncDec_
@@ -120,10 +120,10 @@ selector:
 	;
 
 literal:
-	BoolLiteral
-	| IntegerLiteral
-	| StringLiteral
-	| NULL
+	literalType = BoolLiteral
+	| literalType = IntLiteral
+	| literalType = StringLiteral
+	| literalType = NULL
 	;
 
 arguments	: LPAREN exprList? RPAREN;

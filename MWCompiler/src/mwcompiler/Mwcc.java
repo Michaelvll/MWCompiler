@@ -33,6 +33,7 @@ public class Mwcc {
     public static void main(String[] args) {
         compilerArgSolve(args);
         buildAst();
+        System.out.println("Build No exception!");
     }
 
     private static void compilerArgSolve(String[] args) {

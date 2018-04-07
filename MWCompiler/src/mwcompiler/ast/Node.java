@@ -9,9 +9,9 @@ package mwcompiler.ast;
 
 import mwcompiler.ast.tools.*;
 
-abstract public class Node {
+public abstract class Node {
     //TODO
 
-    abstract void accept(AstVisitor visitor);
+    public abstract void accept(AstVisitor visitor);
 }
 

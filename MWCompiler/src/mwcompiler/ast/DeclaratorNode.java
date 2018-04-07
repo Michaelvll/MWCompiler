@@ -9,11 +9,7 @@ package mwcompiler.ast;
 
 import mwcompiler.ast.tools.AstVisitor;
 
-public class DeclaratorNode extends Node {
+public abstract class DeclaratorNode extends Node {
     //TODO
 
-    @Override
-    void accept(AstVisitor visitor) {
-        visitor.visit(this);
-    }
 }

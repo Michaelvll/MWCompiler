@@ -14,7 +14,7 @@ import mwcompiler.ast.tools.Location;
 public class VariableDeclNode extends DeclaratorNode{
     //TODO
     public TypeNode type;
-    public String name;
+    public IdentifierNode var;
     public ExprNode init;
     public Location typePos;
     public Location namePos;
@@ -22,7 +22,7 @@ public class VariableDeclNode extends DeclaratorNode{
 
 
     @Override
-    void accept(AstVisitor visitor) {
+    public void accept(AstVisitor visitor) {
         visitor.visit(this );
     }
 }

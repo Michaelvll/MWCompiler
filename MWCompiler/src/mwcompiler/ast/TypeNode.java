@@ -8,16 +8,30 @@
 package mwcompiler.ast;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.*;
 
 public class TypeNode extends Node {
     //TODO
-    protected String type;
+    public Type type;
 
     public TypeNode(String type){
-        this.type = type;
+        switch (type) {
+            case "int":
+                this.type = new IntType();
+                break;
+            case "string":
+                this.type = new StringType();
+                break;
+            case "bool":
+                this.type = new BoolType();
+                break;
+            default:
+                this.type = new IdentifierType(type);
+        }
+
     }
     @Override
-    void accept(AstVisitor visitor) {
+    public void accept(AstVisitor visitor) {
         visitor.visit(this);
     }
 }
