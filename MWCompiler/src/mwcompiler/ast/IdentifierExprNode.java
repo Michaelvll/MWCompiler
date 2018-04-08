@@ -20,6 +20,10 @@ public class IdentifierExprNode extends ExprNode {
         this.pos = pos;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public void accept(AstVisitor visitor) {
         visitor.visit(this);

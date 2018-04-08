@@ -7,6 +7,9 @@
  */
 package mwcompiler.ast;
 
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.Type;
+
 public class ArrayTypeNode extends TypeNode {
     //TODO
     private Integer dimension = 0;
@@ -15,6 +18,10 @@ public class ArrayTypeNode extends TypeNode {
         super(type);
         this.dimension = dimension;
     }
+    public ArrayTypeNode(NonArrayTypeNode node) {
+        super(node.type);
+        this.dimension = 1;
+    }
 
     public Integer getDimension() {
         return dimension;
@@ -22,5 +29,13 @@ public class ArrayTypeNode extends TypeNode {
 
     public void setDimension(Integer dimension) {
         this.dimension = dimension;
+    }
+    public void addDimension (){
+        ++this.dimension;
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }

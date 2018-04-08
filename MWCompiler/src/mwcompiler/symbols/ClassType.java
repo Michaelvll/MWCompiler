@@ -1,8 +1,8 @@
 package mwcompiler.symbols;
 
-public class IdentifierType extends Type {
+public class ClassType extends Type {
     private String typeName;
-    public IdentifierType(String s) {
+    public ClassType(String s) {
         this.typeName = s;
     }
 
