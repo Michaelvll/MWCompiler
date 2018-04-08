@@ -34,7 +34,7 @@ hs_err_pid*
 target/
 bin/
 .settings/
-tools/
+**/mx_gram/tools
 
 .idea/
 old_fashion/
