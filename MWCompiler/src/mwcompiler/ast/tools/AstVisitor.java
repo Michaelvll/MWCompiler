@@ -10,38 +10,40 @@ import mwcompiler.ast.nodes.*;
  * @since 2018-04-06
  */
 public interface AstVisitor {
-    public void visit(ProgramNode node);
+    void visit(ProgramNode node);
 
-    public void visit(ArrayTypeNode node);
+    void visit(ArrayTypeNode node);
 
-    public void visit(NonArrayTypeNode node);
+    void visit(NonArrayTypeNode node);
 
-    public void visit(VariableDeclNode node);
+    void visit(VariableDeclNode node);
 
-    public void visit(FunctionDeclNode node);
+    void visit(FunctionDeclNode node);
 
 
     // Expressions
-    public void visit(BinaryExprNode node);
+    void visit(BinaryExprNode node);
 
-    public void visit(UnaryExprNode node);
+    void visit(UnaryExprNode node);
 
-    public void visit(IdentifierExprNode node);
+    void visit(IdentifierExprNode node);
 
-    public void visit(NewExprNode node);
+    void visit(NewExprNode node);
 
-    public void visit(NullLiteralNode node);
+    void visit(NullLiteralNode node);
 
     // Literals
-    public void visit(StringLiteralNode node);
+    void visit(StringLiteralNode node);
 
-    public void visit(BoolLiteralNode node);
+    void visit(BoolLiteralNode node);
 
-    public void visit(IntLiteralNode node);
+    void visit(IntLiteralNode node);
 
     // Block
-    public void visit(BlockNode node);
+    void visit(BlockNode node);
 
-    public void visit(VoidTypeNode node);
+    void visit(VoidTypeNode node);
+
+    void visit(ClassDeclNode node);
     //TODO
 }

@@ -64,4 +64,8 @@ public class FunctionDeclNode extends DeclaratorNode {
     public BlockNode getBody() {
         return body;
     }
+
+    public TypeNode getReturnType() {
+        return returnType;
+    }
 }

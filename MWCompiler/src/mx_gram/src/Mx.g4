@@ -81,9 +81,7 @@ whileField : WHILE LPAREN cond = expr RPAREN body;
 
 exprField : expr? SEMI;
 
-classField : Identifier classBody;
-
-classBody : LBRACE declarator* RBRACE;
+classField : Identifier LBRACE declarator* RBRACE;
 
 expr:
 	expr op = (INC | DEC)									# SuffixIncDec_

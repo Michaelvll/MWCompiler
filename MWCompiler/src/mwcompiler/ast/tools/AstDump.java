@@ -61,16 +61,28 @@ public class AstDump implements AstVisitor {
         println("type: void");
     }
 
+    @Override
+    public void visit(ClassDeclNode node) {
+        addIndent();
+        println("<<ClassDeclNode>>");
+        println("name: "+node.getName());
+        println("body:");
+        for (DeclaratorNode declarator:node.getBody()) {
+            declarator.accept(this);
+        }
+        subIndent();
+    }
+
 
     @Override
     public void visit(VariableDeclNode node) {
         addIndent();
         println("<VariableDeclNode>");
-        node.type.accept(this);
+        node.getType().accept(this);
         println("var: " + node.getVar());
-        if (node.init != null) {
+        if (node.getInit() != null) {
             println("init:");
-            node.init.accept(this);
+            node.getInit().accept(this);
         }
         subIndent();
     }
@@ -79,14 +91,14 @@ public class AstDump implements AstVisitor {
     public void visit(FunctionDeclNode node) {
         addIndent();
         println("<<FunctionDeclNode>>");
-        node.returnType.accept(this);
+        node.getReturnType().accept(this);
         println("name: " + node.getName());
         println("params:");
-        for (Node param:node.paramList) {
+        for (Node param:node.getParamList()) {
             param.accept(this);
         }
         println("body:");
-        node.body.accept(this);
+        node.getBody().accept(this);
         subIndent();
     }
 
@@ -127,10 +139,10 @@ public class AstDump implements AstVisitor {
     public void visit(BlockNode node) {
         addIndent();
         println("<<BlockNode>>");
+        subIndent();
         for (Node statement:node.statements){
             statement.accept(this);
         }
-        subIndent();
     }
 
 

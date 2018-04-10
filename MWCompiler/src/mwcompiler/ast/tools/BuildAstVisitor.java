@@ -100,6 +100,23 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         return visit(ctx.block());
     }
 
+    // Class declaration
+
+
+    @Override
+    public Node visitClassDeclField(MxParser.ClassDeclFieldContext ctx) {
+        return visit(ctx.classField());
+    }
+
+    @Override
+    public Node visitClassField(MxParser.ClassFieldContext ctx) {
+        String name = ctx.Identifier().getText();
+        List<DeclaratorNode> body = new ArrayList<>();
+        for (MxParser.DeclaratorContext declarator:ctx.declarator()) {
+            body.add((DeclaratorNode) visit(declarator));
+        }
+        return  new ClassDeclNode(name,body,new Location(ctx.Identifier()),new Location(ctx.LBRACE()));
+    }
 
     // Block
     @Override

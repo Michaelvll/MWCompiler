@@ -1,0 +1,7 @@
+class hello{
+    int a;
+    int b = 5;
+    string main(){
+        eat t = new eat;
+    }
+}
