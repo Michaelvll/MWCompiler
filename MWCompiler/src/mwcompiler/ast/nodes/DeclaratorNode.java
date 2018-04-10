@@ -5,9 +5,7 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast;
-
-import mwcompiler.ast.tools.AstVisitor;
+package mwcompiler.ast.nodes;
 
 public abstract class DeclaratorNode extends Node {
     //TODO

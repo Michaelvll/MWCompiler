@@ -5,33 +5,32 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast;
+package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.symbols.Type;
 
 public class ArrayTypeNode extends TypeNode {
     //TODO
-    private Integer dimension = 0;
+    private Integer dim = 0;
 
-    public ArrayTypeNode(String type, Integer dimension) {
+    public ArrayTypeNode(String type, Integer dim) {
         super(type);
-        this.dimension = dimension;
+        this.dim = dim;
     }
     public ArrayTypeNode(NonArrayTypeNode node) {
         super(node.type);
-        this.dimension = 1;
+        this.dim = 1;
     }
 
-    public Integer getDimension() {
-        return dimension;
+    public Integer getDim() {
+        return dim;
     }
 
-    public void setDimension(Integer dimension) {
-        this.dimension = dimension;
+    public void setDim(Integer dim) {
+        this.dim = dim;
     }
     public void addDimension (){
-        ++this.dimension;
+        ++this.dim;
     }
 
     @Override

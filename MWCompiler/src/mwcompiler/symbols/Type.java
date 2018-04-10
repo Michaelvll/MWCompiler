@@ -10,6 +10,8 @@ public abstract class Type {
                 return new StringType();
             case "bool":
                 return new BoolType();
+            case "void":
+                return new VoidType();
             default:
                 return new ClassType(type);
         }

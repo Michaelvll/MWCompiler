@@ -1,6 +1,5 @@
-package mwcompiler.ast;
+package mwcompiler.ast.nodes;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import mwcompiler.ast.tools.AstVisitor;
 
 public class BoolLiteralNode extends LiteralExprNode {

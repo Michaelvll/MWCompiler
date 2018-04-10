@@ -1,19 +1,27 @@
-package test;
+package test.ast_dump;
 
-import mwcompiler.ast.ExprNode;
-import mwcompiler.ast.Node;
+import mwcompiler.ast.nodes.Node;
+import mwcompiler.ast.tools.AstDump;
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.BuildAstVisitor;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+/**
+ * TestVariableDecl.java
+ * A test for the Ast builder and dumper only with variable declaration
+ *
+ * @author Michael Wu
+ * @since 2018-04-11
+ * */
 
-import mwcompiler.ast.tools.*;
-
-public class TestAstDump {
+public class TestVariableDecl {
     private Node program;
 
     @Before

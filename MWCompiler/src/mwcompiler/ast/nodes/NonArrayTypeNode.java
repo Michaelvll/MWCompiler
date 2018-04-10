@@ -1,4 +1,4 @@
-package mwcompiler.ast;
+package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 

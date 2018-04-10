@@ -1,6 +1,6 @@
 package mwcompiler.ast.tools;
 
-import mwcompiler.ast.*;
+import mwcompiler.ast.nodes.*;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -52,18 +52,22 @@ public class AstDump implements AstVisitor {
 
     @Override
     public void visit(ArrayTypeNode node) {
-        StringBuilder s = new StringBuilder("type: " + node.type.getName());
-        for (int i = 0; i < node.getDimension(); ++i) s.append("[]");
-        println(String.valueOf(s));
+        println("type: " + node.type.getName());
+        println("dim: " + node.getDim());
+    }
+
+    @Override
+    public void visit(VoidTypeNode node) {
+        println("type: void");
     }
 
 
     @Override
     public void visit(VariableDeclNode node) {
         addIndent();
-        println("<<VariableDeclNode>>");
+        println("<VariableDeclNode>");
         node.type.accept(this);
-        println("var: " + node.var.getName());
+        println("var: " + node.getVar());
         if (node.init != null) {
             println("init:");
             node.init.accept(this);
@@ -72,29 +76,34 @@ public class AstDump implements AstVisitor {
     }
 
     @Override
-    public void visit(IdentifierNode node) {
-
-    }
-
-    @Override
-    public void visit(IdentifierExprNode node) {
+    public void visit(FunctionDeclNode node) {
         addIndent();
-        println("<IdentifierExprNode>");
-        println("Val: " + node.getName());
+        println("<<FunctionDeclNode>>");
+        node.returnType.accept(this);
+        println("name: " + node.getName());
+        println("params:");
+        for (Node param:node.paramList) {
+            param.accept(this);
+        }
+        println("body:");
+        node.body.accept(this);
         subIndent();
     }
 
 
     @Override
-    public void visit(BinaryExprNode node) {
-
+    public void visit(IdentifierExprNode node) {
+        addIndent();
+        println("<IdentifierExprNode>");
+        println("val: " + node.getName());
+        subIndent();
     }
 
     @Override
     public void visit(StringLiteralNode node) {
         addIndent();
         println("<StringLiteralNode>");
-        println("Val: " + node.getVal());
+        println("val: " + node.getVal());
         subIndent();
     }
 
@@ -110,7 +119,43 @@ public class AstDump implements AstVisitor {
     public void visit(IntLiteralNode node) {
         addIndent();
         println("<IntLiteralNode>");
-        println("Val: " + String.valueOf(node.getVal()));
+        println("val: " + String.valueOf(node.getVal()));
+        subIndent();
+    }
+
+    @Override
+    public void visit(BlockNode node) {
+        addIndent();
+        println("<<BlockNode>>");
+        for (Node statement:node.statements){
+            statement.accept(this);
+        }
+        subIndent();
+    }
+
+
+    @Override
+    public void visit(BinaryExprNode node) {
+
+    }
+
+    @Override
+    public void visit(UnaryExprNode node) {
+
+    }
+
+    @Override
+    public void visit(NewExprNode node) {
+        addIndent();
+        println("<NewExprNode>");
+        println("type: " + node.createType.getName());
+        println("dim: " + String.valueOf(node.dim));
+        if (node.dimArgs.size() != 0) {
+            println("dimArgs: ");
+            for (Node expr : node.dimArgs) {
+                expr.accept(this);
+            }
+        }
         subIndent();
     }
 

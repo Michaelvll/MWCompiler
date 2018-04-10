@@ -30,12 +30,9 @@ functionDeclField:
 	;
 classDeclField : CLASS classField;
 
-type:
-	type LBRACK RBRACK	# ArrayType_
-	| primitiveType		# PrimitiveType_
-	| classType			# ClassType_
-	;
+type : nonArrayType (LBRACK RBRACK)*;
 
+nonArrayType	: primitiveType | classType;
 primitiveType	: BOOL | INT | STRING;
 classType		: Identifier;
 
@@ -43,11 +40,11 @@ variableField:
 	Identifier (ASSIGN variableInitializer)?
 	;
 
-variableInitializer : expr;
-
 functionField:
 	Identifier paramExprField functionBody
 	;
+
+variableInitializer : expr;
 
 paramExprField:
 	LPAREN (paramExpr (COMMA paramExpr)*)? RPAREN
@@ -89,29 +86,29 @@ classField : Identifier classBody;
 classBody : LBRACE declarator* RBRACE;
 
 expr:
-	expr op = (INC | DEC)					# SuffixIncDec_
-	| expr arguments						# FunctionCall_
-	| expr selector							# Selector_
-	| <assoc = right> op = (INC | DEC) expr	# PreffixIncDec_
-	| <assoc = right> op = (ADD | SUB) expr	# PreffixAddSub_
-	| <assoc = right> NOT expr				# NotExpr_
-	| <assoc = right> BITNOT expr			# BitNotExpr_
-	| NEW creator							# NewCreator_
-	| expr op = (MUL | DIV | MOD) expr		# MulDivExpr_
-	| expr op = (ADD | SUB) expr			# AddSubExpr_
-	| expr op = (LSFT | RSFT) expr			# ShiftExpr_
-	| expr op = (LT | GT | LTE | GTE) expr	# CompareExpr_
-	| expr op = (EQ | NEQ) expr				# EqNeqExpr_
-	| expr BITAND expr						# BitAndExpr_
-	| expr BITXOR expr						# BitXorExpr_
-	| expr BITOR expr						# BitOrExpr_
-	| expr AND expr							# AndExpr_
-	| expr OR expr							# OrExpr_
-	| <assoc = right> expr ASSIGN expr		# AssignExpr_
-	| literal								# Literal_
-	| THIS									# This_
-	| Identifier							# Identifier_
-	| LPAREN expr RPAREN					# ParenExpr_
+	expr op = (INC | DEC)									# SuffixIncDec_
+	| expr arguments										# FunctionCall_
+	| expr selector											# Selector_
+	| <assoc = right> op = (INC | DEC) expr					# PreffixIncDec_
+	| <assoc = right> op = (ADD | SUB) expr					# PreffixAddSub_
+	| <assoc = right> NOT expr								# NotExpr_
+	| <assoc = right> BITNOT expr							# BitNotExpr_
+	| NEW creator											# NewCreator_
+	| left = expr op = (MUL | DIV | MOD) right = expr		# MulDivExpr_
+	| left = expr op = (ADD | SUB) right = expr				# AddSubExpr_
+	| left = expr op = (LSFT | RSFT) right = expr			# ShiftExpr_
+	| left = expr op = (LT | GT | LTE | GTE) right = expr	# CompareExpr_
+	| left = expr op = (EQ | NEQ) right = expr				# EqNeqExpr_
+	| left = expr BITAND right = expr						# BitAndExpr_
+	| left = expr BITXOR right = expr						# BitXorExpr_
+	| left = expr BITOR right = expr						# BitOrExpr_
+	| left = expr AND right = expr							# AndExpr_
+	| left = expr OR right = expr							# OrExpr_
+	| <assoc = right> left = expr ASSIGN right = expr		# AssignExpr_
+	| literal												# Literal_
+	| THIS													# This_
+	| Identifier											# Identifier_
+	| LPAREN expr RPAREN									# ParenExpr_
 	;
 
 selector:
@@ -129,10 +126,7 @@ literal:
 arguments	: LPAREN exprList? RPAREN;
 exprList	: expr (COMMA expr)*;
 creator		: createdName arrayCreatorRest?;
-createdName:
-	Identifier (DOT Identifier)*
-	| primitiveType
-	;
+createdName	: Identifier | primitiveType;
 arrayCreatorRest:
 	LBRACK (
 		RBRACK

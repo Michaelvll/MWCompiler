@@ -5,12 +5,10 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast;
+package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import org.apache.maven.model.Build;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProgramNode extends  Node {
