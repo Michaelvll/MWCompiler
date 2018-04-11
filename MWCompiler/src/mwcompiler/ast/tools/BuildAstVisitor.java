@@ -38,7 +38,6 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         return node;
     }
 
-
     @Override
     public Node visitVariableField(MxParser.VariableFieldContext ctx) {
         String var = ctx.Identifier().getText();
@@ -58,15 +57,16 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     }
 
     // Function declaration
-    private FunctionDeclNode getFunctionField(TerminalNode identifier, MxParser.ParamExprFieldContext paramExprFieldContext, MxParser.FunctionBodyContext functionBodyContext) {
+    private FunctionDeclNode getFunctionField(TerminalNode identifier,
+                                              MxParser.ParamExprFieldContext paramExprFieldContext, MxParser.FunctionBodyContext functionBodyContext) {
         String name = identifier.getText();
         List<VariableDeclNode> params = new ArrayList<>();
         for (MxParser.ParamExprContext param : paramExprFieldContext.paramExpr()) {
             params.add((VariableDeclNode) visit(param));
         }
         BlockNode body = (BlockNode) visit(functionBodyContext);
-        return new FunctionDeclNode(null, name, params, body, null,
-                new Location(identifier), new Location(paramExprFieldContext), new Location(functionBodyContext));
+        return new FunctionDeclNode(null, name, params, body, null, new Location(identifier),
+                new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
 
     @Override
@@ -94,8 +94,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitParamExpr(MxParser.ParamExprContext ctx) {
         TypeNode type = (TypeNode) visit(ctx.type());
         String name = ctx.Identifier().getText();
-        return new VariableDeclNode(type, name, null,
-                new Location(ctx.type()), new Location(ctx.Identifier()), null);
+        return new VariableDeclNode(type, name, null, new Location(ctx.type()), new Location(ctx.Identifier()), null);
     }
 
     @Override
@@ -104,7 +103,6 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     }
 
     // Class declaration
-
 
     @Override
     public Node visitClassDeclField(MxParser.ClassDeclFieldContext ctx) {
@@ -128,7 +126,6 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         return node;
     }
 
-
     // Block
     @Override
     public Node visitBlock(MxParser.BlockContext ctx) {
@@ -138,7 +135,6 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         }
         return new BlockNode(statements);
     }
-
 
     // Type
     @Override
@@ -151,16 +147,14 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         }
     }
 
-
     // Expression
-
 
     @Override
     public Node visitExprField(MxParser.ExprFieldContext ctx) {
-        if (ctx.expr()!=null) {
+        if (ctx.expr() != null) {
             return visit(ctx.expr());
-        }else {
-            return new NullExprNode();
+        } else {
+            return new NullExprNode(new Location(ctx.SEMI()));
         }
     }
 
@@ -170,16 +164,16 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         LiteralExprNode node;
         switch (ctx.literalType.getType()) {
             case MxParser.BoolLiteral:
-                node = new BoolLiteralNode(val);
+                node = new BoolLiteralNode(val, new Location(ctx.literalType));
                 break;
             case MxParser.IntLiteral:
-                node = new IntLiteralNode(val);
+                node = new IntLiteralNode(val, new Location(ctx.literalType));
                 break;
             case MxParser.StringLiteral:
-                node = new StringLiteralNode(val);
+                node = new StringLiteralNode(val, new Location(ctx.literalType));
                 break;
             case MxParser.NULL:
-                node = new NullLiteralNode();
+                node = new NullLiteralNode(new Location(ctx.literalType));
                 break;
             default:
                 throw new RuntimeException("Get unexpected literal type when visiting literal");
@@ -192,25 +186,91 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         return new IdentifierExprNode(ctx.getText(), new Location(ctx));
     }
 
-
     // Binary Expression
     @Override
     public Node visitBinaryExpr_(MxParser.BinaryExpr_Context ctx) {
         ExprNode.OPs op;
-        switch (ctx.op.getType()){
+        switch (ctx.op.getType()) {
+            case MxParser.MUL:
+                op = ExprNode.OPs.MUL;
+                break;
+            case MxParser.DIV:
+                op = ExprNode.OPs.DIV;
+                break;
+            case MxParser.MOD:
+                op = ExprNode.OPs.MOD;
+                break;
+            case MxParser.ADD:
+                op = ExprNode.OPs.ADD;
+                break;
+            case MxParser.SUB:
+                op = ExprNode.OPs.SUB;
+                break;
+            case MxParser.LSFT:
+                op = ExprNode.OPs.LSFT;
+                break;
+            case MxParser.RSFT:
+                op = ExprNode.OPs.RSFT;
+                break;
+            case MxParser.LT:
+                op = ExprNode.OPs.LT;
+                break;
+            case MxParser.GT:
+                op = ExprNode.OPs.GT;
+                break;
+            case MxParser.LTE:
+                op = ExprNode.OPs.LTE;
+                break;
+            case MxParser.GTE:
+                op = ExprNode.OPs.GTE;
+                break;
+            case MxParser.EQ:
+                op = ExprNode.OPs.EQ;
+                break;
+            case MxParser.NEQ:
+                op = ExprNode.OPs.NEQ;
+                break;
+            case MxParser.BITAND:
+                op = ExprNode.OPs.BITAND;
+                break;
+            case MxParser.BITOR:
+                op = ExprNode.OPs.BITOR;
+                break;
+            case MxParser.AND:
+                op = ExprNode.OPs.AND;
+                break;
+            case MxParser.OR:
+                op = ExprNode.OPs.OR;
+                break;
             case MxParser.ASSIGN:
-                op = ExprNode.OPs.Assign;
+                op = ExprNode.OPs.ASSIGN;
                 break;
             default:
                 throw new RuntimeException("Get unexpected operator at BinaryExpression");
         }
         return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)),
-                op, (ExprNode) this.visit(ctx.expr(1)));
+                op, (ExprNode) this.visit(ctx.expr(1)), new Location(ctx.op));
     }
 
-
     // Unary Expression
+    @Override
+    public Node visitSuffixIncDec_(MxParser.SuffixIncDec_Context ctx) {
+        ExprNode node = (ExprNode) visit(ctx.expr());
+        ExprNode.OPs op;
 
+        switch (ctx.op.getType()) {
+            case MxParser.INC:
+                op = ExprNode.OPs.INC_SUFF;
+                break;
+            case MxParser.DEC:
+                op = ExprNode.OPs.DEC_SUFF;
+                break;
+            default:
+                throw new RuntimeException("Get unexpected op at SuffixIncDec");
+
+        }
+        return new UnaryExprNode(op, node, new Location(ctx.expr()));
+    }
 
     @Override
     public Node visitUnaryExpr_(MxParser.UnaryExpr_Context ctx) {
@@ -240,12 +300,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), new Location(ctx.op));
     }
 
-
-    @Override
-    public Node visitSuffixIncDec_(MxParser.SuffixIncDec_Context ctx) {
-        return super.visitSuffixIncDec_(ctx);//TODO
-    }
-
+    // New
     @Override
     public Node visitNewCreator_(MxParser.NewCreator_Context ctx) {
         return visit(ctx.creator());
@@ -262,7 +317,47 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 dimArgs.add((ExprNode) visit(exprs));
             }
         }
-        return new NewExprNode(createType, dim, dimArgs);
+        return new NewExprNode(createType, dim, dimArgs, new Location(ctx.createdName()));
+    }
+
+    // Function Call
+
+    @Override
+    public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
+        ExprNode caller = (ExprNode) visit(ctx.expr());
+        List<ExprNode> args = new ArrayList<>();
+        if (ctx.arguments().exprList()!= null){
+            for (MxParser.ExprContext expr:ctx.arguments().exprList().expr()) {
+                args.add((ExprNode) visit(expr));
+            }
+        }
+        return new FunctionCallNode(caller, args, new Location(ctx.arguments()));
+    }
+
+    // Member Function call
+
+    @Override
+    public Node visitDotMember_(MxParser.DotMember_Context ctx) {
+        ExprNode mom = (ExprNode) visit(ctx.expr());
+        String member = ctx.Identifier().getText();
+        return new DotMemberNode(mom, member, new Location(ctx.DOT()));
+    }
+
+    @Override
+    public Node visitBrackMember_(MxParser.BrackMember_Context ctx) {
+        ExprNode mom = (ExprNode) visit(ctx.mom);
+        ExprNode subscript = (ExprNode) visit(ctx.subscript);
+        return new BrackMemberNode(mom, subscript, new Location(ctx.LBRACK()));
+    }
+
+    @Override
+    public Node visitThis_(MxParser.This_Context ctx) {
+        return new IdentifierExprNode("this", new Location(ctx.THIS()));
+    }
+
+    @Override
+    public Node visitParenExpr_(MxParser.ParenExpr_Context ctx) {
+        return visit(ctx.expr());
     }
 
     //TODO

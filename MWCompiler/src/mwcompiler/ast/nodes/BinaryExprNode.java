@@ -15,11 +15,11 @@ public class BinaryExprNode extends ExprNode {
     private OPs op;
     private ExprNode left, right;
 
-    public BinaryExprNode(ExprNode left, OPs op, ExprNode right) {
+    public BinaryExprNode(ExprNode left, OPs op, ExprNode right, Location pos) {
         this.op = op;
         this.left = left;
         this.right = right;
-        super.location = left.getLocation();
+        super.location = pos;
     }
 
 
@@ -39,5 +39,6 @@ public class BinaryExprNode extends ExprNode {
     public ExprNode getRight() {
         return right;
     }
+
 }
 

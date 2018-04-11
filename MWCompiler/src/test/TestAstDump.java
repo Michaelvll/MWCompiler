@@ -1,4 +1,4 @@
-package test.ast_dump;
+package test;
 
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstDump;
@@ -14,19 +14,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * TestVariableDecl.java
+ * TestAstDump.java
  * A test for the Ast builder and dumper only with variable declaration
  *
  * @author Michael Wu
  * @since 2018-04-11
  * */
 
-public class TestVariableDecl {
+public class TestAstDump {
+    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx"};
+
     private Node program;
 
     @Before
     public void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases/ast/VariableDecl.mx");
+        CharStream input = CharStreams.fromFileName("../testcases"+files[2]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MxParser parser = new MxParser(tokens);

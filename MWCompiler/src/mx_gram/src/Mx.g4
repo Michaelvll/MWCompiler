@@ -94,14 +94,17 @@ classConstructField:
 	;
 
 expr:
-	expr op = (INC | DEC)					# SuffixIncDec_
-	| expr arguments						# FunctionCall_
-	| expr selector							# Selector_
+	expr op = (INC | DEC)						# SuffixIncDec_
+	| expr arguments							# FunctionCall_
+	| expr DOT Identifier						# DotMember_
+	| mom = expr LBRACK subscript = expr RBRACK	# BrackMember_
+	// Unary Expr
 	| <assoc = right> op = (INC | DEC) expr	# UnaryExpr_
 	| <assoc = right> op = (ADD | SUB) expr	# UnaryExpr_
 	| <assoc = right> op = NOT expr			# UnaryExpr_
 	| <assoc = right> op = BITNOT expr		# UnaryExpr_
-	| NEW creator							# NewCreator_
+	// New Expr
+	| NEW creator # NewCreator_
 	// Binary Expr
 	| left = expr op = (MUL | DIV | MOD) right = expr		# BinaryExpr_
 	| left = expr op = (ADD | SUB) right = expr				# BinaryExpr_
@@ -119,11 +122,6 @@ expr:
 	| THIS					# This_
 	| Identifier			# Identifier_
 	| LPAREN expr RPAREN	# ParenExpr_
-	;
-
-selector:
-	DOT Identifier arguments?	# DotMember_
-	| LBRACK expr RBRACK		# BrackMember_
 	;
 
 literal:

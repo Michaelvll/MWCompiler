@@ -83,6 +83,40 @@ public class AstDump implements AstVisitor {
 
     }
 
+    @Override
+    public void visit(FunctionCallNode node) {
+        addIndent();
+        println("<FunctionCallNode>");
+        println("caller:");
+        node.getCaller().accept(this);
+        println("args: ");
+        for(ExprNode arg: node.getArgs()) {
+            arg.accept(this);
+        }
+        subIndent();
+    }
+
+    @Override
+    public void visit(DotMemberNode node) {
+        addIndent();
+        println("<DotMemberNode>");
+        println("mom: ");
+        node.getMom().accept(this);
+        println("member: " + node.getMember());
+        subIndent();
+    }
+
+    @Override
+    public void visit(BrackMemberNode node) {
+        addIndent();
+        println("<BrackMemberNode>");
+        println("mom: ");
+        node.getMom().accept(this);
+        println("subscript: ");
+        node.getSubscript().accept(this);
+        subIndent();
+    }
+
 
     @Override
     public void visit(VariableDeclNode node) {
@@ -196,6 +230,6 @@ public class AstDump implements AstVisitor {
 
     @Override
     public void visit(NullLiteralNode node) {
-        //TODO
+        println("null");
     }
 }
