@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 // import compiler.*;
 
-public class testPrint {
+public class TestPrint {
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
 

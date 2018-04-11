@@ -17,24 +17,22 @@ import CommonMxLexer;
 program : declarator* EOF;
 
 declarator:
-	variableDeclField	# VARIABLEDECL
-	| functionDeclField	# FUNCTIONDECL
-	| classDeclField	# CLASSDECL
+	variableDeclField
+	| functionDeclField
+	| classDeclField
 	;
 
 // Declarators for the program
 variableDeclField : type variableField SEMI;
 functionDeclField:
-	type functionField
-	| VOID functionField
+	type functionField		# TypeFunction_
+	| VOID functionField	# VoidFunction_
 	;
 classDeclField : CLASS classField;
 
-type:
-	primitiveType (LBRACK RBRACK)*	# PRIMITIVETYPE
-	| classType (LBRACK RBRACK)*	# CLASSTYPE
-	;
+type : nonArrayType (LBRACK RBRACK)*;
 
+nonArrayType	: primitiveType | classType;
 primitiveType	: BOOL | INT | STRING;
 classType		: Identifier;
 
@@ -46,6 +44,8 @@ functionField:
 	Identifier paramExprField functionBody
 	;
 
+variableInitializer : expr;
+
 paramExprField:
 	LPAREN (paramExpr (COMMA paramExpr)*)? RPAREN
 	;
@@ -54,17 +54,17 @@ paramExpr : type Identifier;
 functionBody	: block;
 block			: LBRACE statement* RBRACE;
 statement:
-	block				# BLOCKFIELD
-	| variableDeclField	# VARIABLEDECLField
-	| exprField			# EXPRFIELD
-	| conditionField	# CONDITIONFIELD
-	| loopField			# LOOPFIELD
-	| jumpField			# JUMPFIELD
+	block
+	| variableDeclField
+	| exprField
+	| conditionField
+	| loopField
+	| jumpField
 	;
 
 body : statement;
 conditionField:
-	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField*
+	IF LPAREN cond = expr RPAREN body elseifConditionField* elseConditionField?
 	;
 elseifConditionField:
 	ELSE IF LPAREN cond = expr RPAREN body
@@ -75,63 +75,68 @@ jumpField			: jump SEMI;
 jump				: RETURN expr? | BREAK | CONTINUE;
 
 forField:
-	FOR LPAREN vardecl = variableField? SEMI cond = expr? SEMI step = expr?
-		RPAREN body
+	FOR LPAREN vardecl = expr? SEMI cond = expr? SEMI step = expr? RPAREN body
 	;
 whileField : WHILE LPAREN cond = expr RPAREN body;
 
 exprField : expr? SEMI;
 
-classField : Identifier classBody;
+classField : Identifier LBRACE classBody* RBRACE;
 
-classBody : LBRACE declarator* RBRACE;
+classBody:
+	variableDeclField
+	| functionDeclField
+	| classConstructField
+	;
 
-variableInitializer : expr;
+classConstructField:
+	Identifier paramExprField functionBody
+	;
 
 expr:
-	expr op = (INC | DEC)					# SUFFIXINCDEC
-	| expr arguments						# FUNCTIONCALL
-	| expr selector							# SELECTOR
-	| <assoc = right> op = (INC | DEC) expr	# PREFFIXINCDEC
-	| <assoc = right> op = (ADD | SUB) expr	# PREFFIXADDSUB
-	| <assoc = right> NOT expr				# NOTEXPR
-	| <assoc = right> BITNOT expr			# BITNOTEXPR
-	| NEW creator							# NEWCREATOR
-	| expr op = (MUL | DIV | MOD) expr		# MULDIVMOD
-	| expr op = (ADD | SUB) expr			# ADDSUB
-	| expr op = (LSFT | RSFT) expr			# SHIFT
-	| expr op = (LT | GT | LTE | GTE) expr	# RELATION
-	| expr op = (EQ | NEQ) expr				# EQNEQ
-	| expr BITAND expr						# BITANDEXPR
-	| expr BITXOR expr						# BITXOREXPR
-	| expr BITOR expr						# BITOREXPR
-	| expr AND expr							# ANDEXPR
-	| expr OR expr							# OREXPR
-	| <assoc = right> expr ASSIGN expr		# ASSIGNEXPR
-	| literal								# LITERAL
-	| Identifier							# ID
-	| LPAREN expr RPAREN					# PARENEXPR
+	expr op = (INC | DEC)					# SuffixIncDec_
+	| expr arguments						# FunctionCall_
+	| expr selector							# Selector_
+	| <assoc = right> op = (INC | DEC) expr	# UnaryExpr_
+	| <assoc = right> op = (ADD | SUB) expr	# UnaryExpr_
+	| <assoc = right> op = NOT expr			# UnaryExpr_
+	| <assoc = right> op = BITNOT expr		# UnaryExpr_
+	| NEW creator							# NewCreator_
+	// Binary Expr
+	| left = expr op = (MUL | DIV | MOD) right = expr		# BinaryExpr_
+	| left = expr op = (ADD | SUB) right = expr				# BinaryExpr_
+	| left = expr op = (LSFT | RSFT) right = expr			# BinaryExpr_
+	| left = expr op = (LT | GT | LTE | GTE) right = expr	# BinaryExpr_
+	| left = expr op = (EQ | NEQ) right = expr				# BinaryExpr_
+	| left = expr op = BITAND right = expr					# BinaryExpr_
+	| left = expr op = BITXOR right = expr					# BinaryExpr_
+	| left = expr op = BITOR right = expr					# BinaryExpr_
+	| left = expr op = AND right = expr						# BinaryExpr_
+	| left = expr op = OR right = expr						# BinaryExpr_
+	| <assoc = right> left = expr op = ASSIGN right = expr	# BinaryExpr_
+	// Others
+	| literal				# Literal_
+	| THIS					# This_
+	| Identifier			# Identifier_
+	| LPAREN expr RPAREN	# ParenExpr_
 	;
 
 selector:
-	DOT Identifier arguments?	# DOTMEM
-	| LBRACK expr RBRACK		# BRACKMEM
+	DOT Identifier arguments?	# DotMember_
+	| LBRACK expr RBRACK		# BrackMember_
 	;
 
 literal:
-	BoolLiteral
-	| IntegerLiteral
-	| StringLiteral
-	| NULL
+	literalType = BoolLiteral
+	| literalType = IntLiteral
+	| literalType = StringLiteral
+	| literalType = NULL
 	;
 
 arguments	: LPAREN exprList? RPAREN;
 exprList	: expr (COMMA expr)*;
 creator		: createdName arrayCreatorRest?;
-createdName:
-	Identifier (DOT Identifier)*
-	| primitiveType
-	;
+createdName	: Identifier | primitiveType;
 arrayCreatorRest:
 	LBRACK (
 		RBRACK
