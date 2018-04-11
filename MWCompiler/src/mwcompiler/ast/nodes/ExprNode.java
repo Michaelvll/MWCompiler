@@ -17,10 +17,13 @@ public abstract class ExprNode extends Node {
         // Binary
         Assign,
         // Unary
-        New
+        INC,DEC,
+        ADD, SUB,
+        NOT, BITNOT,
+        // New
+        NEW
     }
-    public static String OPNames[] = {
-            "=",    // Assign
-            "new"   // New
-    };
+    public Location getLocation(){
+        return location;
+    }
 }

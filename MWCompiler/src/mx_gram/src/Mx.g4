@@ -81,32 +81,44 @@ whileField : WHILE LPAREN cond = expr RPAREN body;
 
 exprField : expr? SEMI;
 
-classField : Identifier LBRACE declarator* RBRACE;
+classField : Identifier LBRACE classBody* RBRACE;
+
+classBody:
+	variableDeclField
+	| functionDeclField
+	| classConstructField
+	;
+
+classConstructField:
+	Identifier paramExprField functionBody
+	;
 
 expr:
-	expr op = (INC | DEC)									# SuffixIncDec_
-	| expr arguments										# FunctionCall_
-	| expr selector											# Selector_
-	| <assoc = right> op = (INC | DEC) expr					# PreffixIncDec_
-	| <assoc = right> op = (ADD | SUB) expr					# PreffixAddSub_
-	| <assoc = right> NOT expr								# NotExpr_
-	| <assoc = right> BITNOT expr							# BitNotExpr_
-	| NEW creator											# NewCreator_
-	| left = expr op = (MUL | DIV | MOD) right = expr		# MulDivExpr_
-	| left = expr op = (ADD | SUB) right = expr				# AddSubExpr_
-	| left = expr op = (LSFT | RSFT) right = expr			# ShiftExpr_
-	| left = expr op = (LT | GT | LTE | GTE) right = expr	# CompareExpr_
-	| left = expr op = (EQ | NEQ) right = expr				# EqNeqExpr_
-	| left = expr BITAND right = expr						# BitAndExpr_
-	| left = expr BITXOR right = expr						# BitXorExpr_
-	| left = expr BITOR right = expr						# BitOrExpr_
-	| left = expr AND right = expr							# AndExpr_
-	| left = expr OR right = expr							# OrExpr_
-	| <assoc = right> left = expr ASSIGN right = expr		# AssignExpr_
-	| literal												# Literal_
-	| THIS													# This_
-	| Identifier											# Identifier_
-	| LPAREN expr RPAREN									# ParenExpr_
+	expr op = (INC | DEC)					# SuffixIncDec_
+	| expr arguments						# FunctionCall_
+	| expr selector							# Selector_
+	| <assoc = right> op = (INC | DEC) expr	# UnaryExpr_
+	| <assoc = right> op = (ADD | SUB) expr	# UnaryExpr_
+	| <assoc = right> op = NOT expr			# UnaryExpr_
+	| <assoc = right> op = BITNOT expr		# UnaryExpr_
+	| NEW creator							# NewCreator_
+	// Binary Expr
+	| left = expr op = (MUL | DIV | MOD) right = expr		# BinaryExpr_
+	| left = expr op = (ADD | SUB) right = expr				# BinaryExpr_
+	| left = expr op = (LSFT | RSFT) right = expr			# BinaryExpr_
+	| left = expr op = (LT | GT | LTE | GTE) right = expr	# BinaryExpr_
+	| left = expr op = (EQ | NEQ) right = expr				# BinaryExpr_
+	| left = expr op = BITAND right = expr					# BinaryExpr_
+	| left = expr op = BITXOR right = expr					# BinaryExpr_
+	| left = expr op = BITOR right = expr					# BinaryExpr_
+	| left = expr op = AND right = expr						# BinaryExpr_
+	| left = expr op = OR right = expr						# BinaryExpr_
+	| <assoc = right> left = expr op = ASSIGN right = expr	# BinaryExpr_
+	// Others
+	| literal				# Literal_
+	| THIS					# This_
+	| Identifier			# Identifier_
+	| LPAREN expr RPAREN	# ParenExpr_
 	;
 
 selector:

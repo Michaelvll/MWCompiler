@@ -45,5 +45,9 @@ public interface AstVisitor {
     void visit(VoidTypeNode node);
 
     void visit(ClassDeclNode node);
+
+    void visit(NullTypeNode node);
+
+    void visit(NullExprNode node);
     //TODO
 }

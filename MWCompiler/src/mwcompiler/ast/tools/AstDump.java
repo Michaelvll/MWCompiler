@@ -65,12 +65,22 @@ public class AstDump implements AstVisitor {
     public void visit(ClassDeclNode node) {
         addIndent();
         println("<<ClassDeclNode>>");
-        println("name: "+node.getName());
+        println("name: " + node.getName());
         println("body:");
-        for (DeclaratorNode declarator:node.getBody()) {
+        for (DeclaratorNode declarator : node.getBody()) {
             declarator.accept(this);
         }
         subIndent();
+    }
+
+    @Override
+    public void visit(NullTypeNode node) {
+        println("Constructor function");
+    }
+
+    @Override
+    public void visit(NullExprNode node) {
+
     }
 
 
@@ -94,7 +104,7 @@ public class AstDump implements AstVisitor {
         node.getReturnType().accept(this);
         println("name: " + node.getName());
         println("params:");
-        for (Node param:node.getParamList()) {
+        for (Node param : node.getParamList()) {
             param.accept(this);
         }
         println("body:");
@@ -140,7 +150,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<<BlockNode>>");
         subIndent();
-        for (Node statement:node.statements){
+        for (Node statement : node.statements) {
             statement.accept(this);
         }
     }
@@ -148,12 +158,25 @@ public class AstDump implements AstVisitor {
 
     @Override
     public void visit(BinaryExprNode node) {
-        //TODO
+        addIndent();
+        println("<BinaryExprNode>");
+        println("op: " + node.getOp().toString());
+        println("left: ");
+        node.getLeft().accept(this);
+        println("right: ");
+        node.getRight().accept(this);
+        subIndent();
+
     }
 
     @Override
     public void visit(UnaryExprNode node) {
-        //TODO
+        addIndent();
+        println("<UnaryExprNode>");
+        println("op: " + node.getOp().toString());
+        println("expr: ");
+        node.getExpr().accept(this);
+        subIndent();
     }
 
     @Override

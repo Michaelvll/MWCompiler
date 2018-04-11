@@ -28,8 +28,9 @@ public class FunctionDeclNode extends DeclaratorNode {
         this.bodyPos = bodyPos;
     }
 
-    public void setReturnType(TypeNode returnType) {
+    public void setReturnType(TypeNode returnType, Location returnTypePos) {
         this.returnType = returnType;
+        this.returnTypePos = returnTypePos;
     }
 
     public String getName() {
