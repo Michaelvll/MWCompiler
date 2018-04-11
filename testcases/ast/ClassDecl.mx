@@ -1,0 +1,17 @@
+class hello{
+    /*int a;
+    int b = 5;
+    string main(bool k){
+        eat t = new eat;
+    }*/
+    hello(int c, string d) {
+        int t = 0;        
+        t = ++a;
+        --b;
+        +a;
+        -b;
+        !a;
+        ~b;
+
+    }
+}
