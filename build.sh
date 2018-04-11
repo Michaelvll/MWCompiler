@@ -4,4 +4,4 @@
 set -e
 cd "$(dirname "$0")"
 mkdir -p bin
-find ./MWCompiler/src/mwcompiler ./MWCompiler/src/mx_gram -name *.java | javac -d bin -classpath "lib/antlr-4.7.1-complete.jar" @/dev/stdin
+find ./MWCompiler/src/mwcompiler ./MWCompiler/src/mx_gram -name *.java | javac -d bin -cp "./lib/*" @/dev/stdin
