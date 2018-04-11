@@ -96,7 +96,6 @@ public class Mwcc {
             System.out.println(e.getMessage());
 
             System.exit(1);
-            return;
         }
 
     }
@@ -111,7 +110,6 @@ public class Mwcc {
         } catch (IOException e) {
             System.out.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
-            return;
         }
     }
 
