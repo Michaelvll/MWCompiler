@@ -28,7 +28,7 @@ public class TestAstDump {
 
     @Before
     public void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases"+files[4]);
+        CharStream input = CharStreams.fromFileName("../testcases"+files[3]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MxParser parser = new MxParser(tokens);

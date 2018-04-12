@@ -2,6 +2,7 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.VariableSymbol;
 
 import java.util.List;
 
@@ -21,11 +22,12 @@ public class DotMemberNode extends ExprNode {
     }
 
 
-    public String getMember() {
-        return member;
-    }
 
     public ExprNode getContainer() {
         return container;
+    }
+
+    public String getMember() {
+        return member;
     }
 }

@@ -1,6 +1,7 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.symbols.SymbolTable;
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.tree.*;
@@ -16,18 +17,22 @@ import java.util.List;
  * @since 2018-04-06
  */
 public class BuildAstVisitor extends MxBaseVisitor<Node> {
+    private SymbolTable currentSymbolTable = null;
 
     @Override
     public Node visitProgram(MxParser.ProgramContext ctx) {
-        List<DeclaratorNode> declarators = new ArrayList<>();
+        List<Node> declarators = new ArrayList<>();
+        Location programPos = new Location(1,1);
         for (ParseTree child : ctx.declarator()) {
             Node childNode = visit(child);
             if (childNode instanceof DeclaratorNode)
-                declarators.add((DeclaratorNode) childNode);
+                declarators.add(childNode);
             else
-                throw new RuntimeException("Type Mismatch when visiting program");
+                throw new RuntimeException("ERROR: (Building AST) Get unexpected statement when visiting the global scope "+programPos.getLocation());
         }
-        return new ProgramNode(declarators);
+        BlockNode block = new BlockNode(declarators, programPos, currentSymbolTable);
+        currentSymbolTable = block.getCurrentSymbolTable();
+        return new ProgramNode(block);
     }
 
     // Variable declaration
@@ -111,12 +116,21 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitClassField(MxParser.ClassFieldContext ctx) {
-        String name = ctx.Identifier().getText();
-        List<DeclaratorNode> body = new ArrayList<>();
+        String declClass = ctx.Identifier().getText();
+        List<Node> body = new ArrayList<>();
+        Location declClassPos = new Location(ctx.Identifier());
+        Location bodyPos = new Location(ctx.LBRACE());
         for (MxParser.ClassBodyContext declarator : ctx.classBody()) {
-            body.add((DeclaratorNode) visit(declarator));
+            Node statement = visit(declarator);
+            if (statement instanceof VariableDeclNode || statement instanceof FunctionDeclNode) {
+                body.add(visit(declarator));
+            } else {
+                throw new RuntimeException("ERROR: (Building AST) Unexpected statement found in Class declaration " + declClassPos.getLocation());
+            }
         }
-        return new ClassDeclNode(name, body, new Location(ctx.Identifier()), new Location(ctx.LBRACE()));
+        BlockNode block = new BlockNode(body, bodyPos, currentSymbolTable);
+        currentSymbolTable = block.getCurrentSymbolTable();
+        return new ClassDeclNode(declClass, block, declClassPos);
     }
 
     @Override
@@ -133,10 +147,12 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         for (MxParser.StatementContext state : ctx.statement()) {
             statements.add(visit(state));
         }
-        return new BlockNode(statements, new Location(ctx));
+        BlockNode block =  new BlockNode(statements, new Location(ctx),currentSymbolTable);
+        currentSymbolTable = block.getCurrentSymbolTable();
+        return block;
     }
 
-    // Type
+    // TypeSymbol
     @Override
     public Node visitType(MxParser.TypeContext ctx) {
         String type = ctx.nonArrayType().getText();
@@ -162,21 +178,22 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitLiteral(MxParser.LiteralContext ctx) {
         String val = ctx.getText();
         LiteralExprNode node;
+        Location literalPos = new Location(ctx.literalType);
         switch (ctx.literalType.getType()) {
             case MxParser.BoolLiteral:
-                node = new BoolLiteralNode(val, new Location(ctx.literalType));
+                node = new BoolLiteralNode(val, literalPos);
                 break;
             case MxParser.IntLiteral:
-                node = new IntLiteralNode(val, new Location(ctx.literalType));
+                node = new IntLiteralNode(val, literalPos);
                 break;
             case MxParser.StringLiteral:
-                node = new StringLiteralNode(val, new Location(ctx.literalType));
+                node = new StringLiteralNode(val, literalPos);
                 break;
             case MxParser.NULL:
-                node = new NullLiteralNode(new Location(ctx.literalType));
+                node = new NullLiteralNode(literalPos);
                 break;
             default:
-                throw new RuntimeException("Get unexpected literal type when visiting literal");
+                throw new RuntimeException("ERROR: (Building AST) Get unexpected literal type when visiting literal " + literalPos.getLocation());
         }
         return node;
     }
@@ -190,6 +207,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     @Override
     public Node visitBinaryExpr_(MxParser.BinaryExpr_Context ctx) {
         ExprNode.OPs op;
+        Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
             case MxParser.MUL:
                 op = ExprNode.OPs.MUL;
@@ -249,10 +267,10 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 op = ExprNode.OPs.ASSIGN;
                 break;
             default:
-                throw new RuntimeException("Get unexpected operator at BinaryExpression" + ctx.op.getText());
+                throw new RuntimeException("ERROR: (Building AST) Get unexpected operator at BinaryExpression " + opPos.getLocation());
         }
         return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)),
-                op, (ExprNode) this.visit(ctx.expr(1)), new Location(ctx.op));
+                op, (ExprNode) this.visit(ctx.expr(1)), opPos);
     }
 
     // Unary Expression
@@ -260,6 +278,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitSuffixIncDec_(MxParser.SuffixIncDec_Context ctx) {
         ExprNode node = (ExprNode) visit(ctx.expr());
         ExprNode.OPs op;
+        Location opPos = new Location(ctx.op);
 
         switch (ctx.op.getType()) {
             case MxParser.INC:
@@ -269,15 +288,16 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 op = ExprNode.OPs.DEC_SUFF;
                 break;
             default:
-                throw new RuntimeException("Get unexpected op at SuffixIncDec");
+                throw new RuntimeException("ERROR: (Building AST) Get unexpected op at SuffixIncDec " + opPos.getLocation());
 
         }
-        return new UnaryExprNode(op, node, new Location(ctx.expr()));
+        return new UnaryExprNode(op, node, new Location(ctx.op));
     }
 
     @Override
     public Node visitUnaryExpr_(MxParser.UnaryExpr_Context ctx) {
         ExprNode.OPs op;
+        Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
             case MxParser.INC:
                 op = ExprNode.OPs.INC;
@@ -298,9 +318,9 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 op = ExprNode.OPs.BITNOT;
                 break;
             default:
-                throw new RuntimeException("Get unexpected operator" + ctx.op.getText() + " in unary expression");
+                throw new RuntimeException("ERROR: (Building AST) Get unexpected operator" + ctx.op.getText() + " in unary expression " + opPos.getLocation());
         }
-        return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), new Location(ctx.op));
+        return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), opPos);
     }
 
     // New
@@ -439,7 +459,9 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         } else {
             List<Node> statements = new ArrayList<>();
             statements.add(node);
-            return new BlockNode(statements, new Location(ctx));
+            BlockNode block= new BlockNode(statements, new Location(ctx), currentSymbolTable);
+            currentSymbolTable = block.getCurrentSymbolTable();
+            return block;
         }
     }
 

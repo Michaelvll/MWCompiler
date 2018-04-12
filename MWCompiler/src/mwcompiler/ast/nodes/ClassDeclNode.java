@@ -2,6 +2,7 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.TypeSymbol;
 
 import java.util.List;
 
@@ -11,18 +12,16 @@ import java.util.List;
  *
  * @author Michael Wu
  * @since 2018-04-11
- * */
+ */
 public class ClassDeclNode extends DeclaratorNode {
-    private String name;
-    private List<DeclaratorNode> body;
-    private Location namePos;
-    private Location bodyPos;
+    private TypeSymbol declClass;
+    private BlockNode body;
+    private Location declClassPos;
 
-    public ClassDeclNode(String name, List<DeclaratorNode> body, Location namePos, Location bodyPos) {
-        this.name = name;
+    public ClassDeclNode(String declClass, BlockNode body, Location declClassPos) {
+        this.declClass = TypeSymbol.builder(declClass);
         this.body = body;
-        this.namePos = namePos;
-        this.bodyPos = bodyPos;
+        this.declClassPos = declClassPos;
     }
 
 
@@ -31,19 +30,16 @@ public class ClassDeclNode extends DeclaratorNode {
         visitor.visit(this);
     }
 
-    public String getName() {
-        return name;
-    }
 
-    public List<DeclaratorNode> getBody() {
+    public BlockNode getBody() {
         return body;
     }
 
-    public Location getNamePos() {
-        return namePos;
+    public Location getDeclClassPos() {
+        return declClassPos;
     }
 
-    public Location getBodyPos() {
-        return bodyPos;
+    public TypeSymbol getDeclClass() {
+        return declClass;
     }
 }

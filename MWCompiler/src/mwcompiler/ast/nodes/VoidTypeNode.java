@@ -1,7 +1,6 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.symbols.Type;
 
 /**
  * VoidTypeNode.java

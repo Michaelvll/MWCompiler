@@ -1,3 +1,9 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
+
+import java.util.List;
 /**
  * ProgramNode.java
  * The root Node of AST
@@ -5,21 +11,16 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.ast.tools.AstVisitor;
-
-import java.util.List;
 
 public class ProgramNode extends  Node {
     //TODO
-    private final List<DeclaratorNode> declarators;
+    private final BlockNode declarators;
 
-    public ProgramNode(List<DeclaratorNode> declarators){
+    public ProgramNode(BlockNode declarators){
         this.declarators = declarators;
     }
 
-    public List<DeclaratorNode> getDeclarators() {
+    public BlockNode getDeclarators() {
         return declarators;
     }
 

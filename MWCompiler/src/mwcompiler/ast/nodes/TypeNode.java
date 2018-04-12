@@ -1,6 +1,6 @@
 /**
  * TypeNode.java
- * Type extends from Node
+ * TypeSymbol extends from Node
  *
  * @author Michael Wu
  * @since 2018-04-06
@@ -11,17 +11,21 @@ import mwcompiler.symbols.*;
 
 public abstract class TypeNode extends Node {
     //TODO
-    public Type type;
+    protected String type;
 
-    public TypeNode(Type type) {
-        this.type = Type.builder(type);
+    public TypeNode(TypeSymbol type) {
+        this.type = type.getName();
     }
 
     public TypeNode(TypeNode node) {
-        this.type = Type.builder(node.type);
+        this.type = node.type;
     }
 
     public TypeNode(String type) {
-        this.type = Type.builder(type);
+        this.type = type;
+    }
+
+    public String getType() {
+        return this.type;
     }
 }

@@ -39,20 +39,20 @@ public class AstDump implements AstVisitor {
     @Override
     public void visit(ProgramNode node) {
         println("<<ProgramNode>>");
-        List<DeclaratorNode> declarators = node.getDeclarators();
-        for (DeclaratorNode declarator : declarators) {
+        List<Node> declarators = node.getDeclarators().getStatements();
+        for (Node declarator : declarators) {
             declarator.accept(this);
         }
     }
 
     @Override
     public void visit(NonArrayTypeNode node) {
-        println("type: " + node.type.getName());
+        println("type: " + node.getType());
     }
 
     @Override
     public void visit(ArrayTypeNode node) {
-        println("type: " + node.type.getName());
+        println("type: " + node.getType());
         println("dim: " + node.getDim());
     }
 
@@ -65,9 +65,9 @@ public class AstDump implements AstVisitor {
     public void visit(ClassDeclNode node) {
         addIndent();
         println("<<ClassDeclNode>>");
-        println("name: " + node.getName());
+        println("name: <" + node.getDeclClass() + ", " + node.getDeclClass().getName() +">");
         println("body:");
-        for (DeclaratorNode declarator : node.getBody()) {
+        for (Node declarator : node.getBody().getStatements()) {
             declarator.accept(this);
         }
         subIndent();
@@ -187,7 +187,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<VariableDeclNode>");
         node.getType().accept(this);
-        println("var: " + node.getVar());
+        println("var: <" + node.getVar()+", "+node.getVar().getName() +">");
         if (node.getInit() != null) {
             println("init:");
             node.getInit().accept(this);
