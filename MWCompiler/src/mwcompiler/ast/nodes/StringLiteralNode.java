@@ -1,12 +1,14 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
 
 public class StringLiteralNode extends LiteralExprNode {
-    public String val;
+    private String val;
 
-    public StringLiteralNode(String val){
+    public StringLiteralNode(String val, Location pos) {
         this.val = val;
+        super.location = pos;
     }
 
     public String getVal() {

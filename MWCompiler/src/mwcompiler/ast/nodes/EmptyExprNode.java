@@ -3,16 +3,17 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
-public class IntLiteralNode extends LiteralExprNode {
-    private Integer val;
+/**
+ * EmptyExprNode.java
+ * Node for empty expression
+ *
+ * @author Michael Wu
+ * @since 2018-04-11
+ */
+public class EmptyExprNode extends ExprNode {
 
-    public IntLiteralNode(String val, Location pos) {
-        this.val = Integer.decode(val);
+    public EmptyExprNode(Location pos) {
         super.location = pos;
-    }
-
-    public Integer getVal() {
-        return val;
     }
 
     @Override
