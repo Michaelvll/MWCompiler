@@ -4,15 +4,15 @@ import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
 /**
- * NullExprNode.java
+ * EmptyExprNode.java
  * Node for empty expression
  *
  * @author Michael Wu
  * @since 2018-04-11
  */
-public class NullExprNode extends ExprNode {
+public class EmptyExprNode extends ExprNode {
 
-    public NullExprNode(Location pos) {
+    public EmptyExprNode(Location pos) {
         super.location = pos;
     }
 

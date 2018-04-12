@@ -21,7 +21,7 @@ public abstract class ExprNode extends Node {
         LSFT, RSFT,
         LT, GT, LTE, GTE,
         EQ, NEQ,
-        BITAND, BITOR,
+        BITAND, BITXOR, BITOR,
         AND, OR, ASSIGN,
         // Unary
         // ADD, SUB

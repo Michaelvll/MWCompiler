@@ -1331,19 +1331,43 @@ public class MxParser extends Parser {
 	}
 
 	public static class JumpContext extends ParserRuleContext {
-		public TerminalNode RETURN() { return getToken(MxParser.RETURN, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode BREAK() { return getToken(MxParser.BREAK, 0); }
-		public TerminalNode CONTINUE() { return getToken(MxParser.CONTINUE, 0); }
 		public JumpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_jump; }
+	 
+		public JumpContext() { }
+		public void copyFrom(JumpContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class ContinueJump_Context extends JumpContext {
+		public TerminalNode CONTINUE() { return getToken(MxParser.CONTINUE, 0); }
+		public ContinueJump_Context(JumpContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitJump(this);
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitContinueJump_(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class BreakJump_Context extends JumpContext {
+		public TerminalNode BREAK() { return getToken(MxParser.BREAK, 0); }
+		public BreakJump_Context(JumpContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitBreakJump_(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ReturnJump_Context extends JumpContext {
+		public TerminalNode RETURN() { return getToken(MxParser.RETURN, 0); }
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
+		public ReturnJump_Context(JumpContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitReturnJump_(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1357,6 +1381,7 @@ public class MxParser extends Parser {
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case RETURN:
+				_localctx = new ReturnJump_Context(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(196);
@@ -1374,6 +1399,7 @@ public class MxParser extends Parser {
 				}
 				break;
 			case BREAK:
+				_localctx = new BreakJump_Context(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(200);
@@ -1381,6 +1407,7 @@ public class MxParser extends Parser {
 				}
 				break;
 			case CONTINUE:
+				_localctx = new ContinueJump_Context(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(201);

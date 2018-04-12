@@ -133,7 +133,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         for (MxParser.StatementContext state : ctx.statement()) {
             statements.add(visit(state));
         }
-        return new BlockNode(statements);
+        return new BlockNode(statements, new Location(ctx));
     }
 
     // Type
@@ -154,7 +154,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         if (ctx.expr() != null) {
             return visit(ctx.expr());
         } else {
-            return new NullExprNode(new Location(ctx.SEMI()));
+            return new EmptyExprNode(new Location(ctx));
         }
     }
 
@@ -233,6 +233,9 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
             case MxParser.BITAND:
                 op = ExprNode.OPs.BITAND;
                 break;
+            case MxParser.BITXOR:
+                op = ExprNode.OPs.BITXOR;
+                break;
             case MxParser.BITOR:
                 op = ExprNode.OPs.BITOR;
                 break;
@@ -246,7 +249,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 op = ExprNode.OPs.ASSIGN;
                 break;
             default:
-                throw new RuntimeException("Get unexpected operator at BinaryExpression");
+                throw new RuntimeException("Get unexpected operator at BinaryExpression" + ctx.op.getText());
         }
         return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)),
                 op, (ExprNode) this.visit(ctx.expr(1)), new Location(ctx.op));
@@ -326,8 +329,8 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
         ExprNode caller = (ExprNode) visit(ctx.expr());
         List<ExprNode> args = new ArrayList<>();
-        if (ctx.arguments().exprList()!= null){
-            for (MxParser.ExprContext expr:ctx.arguments().exprList().expr()) {
+        if (ctx.arguments().exprList() != null) {
+            for (MxParser.ExprContext expr : ctx.arguments().exprList().expr()) {
                 args.add((ExprNode) visit(expr));
             }
         }
@@ -358,6 +361,106 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     @Override
     public Node visitParenExpr_(MxParser.ParenExpr_Context ctx) {
         return visit(ctx.expr());
+    }
+
+    // If statement
+    @Override
+    public Node visitConditionField(MxParser.ConditionFieldContext ctx) {
+        ExprNode condition = (ExprNode) visit(ctx.cond);
+        BlockNode body = (BlockNode) visit(ctx.body());
+        IfNode ifNode = new IfNode(condition, body, new Location(ctx.IF()));
+        IfNode prevCond = ifNode;
+        if (ctx.elseifConditionField().size() != 0) {
+            for (MxParser.ElseifConditionFieldContext field : ctx.elseifConditionField()) {
+                IfNode nextCond = (IfNode) visit(field);
+                prevCond.setElseCondition(nextCond);
+                prevCond = nextCond;
+            }
+        }
+        if (ctx.elseConditionField() != null) {
+            prevCond.setElseCondition((IfNode) visit(ctx.elseConditionField()));
+        }
+        return ifNode;
+    }
+
+    @Override
+    public Node visitElseifConditionField(MxParser.ElseifConditionFieldContext ctx) {
+        return new IfNode((ExprNode) visit(ctx.cond), (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()));
+    }
+
+    @Override
+    public Node visitElseConditionField(MxParser.ElseConditionFieldContext ctx) {
+        return new IfNode(null, (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()));
+    }
+
+    // Loop statement
+    @Override
+    public Node visitForField(MxParser.ForFieldContext ctx) {
+        ExprNode vardecl = null;
+        ExprNode condition = null;
+        ExprNode step = null;
+        BlockNode body = (BlockNode) visit(ctx.body());
+        Location vardeclPos = null;
+        Location conditionPos = null;
+        Location stepPos = null;
+        if (ctx.vardecl != null) {
+            vardecl = (ExprNode) visit(ctx.vardecl);
+            vardeclPos = new Location(ctx.vardecl);
+        }
+        if (ctx.cond != null) {
+            condition = (ExprNode) visit(ctx.cond);
+            conditionPos = new Location(ctx.cond);
+        }
+        if (ctx.step != null) {
+            step = (ExprNode) visit(ctx.step);
+            stepPos = new Location(ctx.step);
+        }
+        return new LoopNode(vardecl, condition, step, body, vardeclPos, conditionPos, stepPos);
+    }
+
+    @Override
+    public Node visitWhileField(MxParser.WhileFieldContext ctx) {
+        ExprNode condition = null;
+        Location condPos = null;
+        BlockNode body = (BlockNode) visit(ctx.body());
+        if (ctx.cond != null) {
+            condition = (ExprNode) visit(ctx.cond);
+            condPos = new Location(ctx.cond);
+        }
+        return new LoopNode(null, condition, null, body, null,
+                condPos, null);
+    }
+
+    @Override
+    public Node visitBody(MxParser.BodyContext ctx) {
+        Node node = visit(ctx.statement());
+        if (node instanceof BlockNode) {
+            return node;
+        } else {
+            List<Node> statements = new ArrayList<>();
+            statements.add(node);
+            return new BlockNode(statements, new Location(ctx));
+        }
+    }
+
+    @Override
+    public Node visitJumpField(MxParser.JumpFieldContext ctx) {
+        return visit(ctx.jump());
+    }
+
+    @Override
+    public Node visitReturnJump_(MxParser.ReturnJump_Context ctx) {
+        return new ReturnNode((ExprNode) visit(ctx.expr()));
+    }
+
+    @Override
+    public Node visitBreakJump_(MxParser.BreakJump_Context ctx) {
+        return new BreakNode();
+    }
+
+    @Override
+    public Node visitContinueJump_(MxParser.ContinueJump_Context ctx) {
+        return new ContinueNode();
     }
 
     //TODO

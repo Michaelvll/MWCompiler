@@ -79,8 +79,10 @@ public class AstDump implements AstVisitor {
     }
 
     @Override
-    public void visit(NullExprNode node) {
-
+    public void visit(EmptyExprNode node) {
+        addIndent();
+        println("<EmptyExprNode>");
+        subIndent();
     }
 
     @Override
@@ -90,7 +92,7 @@ public class AstDump implements AstVisitor {
         println("caller:");
         node.getCaller().accept(this);
         println("args: ");
-        for(ExprNode arg: node.getArgs()) {
+        for (ExprNode arg : node.getArgs()) {
             arg.accept(this);
         }
         subIndent();
@@ -100,8 +102,8 @@ public class AstDump implements AstVisitor {
     public void visit(DotMemberNode node) {
         addIndent();
         println("<DotMemberNode>");
-        println("mom: ");
-        node.getMom().accept(this);
+        println("container: ");
+        node.getContainer().accept(this);
         println("member: " + node.getMember());
         subIndent();
     }
@@ -110,10 +112,72 @@ public class AstDump implements AstVisitor {
     public void visit(BrackMemberNode node) {
         addIndent();
         println("<BrackMemberNode>");
-        println("mom: ");
-        node.getMom().accept(this);
+        println("container: ");
+        node.getContainer().accept(this);
         println("subscript: ");
         node.getSubscript().accept(this);
+        subIndent();
+    }
+
+    @Override
+    public void visit(IfNode node) {
+        addIndent();
+        println("<IfNode>");
+        if (node.getCondition() != null) {
+            println("cond: ");
+            node.getCondition().accept(this);
+        }
+        println("body: ");
+        node.getBody().accept(this);
+        if (node.getElseCondition() != null) {
+            println("else: ");
+            node.getElseCondition().accept(this);
+        }
+        subIndent();
+    }
+
+    @Override
+    public void visit(LoopNode node) {
+        addIndent();
+        println("<LoopNode>");
+        if (node.getVarDecl() != null) {
+            println("varDecl: ");
+            node.getVarDecl().accept(this);
+        }
+        if (node.getCondition() != null) {
+            println("cond: ");
+            node.getCondition().accept(this);
+        }
+        if (node.getStep() != null) {
+            println("step: ");
+            node.getStep().accept(this);
+        }
+        node.getBody().accept(this);
+        subIndent();
+    }
+
+    @Override
+    public void visit(BreakNode node) {
+        addIndent();
+        println("<BreakNode>");
+        subIndent();
+    }
+
+    @Override
+    public void visit(ReturnNode node) {
+        addIndent();
+        println("<ReturnNode>");
+        if (node.getReturnVal() != null) {
+            println("returnVal: ");
+            node.getReturnVal().accept(this);
+        }
+        subIndent();
+    }
+
+    @Override
+    public void visit(ContinueNode node) {
+        addIndent();
+        println("<ContinueNode>");
         subIndent();
     }
 
@@ -184,7 +248,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<<BlockNode>>");
         subIndent();
-        for (Node statement : node.statements) {
+        for (Node statement : node.getStatements()) {
             statement.accept(this);
         }
     }
@@ -230,6 +294,8 @@ public class AstDump implements AstVisitor {
 
     @Override
     public void visit(NullLiteralNode node) {
-        println("null");
+        addIndent();
+        println("<NullLiteralNode>");
+        subIndent();
     }
 }

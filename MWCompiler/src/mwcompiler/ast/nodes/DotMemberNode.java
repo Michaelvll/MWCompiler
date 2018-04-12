@@ -6,11 +6,11 @@ import mwcompiler.ast.tools.Location;
 import java.util.List;
 
 public class DotMemberNode extends ExprNode {
-    private ExprNode mom;
+    private ExprNode container;
     private String member;
 
-    public DotMemberNode(ExprNode mom, String member, Location pos) {
-        this.mom = mom;
+    public DotMemberNode(ExprNode container, String member, Location pos) {
+        this.container = container;
         this.member = member;
         super.location = pos;
     }
@@ -20,15 +20,12 @@ public class DotMemberNode extends ExprNode {
         visitor.visit(this);
     }
 
-    public ExprNode getMom() {
-        return mom;
-    }
-
-    public void setMom(ExprNode mom) {
-        this.mom = mom;
-    }
 
     public String getMember() {
         return member;
+    }
+
+    public ExprNode getContainer() {
+        return container;
     }
 }

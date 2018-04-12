@@ -72,8 +72,11 @@ elseifConditionField:
 elseConditionField	: ELSE body;
 loopField			: forField | whileField;
 jumpField			: jump SEMI;
-jump				: RETURN expr? | BREAK | CONTINUE;
-
+jump:
+	RETURN expr?	# ReturnJump_
+	| BREAK			# BreakJump_
+	| CONTINUE		# ContinueJump_
+	;
 forField:
 	FOR LPAREN vardecl = expr? SEMI cond = expr? SEMI step = expr? RPAREN body
 	;

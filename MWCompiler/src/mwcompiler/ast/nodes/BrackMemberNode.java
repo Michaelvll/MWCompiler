@@ -4,11 +4,11 @@ import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
 public class BrackMemberNode extends ExprNode {
-    private ExprNode mom;
+    private ExprNode container;
     private ExprNode subscript;
 
-    public BrackMemberNode(ExprNode mom, ExprNode subscript, Location pos) {
-        this.mom = mom;
+    public BrackMemberNode(ExprNode container, ExprNode subscript, Location pos) {
+        this.container = container;
         this.subscript = subscript;
         super.location = pos;
     }
@@ -18,8 +18,8 @@ public class BrackMemberNode extends ExprNode {
         visitor.visit(this);
     }
 
-    public ExprNode getMom() {
-        return mom;
+    public ExprNode getContainer() {
+        return container;
     }
 
     public ExprNode getSubscript() {
