@@ -1,9 +1,10 @@
 class hello{
-    /*int a;
-    int b = 5;
+    int a;
+    int b = a*(c-d)/4 + 5;
     string main(bool k){
         eat t = new eat;
-    }*/
+        a.b.c(15)[3];
+    }
     hello(int c, string d) {
         int t = 0;        
         t = ++a;

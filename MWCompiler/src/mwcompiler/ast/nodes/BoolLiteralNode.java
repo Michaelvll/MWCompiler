@@ -1,14 +1,16 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
 
 public class BoolLiteralNode extends LiteralExprNode {
     public enum BoolVal{
         TRUE, FALSE
     };
-    public BoolVal val;
+    private BoolVal val;
 
-    public BoolLiteralNode(String val) {
+    public BoolLiteralNode(String val, Location pos) {
+        super.location = pos;
         switch (val) {
             case "true":
                 this.val = BoolVal.TRUE;

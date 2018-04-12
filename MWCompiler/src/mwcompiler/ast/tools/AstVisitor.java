@@ -48,6 +48,24 @@ public interface AstVisitor {
 
     void visit(NullTypeNode node);
 
-    void visit(NullExprNode node);
+    void visit(EmptyExprNode node);
+
+    void visit(FunctionCallNode node);
+
+    void visit(DotMemberNode node);
+
+    void visit(BrackMemberNode node);
+
+    void visit(IfNode node);
+
+    void visit(LoopNode node);
+
+    void visit(BreakNode node);
+
+    void visit(ReturnNode node);
+
+    void visit(ContinueNode node);
+
+
     //TODO
 }

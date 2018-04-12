@@ -1,3 +1,7 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.Location;
+
 /**
  * ExprNode.java
  * Expression extends from Node
@@ -5,25 +9,31 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.ast.tools.Location;
-
 public abstract class ExprNode extends Node {
     //TODO
 
     protected Location location;
-    public enum OPs{
+
+    public enum OPs {
         // Binary
-        Assign,
-        // Unary
-        INC,DEC,
         ADD, SUB,
+        MUL, DIV, MOD,
+        LSFT, RSFT,
+        LT, GT, LTE, GTE,
+        EQ, NEQ,
+        BITAND, BITXOR, BITOR,
+        AND, OR, ASSIGN,
+        // Unary
+        // ADD, SUB
+        INC_SUFF,
+        DEC_SUFF,
+        INC, DEC,
         NOT, BITNOT,
-        // New
+        // NEW
         NEW
     }
-    public Location getLocation(){
+
+    public Location getLocation() {
         return location;
     }
 }
