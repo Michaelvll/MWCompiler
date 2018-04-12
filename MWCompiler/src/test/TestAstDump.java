@@ -22,13 +22,13 @@ import org.junit.Test;
  * */
 
 public class TestAstDump {
-    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx"};
+    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx"};
 
     private Node program;
 
     @Before
     public void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases"+files[3]);
+        CharStream input = CharStreams.fromFileName("../testcases"+files[4]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MxParser parser = new MxParser(tokens);
