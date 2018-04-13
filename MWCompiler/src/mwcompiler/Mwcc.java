@@ -13,9 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.List;
 
-import mwcompiler.ast.nodes.DeclaratorNode;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.BuildAstVisitor;
 import mwcompiler.symbols.tools.TransformType2Symbol;
@@ -25,7 +23,6 @@ import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import org.apache.maven.model.Build;
 
 public class Mwcc {
     private static InputStream in = System.in;
@@ -40,7 +37,7 @@ public class Mwcc {
         BuildAstVisitor buildAstVisitor = buildAst();
         TransformType2Symbol.symbolize(buildAstVisitor);
 
-//        System.out.println("Build No exception!");
+        //        System.out.println("Build No exception!");
     }
 
     private static void compilerArgSolve(String[] args) {
