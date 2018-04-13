@@ -2,9 +2,8 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
-import mwcompiler.symbols.TypeSymbol;
-
-import java.util.List;
+import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.SymbolTable;
 
 /**
  * ClassDeclNode.java
@@ -14,14 +13,15 @@ import java.util.List;
  * @since 2018-04-11
  */
 public class ClassDeclNode extends DeclaratorNode {
-    private TypeSymbol declClass;
+    private NonArrayTypeSymbol classSymbol;
     private BlockNode body;
     private Location declClassPos;
 
-    public ClassDeclNode(String declClass, BlockNode body, Location declClassPos) {
-        this.declClass = TypeSymbol.builder(declClass);
+    public ClassDeclNode(String classSymbol, BlockNode body, Location declClassPos) {
+        this.classSymbol = NonArrayTypeSymbol.builder(classSymbol); // Throw an already declared runtime error
         this.body = body;
         this.declClassPos = declClassPos;
+        SymbolTable.putNamedSymbolTable(this.classSymbol, body.getCurrentSymbolTable());
     }
 
 
@@ -35,11 +35,17 @@ public class ClassDeclNode extends DeclaratorNode {
         return body;
     }
 
-    public Location getDeclClassPos() {
-        return declClassPos;
+    public NonArrayTypeSymbol getClassSymbol() {
+        return classSymbol;
     }
 
-    public TypeSymbol getDeclClass() {
-        return declClass;
+    @Override
+    public void transform2Symbol() {
+        // nothing need to be down
+    }
+
+    @Override
+    public Location getStartLocation() {
+        return declClassPos;
     }
 }

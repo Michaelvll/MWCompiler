@@ -29,4 +29,8 @@ After the lexer and parser have finished, MWcc begins AST building by calling [m
 
 When building the AST, types defined by (class) declaration are transformed to *TypeSymbol*s (same types have only one same instance), as well as the variables in declaration are transformed to *VariableSymbol*s. (Types and variables used are still in form of String).
 
-**Symbol tables**, which forms a chain, are stored in *BlockNode*s. The construction of the Symbol Tables has been done while AST is building, but the content in those Symbol Tables are incompleted.
+**Symbol tables**, which forms a chain, are stored in *BlockNode*s. The construction of the Symbol Tables has been done while AST is building, but the contents in those Symbol Tables are incompleted.
+
+#### Type Checking
+
+<!-- Complete the symbol table. -->

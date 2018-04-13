@@ -26,6 +26,11 @@ public class BlockNode extends Node {
     }
 
     @Override
+    public Location getStartLocation() {
+        return location;
+    }
+
+    @Override
     public void accept(AstVisitor visitor) {
         visitor.visit(this);
     }

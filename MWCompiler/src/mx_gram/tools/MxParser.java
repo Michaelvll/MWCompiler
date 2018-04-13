@@ -38,7 +38,7 @@ public class MxParser extends Parser {
 		RULE_creator = 34, RULE_createdName = 35, RULE_arrayCreatorRest = 36;
 	public static final String[] ruleNames = {
 		"program", "declarator", "variableDeclField", "functionDeclField", "classDeclField", 
-		"type", "nonArrayType", "primitiveType", "classType", "variableField", 
+		"typename", "nonArrayType", "primitiveType", "classType", "variableField",
 		"functionField", "variableInitializer", "paramExprField", "paramExpr", 
 		"functionBody", "block", "statement", "body", "conditionField", "elseifConditionField", 
 		"elseConditionField", "loopField", "jumpField", "jump", "forField", "whileField", 

@@ -1,6 +1,9 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.TypeSymbol;
 
 /**
  * VoidTypeNode.java
@@ -8,14 +11,20 @@ import mwcompiler.ast.tools.AstVisitor;
  *
  * @author Michael Wu
  * @since 2018-04-11
- * */
+ */
 public class VoidTypeNode extends TypeNode {
-    public VoidTypeNode() {
-        super("void");
+    public VoidTypeNode(Location pos) {
+        super("void", pos);
     }
 
     @Override
     public void accept(AstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public TypeSymbol getSymbol() {
+        return NonArrayTypeSymbol.getSymbol("void");
+
     }
 }

@@ -5,6 +5,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class SymbolTable {
+    private static Dictionary<NonArrayTypeSymbol, SymbolTable> type2SymbolTableMap = new Hashtable<>();
     private Dictionary<VariableSymbol, TypeSymbol> currentMap = new Hashtable<>();
     private SymbolTable outerSymbolTable;
 
@@ -25,12 +26,20 @@ public class SymbolTable {
         return search == null;
     }
 
-    public TypeSymbol find(VariableSymbol variableSymbol) {
+    public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable){
+        type2SymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
+    }
+
+    public TypeSymbol findall(VariableSymbol variableSymbol) {
         TypeSymbol search = currentMap.get(variableSymbol);
         if (search == null && outerSymbolTable != null) {
-            search = outerSymbolTable.find(variableSymbol);
+            search = outerSymbolTable.findall(variableSymbol);
         }
         return search;
+    }
+
+    public TypeSymbol findin(VariableSymbol variableSymbol) {
+        return currentMap.get(variableSymbol);
     }
 
 }

@@ -23,14 +23,14 @@ declarator:
 	;
 
 // Declarators for the program
-variableDeclField : type variableField SEMI;
+variableDeclField : typename variableField SEMI;
 functionDeclField:
-	type functionField		# TypeFunction_
+	typename functionField		# TypeFunction_
 	| VOID functionField	# VoidFunction_
 	;
 classDeclField : CLASS classField;
 
-type : nonArrayType (LBRACK RBRACK)*;
+typename : nonArrayType (LBRACK RBRACK)*;
 
 nonArrayType	: primitiveType | classType;
 primitiveType	: BOOL | INT | STRING;
@@ -49,7 +49,7 @@ variableInitializer : expr;
 paramExprField:
 	LPAREN (paramExpr (COMMA paramExpr)*)? RPAREN
 	;
-paramExpr : type Identifier;
+paramExpr : typename Identifier;
 
 functionBody	: block;
 block			: LBRACE statement* RBRACE;

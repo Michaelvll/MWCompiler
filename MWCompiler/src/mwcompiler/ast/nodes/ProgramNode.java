@@ -14,14 +14,21 @@ import java.util.List;
 
 public class ProgramNode extends  Node {
     //TODO
-    private final BlockNode declarators;
+    private BlockNode declarators;
+    Location location;
 
-    public ProgramNode(BlockNode declarators){
+    public ProgramNode(BlockNode declarators, Location pos){
         this.declarators = declarators;
+        this.location = pos;
     }
 
     public BlockNode getDeclarators() {
         return declarators;
+    }
+
+    @Override
+    public Location getStartLocation() {
+        return location;
     }
 
     @Override

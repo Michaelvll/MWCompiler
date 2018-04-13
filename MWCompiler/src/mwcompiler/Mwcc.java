@@ -1,7 +1,7 @@
 /**
  * Mwcc.java
  * The main class of mwcompiler for Mx language
- * 
+ *
  * @author Michael Wu
  * @version 1.0
  * @since 2018-04-05
@@ -13,26 +13,33 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.List;
 
+import mwcompiler.ast.nodes.DeclaratorNode;
+import mwcompiler.ast.nodes.Node;
+import mwcompiler.ast.tools.BuildAstVisitor;
+import mwcompiler.symbols.tools.TransformType2Symbol;
 import org.apache.commons.cli.*;
 
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.apache.maven.model.Build;
 
 public class Mwcc {
     private static InputStream in = System.in;
     private static PrintStream out = System.out;
+    private static Node programRoot;
 
     /**
-     * @param args
-     *
-     * The entry of Mwcc
+     * @param args The entry of Mwcc
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         compilerArgSolve(args);
-        buildAst();
+        BuildAstVisitor buildAstVisitor = buildAst();
+        TransformType2Symbol.symbolize(buildAstVisitor);
+
         System.out.println("Build No exception!");
     }
 
@@ -100,17 +107,20 @@ public class Mwcc {
 
     }
 
-    private static void buildAst() {
+    private static BuildAstVisitor buildAst() throws Exception {
+        BuildAstVisitor buildAstVisitor = new BuildAstVisitor();
         try {
             CharStream input = CharStreams.fromStream(in);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
             ParseTree tree = parser.program();
+            programRoot = buildAstVisitor.visit(tree);
         } catch (IOException e) {
-            System.out.println("Can't read from the input file: " + e.getMessage());
+            System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
         }
+        return buildAstVisitor;
     }
 
 }
