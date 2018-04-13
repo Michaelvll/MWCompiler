@@ -49,11 +49,11 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitClassDeclField(MxParser.ClassDeclFieldContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#typename}.
+	 * Visit a parse tree produced by {@link MxParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypename(MxParser.TypenameContext ctx);
+	T visitType(MxParser.TypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#nonArrayType}.
 	 * @param ctx the parse tree
