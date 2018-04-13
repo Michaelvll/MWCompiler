@@ -1,3 +1,10 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.ArrayTypeSymbol;
+import mwcompiler.symbols.TypeSymbol;
+
 /**
  * ArrayTypeNode.java
  * ArrayType extends from TypeNode
@@ -5,20 +12,17 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.ast.tools.AstVisitor;
 
 public class ArrayTypeNode extends TypeNode {
     //TODO
-    private Integer dim = 0;
+    private Integer dim = -1;
 
-    public ArrayTypeNode(String type, Integer dim) {
-        super(type);
+    public ArrayTypeNode(String type, Integer dim, Location pos) {
+        super(type, pos);
         this.dim = dim;
     }
     public ArrayTypeNode(NonArrayTypeNode node) {
-        super(node.type);
+        super(node.typename, node.location);
         this.dim = 1;
     }
 
@@ -36,5 +40,10 @@ public class ArrayTypeNode extends TypeNode {
     @Override
     public void accept(AstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public TypeSymbol getSymbol() {
+        return ArrayTypeSymbol.getSymbol(super.getTypename(), dim);
     }
 }

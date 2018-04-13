@@ -80,7 +80,7 @@ BoolLiteral : TRUE | FALSE;
 
 IntLiteral : DecimalInt | HexInt | OctInt | BinInt;
 
-// Name of variables(including name of classes and functions)
+// Name of variables(including classSymbol of classes and functions)
 StringLiteral : '"' StringCharactors? '"';
 
 Identifier : [a-zA-Z][0-9a-zA-Z_]*;

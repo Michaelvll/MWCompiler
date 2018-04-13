@@ -24,7 +24,7 @@ public class UnaryExprNode extends ExprNode {
         return op;
     }
 
-    public Location getLocation() {
+    public Location getStartLocation() {
         return super.location;
     }
 

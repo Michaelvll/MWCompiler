@@ -12,6 +12,9 @@ import mwcompiler.ast.tools.*;
 public abstract class Node {
     //TODO
 
+    public void transform2Symbol(){
+    }
+    public abstract Location getStartLocation();
     public abstract void accept(AstVisitor visitor);
 }
 

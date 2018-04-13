@@ -32,8 +32,8 @@ public abstract class ExprNode extends Node {
         // NEW
         NEW
     }
-
-    public Location getLocation() {
+    @Override
+    public Location getStartLocation() {
         return location;
     }
 }

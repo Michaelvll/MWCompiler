@@ -57,4 +57,9 @@ public class LoopNode extends Node {
     public Location getStepPos() {
         return stepPos;
     }
+
+    @Override
+    public Location getStartLocation() {
+        return varDeclPos;
+    }
 }

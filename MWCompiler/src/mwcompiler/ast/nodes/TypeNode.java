@@ -1,27 +1,46 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.*;
+
 /**
  * TypeNode.java
- * Type extends from Node
+ * NonArrayTypeSymbol extends from Node
  *
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.symbols.*;
 
 public abstract class TypeNode extends Node {
     //TODO
-    public Type type;
+    protected String typename;
+    Location location;
 
-    public TypeNode(Type type) {
-        this.type = Type.builder(type);
+    protected TypeNode(String typename, Location location) {
+        this.typename = typename;
+        this.location = location;
     }
 
-    public TypeNode(TypeNode node) {
-        this.type = Type.builder(node.type);
+    public static TypeNode builder(String type, Integer dim, Location pos) {
+        if (dim == 0) {
+            return new NonArrayTypeNode(type, pos);
+        } else {
+            return new ArrayTypeNode(type, dim, pos);
+        }
     }
 
-    public TypeNode(String type) {
-        this.type = Type.builder(type);
+    public static TypeNode builder(String type, Location pos) {
+        return new NonArrayTypeNode(type, pos);
+    }
+
+    public String getTypename() {
+        return this.typename;
+    }
+
+    public abstract TypeSymbol getSymbol();
+
+    @Override
+    public Location getStartLocation() {
+        return location;
     }
 }
