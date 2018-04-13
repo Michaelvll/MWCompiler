@@ -13,7 +13,7 @@ import mwcompiler.ast.tools.Location;
  * */
 public class NullLiteralNode extends LiteralExprNode {
     public NullLiteralNode(Location pos) {
-        super.location = pos;
+        super(pos);
     }
 
     @Override

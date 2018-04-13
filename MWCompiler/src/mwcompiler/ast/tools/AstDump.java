@@ -3,7 +3,6 @@ package mwcompiler.ast.tools;
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.VariableSymbol;
 
 import java.io.PrintStream;
 import java.util.List;

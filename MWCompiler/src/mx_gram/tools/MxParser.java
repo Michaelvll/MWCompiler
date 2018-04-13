@@ -27,7 +27,7 @@ public class MxParser extends Parser {
 		WS=54;
 	public static final int
 		RULE_program = 0, RULE_declarator = 1, RULE_variableDeclField = 2, RULE_functionDeclField = 3, 
-		RULE_classDeclField = 4, RULE_type = 5, RULE_nonArrayType = 6, RULE_primitiveType = 7, 
+		RULE_classDeclField = 4, RULE_typename = 5, RULE_nonArrayType = 6, RULE_primitiveType = 7, 
 		RULE_classType = 8, RULE_variableField = 9, RULE_functionField = 10, RULE_variableInitializer = 11, 
 		RULE_paramExprField = 12, RULE_paramExpr = 13, RULE_functionBody = 14, 
 		RULE_block = 15, RULE_statement = 16, RULE_body = 17, RULE_conditionField = 18, 
@@ -38,7 +38,7 @@ public class MxParser extends Parser {
 		RULE_creator = 34, RULE_createdName = 35, RULE_arrayCreatorRest = 36;
 	public static final String[] ruleNames = {
 		"program", "declarator", "variableDeclField", "functionDeclField", "classDeclField", 
-		"typename", "nonArrayType", "primitiveType", "classType", "variableField",
+		"typename", "nonArrayType", "primitiveType", "classType", "variableField", 
 		"functionField", "variableInitializer", "paramExprField", "paramExpr", 
 		"functionBody", "block", "statement", "body", "conditionField", "elseifConditionField", 
 		"elseConditionField", "loopField", "jumpField", "jump", "forField", "whileField", 
@@ -230,8 +230,8 @@ public class MxParser extends Parser {
 	}
 
 	public static class VariableDeclFieldContext extends ParserRuleContext {
-		public TypeContext type() {
-			return getRuleContext(TypeContext.class,0);
+		public TypenameContext typename() {
+			return getRuleContext(TypenameContext.class,0);
 		}
 		public VariableFieldContext variableField() {
 			return getRuleContext(VariableFieldContext.class,0);
@@ -255,7 +255,7 @@ public class MxParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(87);
-			type();
+			typename();
 			setState(88);
 			variableField();
 			setState(89);
@@ -285,8 +285,8 @@ public class MxParser extends Parser {
 		}
 	}
 	public static class TypeFunction_Context extends FunctionDeclFieldContext {
-		public TypeContext type() {
-			return getRuleContext(TypeContext.class,0);
+		public TypenameContext typename() {
+			return getRuleContext(TypenameContext.class,0);
 		}
 		public FunctionFieldContext functionField() {
 			return getRuleContext(FunctionFieldContext.class,0);
@@ -326,7 +326,7 @@ public class MxParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(91);
-				type();
+				typename();
 				setState(92);
 				functionField();
 				}
@@ -395,7 +395,7 @@ public class MxParser extends Parser {
 		return _localctx;
 	}
 
-	public static class TypeContext extends ParserRuleContext {
+	public static class TypenameContext extends ParserRuleContext {
 		public NonArrayTypeContext nonArrayType() {
 			return getRuleContext(NonArrayTypeContext.class,0);
 		}
@@ -407,20 +407,20 @@ public class MxParser extends Parser {
 		public TerminalNode RBRACK(int i) {
 			return getToken(MxParser.RBRACK, i);
 		}
-		public TypeContext(ParserRuleContext parent, int invokingState) {
+		public TypenameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_type; }
+		@Override public int getRuleIndex() { return RULE_typename; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitType(this);
+			if ( visitor instanceof MxVisitor ) return ((MxVisitor<? extends T>)visitor).visitTypename(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final TypeContext type() throws RecognitionException {
-		TypeContext _localctx = new TypeContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_type);
+	public final TypenameContext typename() throws RecognitionException {
+		TypenameContext _localctx = new TypenameContext(_ctx, getState());
+		enterRule(_localctx, 10, RULE_typename);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -797,8 +797,8 @@ public class MxParser extends Parser {
 	}
 
 	public static class ParamExprContext extends ParserRuleContext {
-		public TypeContext type() {
-			return getRuleContext(TypeContext.class,0);
+		public TypenameContext typename() {
+			return getRuleContext(TypenameContext.class,0);
 		}
 		public TerminalNode Identifier() { return getToken(MxParser.Identifier, 0); }
 		public ParamExprContext(ParserRuleContext parent, int invokingState) {
@@ -819,7 +819,7 @@ public class MxParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(141);
-			type();
+			typename();
 			setState(142);
 			match(Identifier);
 			}

@@ -13,7 +13,7 @@ import mwcompiler.ast.tools.Location;
 public class EmptyExprNode extends ExprNode {
 
     public EmptyExprNode(Location pos) {
-        super.location = pos;
+        super(pos);
     }
 
     @Override

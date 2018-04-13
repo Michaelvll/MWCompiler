@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * This interface defines a complete generic visitor for a parse tree produced
  * by {@link MxParser}.
  *
- * @param <T> The return typename of the visit operation. Use {@link Void} for
- * operations with no return typename.
+ * @param <T> The return type of the visit operation. Use {@link Void} for
+ * operations with no return type.
  */
 public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	/**
@@ -49,11 +49,11 @@ public interface MxVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitClassDeclField(MxParser.ClassDeclFieldContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#type}.
+	 * Visit a parse tree produced by {@link MxParser#typename}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitType(MxParser.TypeContext ctx);
+	T visitTypename(MxParser.TypenameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#nonArrayType}.
 	 * @param ctx the parse tree

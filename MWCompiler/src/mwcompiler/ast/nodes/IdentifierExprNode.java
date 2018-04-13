@@ -19,8 +19,8 @@ public class IdentifierExprNode extends ExprNode {
     private InstanceSymbol instanceSymbol;
 
     public IdentifierExprNode(String name, Location pos) {
+        super(pos);
         this.instanceName = name;
-        super.location = pos;
     }
 
     @Override

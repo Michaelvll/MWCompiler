@@ -3,15 +3,11 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.Location;
 
-public abstract class JumpNode extends Node {
-    Location location;
+public abstract class JumpNode extends ExprNode {
 
-    JumpNode(Location location) {
-        this.location = location;
+
+    JumpNode(Location pos) {
+        super(pos);
     }
 
-    @Override
-    public Location getStartLocation() {
-        return location;
-    }
 }
