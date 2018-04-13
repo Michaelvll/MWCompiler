@@ -8,9 +8,9 @@ public class BrackMemberNode extends ExprNode {
     private ExprNode subscript;
 
     public BrackMemberNode(ExprNode container, ExprNode subscript, Location pos) {
+        super(pos);
         this.container = container;
         this.subscript = subscript;
-        super.location = pos;
     }
 
     @Override

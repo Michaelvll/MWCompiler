@@ -10,9 +10,9 @@ public class NewExprNode extends ExprNode {
     private List<ExprNode> dimArgs;
 
     public NewExprNode(String createType, Integer dim, List<ExprNode> dimArgs, Location pos) {
+        super(pos);
         this.createType = TypeNode.builder(createType,dim,pos);
         this.dimArgs = dimArgs;
-        super.location = pos;
     }
 
     @Override

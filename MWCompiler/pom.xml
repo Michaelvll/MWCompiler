@@ -9,7 +9,6 @@
     <artifactId>MWCompiler</artifactId>
     <version>0.1</version>
     <packaging>jar</packaging>
-    <classSymbol>MWCompiler</classSymbol>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

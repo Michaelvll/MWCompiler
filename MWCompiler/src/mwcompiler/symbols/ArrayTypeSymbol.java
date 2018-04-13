@@ -1,7 +1,6 @@
 package mwcompiler.symbols;
 
 
-import mwcompiler.ast.nodes.ArrayTypeNode;
 
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;

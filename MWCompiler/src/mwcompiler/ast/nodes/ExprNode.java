@@ -12,7 +12,11 @@ import mwcompiler.ast.tools.Location;
 public abstract class ExprNode extends Node {
     //TODO
 
-    protected Location location;
+    private Location location;
+
+    ExprNode(Location pos) {
+        location = pos;
+    }
 
     public enum OPs {
         // Binary
@@ -32,6 +36,7 @@ public abstract class ExprNode extends Node {
         // NEW
         NEW
     }
+
     @Override
     public Location getStartLocation() {
         return location;

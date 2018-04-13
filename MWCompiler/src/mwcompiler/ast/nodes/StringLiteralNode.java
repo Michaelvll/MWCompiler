@@ -7,8 +7,8 @@ public class StringLiteralNode extends LiteralExprNode {
     private String val;
 
     public StringLiteralNode(String val, Location pos) {
+        super(pos);
         this.val = val;
-        super.location = pos;
     }
 
     public String getVal() {
