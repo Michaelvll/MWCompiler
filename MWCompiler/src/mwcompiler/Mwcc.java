@@ -40,7 +40,7 @@ public class Mwcc {
         BuildAstVisitor buildAstVisitor = buildAst();
         TransformType2Symbol.symbolize(buildAstVisitor);
 
-        System.out.println("Build No exception!");
+//        System.out.println("Build No exception!");
     }
 
     private static void compilerArgSolve(String[] args) {
