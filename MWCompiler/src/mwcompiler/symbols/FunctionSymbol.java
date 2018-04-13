@@ -3,8 +3,6 @@ package mwcompiler.symbols;
 import mwcompiler.ast.nodes.TypeNode;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 public class FunctionSymbol extends InstanceSymbol {

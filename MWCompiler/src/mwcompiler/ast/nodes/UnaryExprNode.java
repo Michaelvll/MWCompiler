@@ -9,9 +9,9 @@ public class UnaryExprNode extends ExprNode {
     private ExprNode expr;
 
     public UnaryExprNode(OPs op, ExprNode expr, Location pos) {
+        super(pos);
         this.op = op;
         this.expr = expr;
-        super.location = pos;
     }
 
 
@@ -24,9 +24,6 @@ public class UnaryExprNode extends ExprNode {
         return op;
     }
 
-    public Location getStartLocation() {
-        return super.location;
-    }
 
     public ExprNode getExpr() {
         return expr;

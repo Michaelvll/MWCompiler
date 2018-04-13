@@ -27,9 +27,13 @@ In order to make the semantic analysis more explicit, MWcc build an Abstract Syn
 
 After the lexer and parser have finished, MWcc begins AST building by calling [mwcompiler.ast.tools.BuildAstVisitor](./MWCompiler/src/mwcompiler/ast/tools/BuildAstVisitor.java). And the abstract syntex nodes are defined in [mwcompiler.ast.nodes](./MWCompiler/src/mwcompiler/ast/nodes/)
 
-When building the AST, types defined by (class) declaration are transformed to *TypeSymbol*s (same types have only one same instance), as well as the variables in declaration are transformed to *VariableSymbol*s. (Types and variables used are still in form of String).
+When building the AST, types defined by (class) declaration are transformed to *TypeSymbol*s (same types have only one same instance).
 
 **Symbol tables**, which forms a chain, are stored in *BlockNode*s. The construction of the Symbol Tables has been done while AST is building, but the contents in those Symbol Tables are incompleted.
+
+### Symbol Transforming
+
+Transform the Variables to [VariableSymbol](./MWCompiler/src/mwcompiler/symbols/VariableSymbol.java)s and functions to [FunctionSymbol](./MWCompiler/src/mwcompiler/symbols/FunctionSymbol.java)s 
 
 #### Type Checking
 

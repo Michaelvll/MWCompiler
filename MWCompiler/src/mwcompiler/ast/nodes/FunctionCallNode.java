@@ -10,9 +10,9 @@ public class FunctionCallNode extends ExprNode {
     private List<ExprNode> args;
 
     public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos) {
+        super(pos);
         this.caller = caller;
         this.args = args;
-        super.location = pos;
     }
 
     @Override

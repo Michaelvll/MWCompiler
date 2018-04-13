@@ -10,7 +10,7 @@ public class BoolLiteralNode extends LiteralExprNode {
     private BoolVal val;
 
     public BoolLiteralNode(String val, Location pos) {
-        super.location = pos;
+        super(pos);
         switch (val) {
             case "true":
                 this.val = BoolVal.TRUE;
