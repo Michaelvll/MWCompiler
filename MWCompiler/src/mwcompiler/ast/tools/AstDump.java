@@ -1,6 +1,9 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.VariableSymbol;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -39,35 +42,35 @@ public class AstDump implements AstVisitor {
     @Override
     public void visit(ProgramNode node) {
         println("<<ProgramNode>>");
-        List<DeclaratorNode> declarators = node.getDeclarators();
-        for (DeclaratorNode declarator : declarators) {
+        List<Node> declarators = node.getDeclarators().getStatements();
+        for (Node declarator : declarators) {
             declarator.accept(this);
         }
     }
 
     @Override
     public void visit(NonArrayTypeNode node) {
-        println("type: " + node.type.getName());
+        println("typename: " + node.getTypename());
     }
 
     @Override
     public void visit(ArrayTypeNode node) {
-        println("type: " + node.type.getName());
+        println("typename: " + node.getTypename());
         println("dim: " + node.getDim());
     }
 
     @Override
     public void visit(VoidTypeNode node) {
-        println("type: void");
+        println("typename: void");
     }
 
     @Override
     public void visit(ClassDeclNode node) {
         addIndent();
         println("<<ClassDeclNode>>");
-        println("name: " + node.getName());
+        println("name: <" + node.getClassSymbol() + ", " + node.getClassSymbol().getName() +">");
         println("body:");
-        for (DeclaratorNode declarator : node.getBody()) {
+        for (Node declarator : node.getBody().getStatements()) {
             declarator.accept(this);
         }
         subIndent();
@@ -187,7 +190,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<VariableDeclNode>");
         node.getType().accept(this);
-        println("var: " + node.getVar());
+        println("var: <" + node.getVar()+", "+node.getVar().getName() +">");
         if (node.getInit() != null) {
             println("init:");
             node.getInit().accept(this);
@@ -199,8 +202,9 @@ public class AstDump implements AstVisitor {
     public void visit(FunctionDeclNode node) {
         addIndent();
         println("<<FunctionDeclNode>>");
-        node.getReturnType().accept(this);
-        println("name: " + node.getName());
+        FunctionSymbol functionSymbol = node.getFunctionSymbol();
+        println("type: <" + functionSymbol.getReturnType() + ", " +functionSymbol.getReturnType().getName() +">");
+        println("name: <" + node.getFunctionSymbol()+", "+node.getFunctionSymbol().getName()+">");
         println("params:");
         for (Node param : node.getParamList()) {
             param.accept(this);
@@ -215,7 +219,8 @@ public class AstDump implements AstVisitor {
     public void visit(IdentifierExprNode node) {
         addIndent();
         println("<IdentifierExprNode>");
-        println("val: " + node.getName());
+        InstanceSymbol instanceSymbol = node.getInstanceSymbol();
+        println("val: <" + instanceSymbol + ", " + instanceSymbol.getName() + ">");
         subIndent();
     }
 
@@ -281,11 +286,14 @@ public class AstDump implements AstVisitor {
     public void visit(NewExprNode node) {
         addIndent();
         println("<NewExprNode>");
-        println("type: " + node.createType.getName());
-        println("dim: " + String.valueOf(node.dim));
-        if (node.dimArgs.size() != 0) {
+        TypeNode createType = node.getCreateType();
+        println("typename: " + createType.getTypename());
+        if (createType instanceof ArrayTypeNode) {
+            println("dim: "+String.valueOf(((ArrayTypeNode) createType).getDim()));
+        }
+        if (node.getDimArgs().size() != 0) {
             println("dimArgs: ");
-            for (Node expr : node.dimArgs) {
+            for (Node expr : node.getDimArgs()) {
                 expr.accept(this);
             }
         }

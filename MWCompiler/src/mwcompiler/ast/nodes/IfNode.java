@@ -17,6 +17,10 @@ public class IfNode extends Node {
     }
 
 
+    @Override
+    public Location getStartLocation() {
+        return location;
+    }
 
     @Override
     public void accept(AstVisitor visitor) {

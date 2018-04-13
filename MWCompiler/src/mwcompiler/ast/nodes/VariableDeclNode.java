@@ -1,3 +1,9 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.symbols.VariableSymbol;
 /**
  * VariableDeclNode.java
  * VariableDeclaration extends from DeclaratorNode
@@ -5,15 +11,12 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
 
 public class VariableDeclNode extends DeclaratorNode{
     //TODO
     private TypeNode type;
-    private String var;
+    private TypeSymbol typeSymbol;
+    private VariableSymbol var;
     private ExprNode init;
     private Location typePos;
     private Location varPos;
@@ -21,7 +24,7 @@ public class VariableDeclNode extends DeclaratorNode{
 
     public VariableDeclNode(TypeNode type, String var, ExprNode init, Location typePos, Location varPos, Location initPos) {
         this.type = type;
-        this.var = var;
+        this.var = VariableSymbol.getSymbol(var);
         this.init = init;
         this.typePos = typePos;
         this.varPos = varPos;
@@ -38,7 +41,7 @@ public class VariableDeclNode extends DeclaratorNode{
         this.typePos = typePos;
     }
 
-    public String getVar() {
+    public VariableSymbol getVar() {
         return var;
     }
 
@@ -60,5 +63,19 @@ public class VariableDeclNode extends DeclaratorNode{
 
     public Location getInitPos() {
         return initPos;
+    }
+
+    public TypeSymbol getTypeSymbol() {
+        return typeSymbol;
+    }
+
+    @Override
+    public void transform2Symbol() {
+        typeSymbol = type.getSymbol();
+    }
+
+    @Override
+    public Location getStartLocation() {
+        return typePos;
     }
 }
