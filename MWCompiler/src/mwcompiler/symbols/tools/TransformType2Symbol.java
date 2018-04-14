@@ -4,6 +4,7 @@ import mwcompiler.ast.nodes.DeclaratorNode;
 import mwcompiler.ast.nodes.IdentifierExprNode;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.BuildAstVisitor;
+import mwcompiler.symbols.SymbolTable;
 
 import java.util.List;
 

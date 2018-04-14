@@ -1,7 +1,7 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 
 import java.io.PrintStream;
@@ -201,9 +201,9 @@ public class AstDump implements AstVisitor {
     public void visit(FunctionDeclNode node) {
         addIndent();
         println("<<FunctionDeclNode>>");
-        FunctionSymbol functionSymbol = node.getFunctionSymbol();
-        println("type: <" + functionSymbol.getReturnType() + ", " +functionSymbol.getReturnType().getName() +">");
-        println("name: <" + node.getFunctionSymbol()+", "+node.getFunctionSymbol().getName()+">");
+        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
+        println("type: <" + functionTypeSymbol.getReturnType() + ", " +functionTypeSymbol.getReturnType().getName() +">");
+        println("name: <" + node.getInstanceSymbol()+", "+node.getInstanceSymbol().getName()+">");
         println("params:");
         for (Node param : node.getParamList()) {
             param.accept(this);
