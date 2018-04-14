@@ -13,6 +13,7 @@ public class InstanceSymbol extends Symbol {
         symbolMap.put("size", new InstanceSymbol("size"));
         // String
         symbolMap.put("length", new InstanceSymbol("length"));
+        symbolMap.put("substring",new InstanceSymbol("substring"));
         symbolMap.put("parseInt", new InstanceSymbol("parseInt"));
         symbolMap.put("ord", new InstanceSymbol("ord"));
 
