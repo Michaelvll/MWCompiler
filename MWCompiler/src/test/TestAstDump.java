@@ -17,21 +17,21 @@ import org.junit.Test;
 
 /**
  * TestAstDump.java
- * A test for the Ast builder and dumper only with variable declaration
+ * A test for the Ast getSymbol and dumper only with variable declaration
  *
  * @author Michael Wu
  * @since 2018-04-11
  * */
 
 public class TestAstDump {
-    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx"};
+    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx","/ast/611.mx"};
 
     private Node program;
     private BuildAstVisitor buildAstVisitor;
 
     @Before
     public void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases"+files[3]);
+        CharStream input = CharStreams.fromFileName("../testcases"+files[5]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MxParser parser = new MxParser(tokens);

@@ -2,8 +2,9 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
+import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
-import mwcompiler.symbols.VariableSymbol;
+
 /**
  * VariableDeclNode.java
  * VariableDeclaration extends from DeclaratorNode
@@ -16,7 +17,7 @@ public class VariableDeclNode extends DeclaratorNode{
     //TODO
     private TypeNode type;
     private TypeSymbol typeSymbol;
-    private VariableSymbol var;
+    private InstanceSymbol var;
     private ExprNode init;
     private Location typePos;
     private Location varPos;
@@ -24,7 +25,7 @@ public class VariableDeclNode extends DeclaratorNode{
 
     public VariableDeclNode(TypeNode type, String var, ExprNode init, Location typePos, Location varPos, Location initPos) {
         this.type = type;
-        this.var = VariableSymbol.getSymbol(var);
+        this.var = InstanceSymbol.getSymbol(var);
         this.init = init;
         this.typePos = typePos;
         this.varPos = varPos;
@@ -41,7 +42,7 @@ public class VariableDeclNode extends DeclaratorNode{
         this.typePos = typePos;
     }
 
-    public VariableSymbol getVar() {
+    public InstanceSymbol getVar() {
         return var;
     }
 

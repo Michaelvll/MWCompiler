@@ -5,8 +5,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class SymbolTable {
-    private static Dictionary<NonArrayTypeSymbol, SymbolTable> type2SymbolTableMap = new Hashtable<>();
-    private Dictionary<VariableSymbol, TypeSymbol> currentMap = new Hashtable<>();
+    private static Dictionary<NonArrayTypeSymbol, SymbolTable> type2SymbolTableMap = new Hashtable<>(); //TODO: add inner function to it
+    private Dictionary<InstanceSymbol, TypeSymbol> currentMap = new Hashtable<>();
     private SymbolTable outerSymbolTable;
 
     public SymbolTable(SymbolTable outerSymbolTable) {
@@ -16,13 +16,13 @@ public class SymbolTable {
     /**
      * Put entries into symbol table
      *
-     * @param variableSymbol
+     * @param instanceSymbol
      * @param typeSymbol
      * @return whether the put action overlap the former defined variable symbol in the same scope
      */
-    public Boolean put(VariableSymbol variableSymbol, TypeSymbol typeSymbol) {
-        TypeSymbol search = currentMap.get(variableSymbol);
-        currentMap.put(variableSymbol, typeSymbol);
+    public Boolean put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
+        TypeSymbol search = currentMap.get(instanceSymbol);
+        currentMap.put(instanceSymbol, typeSymbol);
         return search == null;
     }
 
@@ -30,16 +30,16 @@ public class SymbolTable {
         type2SymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 
-    public TypeSymbol findall(VariableSymbol variableSymbol) {
-        TypeSymbol search = currentMap.get(variableSymbol);
+    public TypeSymbol findall(InstanceSymbol instanceSymbol) {
+        TypeSymbol search = currentMap.get(instanceSymbol);
         if (search == null && outerSymbolTable != null) {
-            search = outerSymbolTable.findall(variableSymbol);
+            search = outerSymbolTable.findall(instanceSymbol);
         }
         return search;
     }
 
-    public TypeSymbol findin(VariableSymbol variableSymbol) {
-        return currentMap.get(variableSymbol);
+    public TypeSymbol findin(InstanceSymbol instanceSymbol) {
+        return currentMap.get(instanceSymbol);
     }
 
 }

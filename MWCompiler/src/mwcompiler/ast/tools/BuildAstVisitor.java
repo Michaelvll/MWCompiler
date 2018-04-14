@@ -1,11 +1,10 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.SymbolTable;
 import mx_gram.tools.*;
 
-import org.antlr.v4.codegen.model.decl.Decl;
 import org.antlr.v4.runtime.tree.*;
 
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.List;
  */
 public class BuildAstVisitor extends MxBaseVisitor<Node> {
     private SymbolTable currentSymbolTable = null;
+    public SymbolTable globalSymbolTable = null;
     public List<Node> unsymboledFunctionNodes = new ArrayList<>();
     public List<Node> unsymboledVariableNodes = new ArrayList<>();
     public List<Node> unsymboledIdentifierExprNode = new ArrayList<>();
@@ -39,6 +39,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         }
         BlockNode block = new BlockNode(declarators, programPos, currentSymbolTable);
         currentSymbolTable = block.getCurrentSymbolTable();
+        globalSymbolTable = currentSymbolTable;
         return new ProgramNode(block, new Location(ctx));
     }
 
@@ -73,9 +74,9 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     private FunctionDeclNode getFunctionField(TerminalNode identifier,
                                               MxParser.ParamExprFieldContext paramExprFieldContext, MxParser.FunctionBodyContext functionBodyContext) {
         String name = identifier.getText();
-        FunctionSymbol functionSymbol;
+        InstanceSymbol instanceSymbol;
         try {
-            functionSymbol = FunctionSymbol.builder(name);//TODO here is not good for construction function
+            instanceSymbol = InstanceSymbol.getSymbol(name);
         } catch (RuntimeException e) {
             throw new RuntimeException("ERROR: (Building AST)" + e.getMessage() + new Location(identifier).getLocation());
         }
@@ -84,7 +85,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
             params.add((VariableDeclNode) visit(param));
         }
         BlockNode body = (BlockNode) visit(functionBodyContext);
-        return new FunctionDeclNode(null, functionSymbol, params, body, null, new Location(identifier),
+        return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
                 new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
 
@@ -388,9 +389,10 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitDotMember_(MxParser.DotMember_Context ctx) {
-        ExprNode mom = (ExprNode) visit(ctx.expr());
-        String member = ctx.Identifier().getText();
-        return new DotMemberNode(mom, member, new Location(ctx.DOT()));
+        ExprNode container = (ExprNode) visit(ctx.expr());
+        IdentifierExprNode member = new IdentifierExprNode(ctx.Identifier().getText(), new Location(ctx.Identifier()));
+        unsymboledIdentifierExprNode.add(member);
+        return new DotMemberNode(container, member, new Location(ctx.DOT()));
     }
 
     @Override
@@ -501,7 +503,10 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitReturnJump_(MxParser.ReturnJump_Context ctx) {
-        return new ReturnNode((ExprNode) visit(ctx.expr()),new Location(ctx));
+        ExprNode node=null;
+        if (ctx.expr()!=null)
+            node =(ExprNode) visit(ctx.expr());
+        return new ReturnNode(node,new Location(ctx));
     }
 
     @Override
