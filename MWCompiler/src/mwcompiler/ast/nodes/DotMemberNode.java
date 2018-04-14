@@ -5,9 +5,9 @@ import mwcompiler.ast.tools.Location;
 
 public class DotMemberNode extends ExprNode {
     private ExprNode container;
-    private String member;
+    private IdentifierExprNode member;
 
-    public DotMemberNode(ExprNode container, String member, Location pos) {
+    public DotMemberNode(ExprNode container, IdentifierExprNode member, Location pos) {
         super(pos);
         this.container = container;
         this.member = member;
@@ -23,7 +23,7 @@ public class DotMemberNode extends ExprNode {
         return container;
     }
 
-    public String getMember() {
+    public IdentifierExprNode getMember() {
         return member;
     }
 }

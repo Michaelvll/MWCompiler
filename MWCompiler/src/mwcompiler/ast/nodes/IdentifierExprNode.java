@@ -3,7 +3,6 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.VariableSymbol;
 
 /**
  * IdentifierExprNode.java
@@ -25,7 +24,7 @@ public class IdentifierExprNode extends ExprNode {
 
     @Override
     public void transform2Symbol() {
-        this.instanceSymbol = InstanceSymbol.getSymbol(this.instanceName);
+        this.instanceSymbol = InstanceSymbol.solveInstanceSymbol(this.instanceName);
     }
 
 

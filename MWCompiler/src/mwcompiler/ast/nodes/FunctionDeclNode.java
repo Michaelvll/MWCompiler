@@ -2,14 +2,16 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
-import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.FunctionTypeSymbol;
+import mwcompiler.symbols.InstanceSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionDeclNode extends DeclaratorNode {
     private TypeNode returnType;
-    private FunctionSymbol functionSymbol;
+    private InstanceSymbol instanceSymbol;
+    private FunctionTypeSymbol functionTypeSymbol;
     private List<VariableDeclNode> paramList;
     private BlockNode body;
     private Location returnTypePos;
@@ -18,11 +20,12 @@ public class FunctionDeclNode extends DeclaratorNode {
     private Location bodyPos;
 
 
-    public FunctionDeclNode(TypeNode returnType, FunctionSymbol functionSymbol, List<VariableDeclNode> paramList, BlockNode body, Location returnTypePos, Location namePos, Location paramListPos, Location bodyPos) {
+    public FunctionDeclNode(TypeNode returnType, InstanceSymbol instanceSymbol, List<VariableDeclNode> paramList, BlockNode body,
+                            Location returnTypePos, Location namePos, Location paramListPos, Location bodyPos) {
         this.returnType = returnType;
         this.paramList = paramList;
         this.body = body;
-        this.functionSymbol = functionSymbol;
+        this.instanceSymbol = instanceSymbol;
 
         this.returnTypePos = returnTypePos;
         this.namePos = namePos;
@@ -69,8 +72,8 @@ public class FunctionDeclNode extends DeclaratorNode {
         return returnType;
     }
 
-    public FunctionSymbol getFunctionSymbol() {
-        return functionSymbol;
+    public InstanceSymbol getInstanceSymbol() {
+        return instanceSymbol;
     }
 
     @Override
@@ -79,12 +82,16 @@ public class FunctionDeclNode extends DeclaratorNode {
         for (VariableDeclNode variableDeclNode : paramList) {
             params.add(variableDeclNode.getType());
         }
-        functionSymbol.setFunctionTypes(returnType, params);
+       this.functionTypeSymbol = FunctionTypeSymbol.builder(returnType, params);
 
     }
 
     @Override
     public Location getStartLocation() {
         return returnTypePos;
+    }
+
+    public FunctionTypeSymbol getFunctionTypeSymbol() {
+        return functionTypeSymbol;
     }
 }
