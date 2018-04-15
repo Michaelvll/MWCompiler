@@ -2,7 +2,8 @@ package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.SymbolTable;
+import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.TypeSymbol;
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.tree.*;
@@ -18,12 +19,6 @@ import java.util.List;
  * @since 2018-04-06
  */
 public class BuildAstVisitor extends MxBaseVisitor<Node> {
-    private SymbolTable currentSymbolTable = null;
-    public SymbolTable globalSymbolTable = null;
-    public List<Node> unsymboledFunctionNodes = new ArrayList<>();
-    public List<Node> unsymboledVariableNodes = new ArrayList<>();
-    public List<Node> unsymboledIdentifierExprNode = new ArrayList<>();
-
 
 
     @Override
@@ -37,9 +32,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
             else
                 throw new RuntimeException("ERROR: (Building AST) Get unexpected statement when visiting the global scope " + programPos.getLocation());
         }
-        BlockNode block = new BlockNode(declarators, programPos, currentSymbolTable);
-        currentSymbolTable = block.getCurrentSymbolTable();
-        globalSymbolTable = currentSymbolTable;
+        BlockNode block = new BlockNode(declarators, programPos);
         return new ProgramNode(block, new Location(ctx));
     }
 
@@ -47,8 +40,8 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     @Override
     public Node visitVariableDeclField(MxParser.VariableDeclFieldContext ctx) {
         VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
-        node.setType((TypeNode) visit(ctx.type()), new Location(ctx.type()));
-        unsymboledVariableNodes.add(node);
+        TypeNode typeNode = (TypeNode) visit(ctx.type());
+        node.setType(typeNode.getTypeSymbol(), new Location(ctx.type()));
         return node;
     }
 
@@ -76,7 +69,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         String name = identifier.getText();
         InstanceSymbol instanceSymbol;
         try {
-            instanceSymbol = InstanceSymbol.getSymbol(name);
+            instanceSymbol = InstanceSymbol.builder(name);
         } catch (RuntimeException e) {
             throw new RuntimeException("ERROR: (Building AST)" + e.getMessage() + new Location(identifier).getLocation());
         }
@@ -91,26 +84,24 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitTypeFunction_(MxParser.TypeFunction_Context ctx) {
-        TypeNode returnType = (TypeNode) visit(ctx.type());
+        TypeNode returnTypeNode = (TypeNode) visit(ctx.type());
         FunctionDeclNode node = (FunctionDeclNode) visit(ctx.functionField());
-        node.setReturnType(returnType, new Location(ctx.type()));
-        unsymboledFunctionNodes.add(node);
+        node.setReturnType(returnTypeNode.getTypeSymbol(), new Location(ctx.type()));
         return node;
     }
 
     @Override
     public Node visitVoidFunction_(MxParser.VoidFunction_Context ctx) {
-        TypeNode returnType = new VoidTypeNode(new Location(ctx));
+        TypeSymbol returnType = NonArrayTypeSymbol.builder("void");
         FunctionDeclNode node = (FunctionDeclNode) visit(ctx.functionField());
         node.setReturnType(returnType, new Location(ctx.VOID()));
-        unsymboledFunctionNodes.add(node);
         return node;
     }
+
     @Override
     public Node visitClassConstructField(MxParser.ClassConstructFieldContext ctx) {
         FunctionDeclNode node = getFunctionField(ctx.Identifier(), ctx.paramExprField(), ctx.functionBody());
-        node.setReturnType(new NullTypeNode(new Location(ctx)), null);
-        unsymboledFunctionNodes.add(node);
+        node.setReturnType(NonArrayTypeSymbol.getConstructorType(), null);
         return node;
     }
 
@@ -121,16 +112,15 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitParamExpr(MxParser.ParamExprContext ctx) {
-        TypeNode type = (TypeNode) visit(ctx.type());
+        TypeNode typeNode = (TypeNode) visit(ctx.type());
         String name = ctx.Identifier().getText();
-        return new VariableDeclNode(type, name, null, new Location(ctx.type()), new Location(ctx.Identifier()), null);
+        return new VariableDeclNode(typeNode.getTypeSymbol(), name, null, new Location(ctx.type()), new Location(ctx.Identifier()), null);
     }
 
     @Override
     public Node visitFunctionBody(MxParser.FunctionBodyContext ctx) {
         return visit(ctx.block());
     }
-
 
 
     // Class declaration
@@ -154,13 +144,12 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
                 throw new RuntimeException("ERROR: (Building AST) Unexpected statement found in Class declaration " + declClassPos.getLocation());
             }
         }
-        BlockNode block = new BlockNode(body, bodyPos, currentSymbolTable);
-        currentSymbolTable = block.getCurrentSymbolTable();
+        BlockNode block = new BlockNode(body, bodyPos);
         ClassDeclNode classDeclNode;
         try {
             classDeclNode = new ClassDeclNode(declClass, block, declClassPos);
-        }catch (RuntimeException e) {
-            throw new RuntimeException("ERROR: (Building AST) "+e.getMessage()+ declClassPos.getLocation());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("ERROR: (Building AST) " + e.getMessage() + declClassPos.getLocation());
         }
         return classDeclNode;
     }
@@ -173,9 +162,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         for (MxParser.StatementContext state : ctx.statement()) {
             statements.add(visit(state));
         }
-        BlockNode block = new BlockNode(statements, new Location(ctx), currentSymbolTable);
-        currentSymbolTable = block.getCurrentSymbolTable();
-        return block;
+        return new BlockNode(statements, new Location(ctx));
     }
 
     // NonArrayTypeSymbol
@@ -183,9 +170,9 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitType(MxParser.TypeContext ctx) {
         String type = ctx.nonArrayType().getText();
         if (ctx.LBRACK().size() != 0) {
-            return TypeNode.builder(type, ctx.LBRACK().size(), new Location(ctx));
+            return new TypeNode(type, ctx.LBRACK().size(), new Location(ctx));
         } else {
-            return TypeNode.builder(ctx.getText(), new Location(ctx));
+            return new TypeNode(ctx.getText(), new Location(ctx));
         }
     }
 
@@ -226,9 +213,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitIdentifier_(MxParser.Identifier_Context ctx) {
-        IdentifierExprNode node = new IdentifierExprNode(ctx.getText(), new Location(ctx));
-        unsymboledIdentifierExprNode.add(node);
-        return node;
+        return new IdentifierExprNode(ctx.getText(), new Location(ctx));
     }
 
     // Binary Expression
@@ -391,7 +376,6 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitDotMember_(MxParser.DotMember_Context ctx) {
         ExprNode container = (ExprNode) visit(ctx.expr());
         IdentifierExprNode member = new IdentifierExprNode(ctx.Identifier().getText(), new Location(ctx.Identifier()));
-        unsymboledIdentifierExprNode.add(member);
         return new DotMemberNode(container, member, new Location(ctx.DOT()));
     }
 
@@ -404,9 +388,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitThis_(MxParser.This_Context ctx) {
-        IdentifierExprNode node = new IdentifierExprNode("this", new Location(ctx.THIS()));
-        unsymboledIdentifierExprNode.add(node);
-        return node;
+        return new IdentifierExprNode("this", new Location(ctx.THIS()));
     }
 
     @Override
@@ -490,9 +472,7 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
         } else {
             List<Node> statements = new ArrayList<>();
             statements.add(node);
-            BlockNode block = new BlockNode(statements, new Location(ctx), currentSymbolTable);
-            currentSymbolTable = block.getCurrentSymbolTable();
-            return block;
+            return new BlockNode(statements, new Location(ctx));
         }
     }
 
@@ -503,10 +483,10 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitReturnJump_(MxParser.ReturnJump_Context ctx) {
-        ExprNode node=null;
-        if (ctx.expr()!=null)
-            node =(ExprNode) visit(ctx.expr());
-        return new ReturnNode(node,new Location(ctx));
+        ExprNode node = null;
+        if (ctx.expr() != null)
+            node = (ExprNode) visit(ctx.expr());
+        return new ReturnNode(node, new Location(ctx));
     }
 
     @Override
@@ -518,6 +498,4 @@ public class BuildAstVisitor extends MxBaseVisitor<Node> {
     public Node visitContinueJump_(MxParser.ContinueJump_Context ctx) {
         return new ContinueNode(new Location(ctx));
     }
-
-    //TODO
 }

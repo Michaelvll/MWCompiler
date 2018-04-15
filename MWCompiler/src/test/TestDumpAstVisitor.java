@@ -1,29 +1,27 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.AstDump;
+import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.BuildAstVisitor;
-import mwcompiler.symbols.tools.TransformType2Symbol;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.maven.model.Build;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * TestAstDump.java
- * A test for the Ast getSymbol and dumper only with variable declaration
+ * TestDumpAstVisitor.java
+ * A test for the Ast builder and dumper only with variable declaration
  *
  * @author Michael Wu
  * @since 2018-04-11
  * */
 
-public class TestAstDump {
+public class TestDumpAstVisitor {
     private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx","/ast/611.mx"};
 
     private Node program;
@@ -43,8 +41,7 @@ public class TestAstDump {
 
     @Test
     public void testDumpAst() {
-        TransformType2Symbol.symbolize(buildAstVisitor);
-        AstVisitor dump = new AstDump();
+        AstVisitor dump = new DumpAstVisitor();
         program.accept(dump);
 
     }

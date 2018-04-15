@@ -1,7 +1,6 @@
 package mwcompiler.symbols;
 
 
-
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;
     private Integer dim;
@@ -12,10 +11,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     public static ArrayTypeSymbol builder(String name, Integer dim) {
-        NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.getSymbol(name);
-        if (nonArrayTypeSymbol == null) {
-            throw new RuntimeException("Declaring array for unknown typename");
-        }
+        NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.builder(name);
         ArrayTypeSymbol arrayTypeSymbol = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
         symbolMap.put(combineName(name, dim), arrayTypeSymbol);
         return arrayTypeSymbol;
@@ -24,14 +20,6 @@ public class ArrayTypeSymbol extends TypeSymbol {
     private ArrayTypeSymbol(NonArrayTypeSymbol nonArrayTypeSymbol, Integer dim) {
         this.nonArrayTypeSymbol = nonArrayTypeSymbol;
         this.dim = dim;
-    }
-
-    public static ArrayTypeSymbol getSymbol(String name, Integer dim) {
-        Symbol search = symbolMap.get(combineName(name, dim));
-        if (search == null) {
-            search = builder(name, dim);
-        }
-        return (ArrayTypeSymbol) search;
     }
 
 

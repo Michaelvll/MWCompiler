@@ -3,20 +3,21 @@ package mwcompiler.ast.tools;
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.TypeSymbol;
 
 import java.io.PrintStream;
 import java.util.List;
 
-public class AstDump implements AstVisitor {
+public class DumpAstVisitor implements AstVisitor{
     private String indent;
     private PrintStream out;
 
-    public AstDump() {
+    public DumpAstVisitor() {
         indent = "";
         this.out = new PrintStream(System.out);
     }
 
-    public AstDump(PrintStream out) {
+    public DumpAstVisitor(PrintStream out) {
         indent = "";
         this.out = out;
     }
@@ -41,50 +42,33 @@ public class AstDump implements AstVisitor {
     @Override
     public void visit(ProgramNode node) {
         println("<<ProgramNode>>");
-        List<Node> declarators = node.getDeclarators().getStatements();
+        List<Node> declarators = node.getBlock().getStatements();
         for (Node declarator : declarators) {
             declarator.accept(this);
         }
-    }
 
-    @Override
-    public void visit(NonArrayTypeNode node) {
-        println("typename: " + node.getTypename());
-    }
-
-    @Override
-    public void visit(ArrayTypeNode node) {
-        println("typename: " + node.getTypename());
-        println("dim: " + node.getDim());
-    }
-
-    @Override
-    public void visit(VoidTypeNode node) {
-        println("typename: void");
     }
 
     @Override
     public void visit(ClassDeclNode node) {
         addIndent();
         println("<<ClassDeclNode>>");
-        println("name: <" + node.getClassSymbol() + ", " + node.getClassSymbol().getName() +">");
+        println("name: <" + node.getClassSymbol() + ", " + node.getClassSymbol().getName() + ">");
         println("body:");
         for (Node declarator : node.getBody().getStatements()) {
             declarator.accept(this);
         }
         subIndent();
+        
     }
 
-    @Override
-    public void visit(NullTypeNode node) {
-        println("Constructor function");
-    }
 
     @Override
     public void visit(EmptyExprNode node) {
         addIndent();
         println("<EmptyExprNode>");
         subIndent();
+        
     }
 
     @Override
@@ -93,11 +77,14 @@ public class AstDump implements AstVisitor {
         println("<FunctionCallNode>");
         println("caller:");
         node.getCaller().accept(this);
-        println("args: ");
-        for (ExprNode arg : node.getArgs()) {
-            arg.accept(this);
+        if (!node.getArgs().isEmpty()) {
+            println("args: ");
+            for (ExprNode arg : node.getArgs()) {
+                arg.accept(this);
+            }
         }
         subIndent();
+        
     }
 
     @Override
@@ -106,8 +93,9 @@ public class AstDump implements AstVisitor {
         println("<DotMemberNode>");
         println("container: ");
         node.getContainer().accept(this);
-        println("member: " + node.getMember());
+        println("member: <" + node.getMember().getInstanceSymbol() + ", " + node.getMember().getInstanceSymbol().getName() + ">");
         subIndent();
+        
     }
 
     @Override
@@ -119,6 +107,7 @@ public class AstDump implements AstVisitor {
         println("subscript: ");
         node.getSubscript().accept(this);
         subIndent();
+        
     }
 
     @Override
@@ -136,6 +125,7 @@ public class AstDump implements AstVisitor {
             node.getElseCondition().accept(this);
         }
         subIndent();
+        
     }
 
     @Override
@@ -156,6 +146,7 @@ public class AstDump implements AstVisitor {
         }
         node.getBody().accept(this);
         subIndent();
+        
     }
 
     @Override
@@ -163,6 +154,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<BreakNode>");
         subIndent();
+        
     }
 
     @Override
@@ -174,6 +166,7 @@ public class AstDump implements AstVisitor {
             node.getReturnVal().accept(this);
         }
         subIndent();
+        
     }
 
     @Override
@@ -181,6 +174,7 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<ContinueNode>");
         subIndent();
+        
     }
 
 
@@ -188,13 +182,14 @@ public class AstDump implements AstVisitor {
     public void visit(VariableDeclNode node) {
         addIndent();
         println("<VariableDeclNode>");
-        node.getType().accept(this);
-        println("var: <" + node.getVar()+", "+node.getVar().getName() +">");
+        println("type: <"+node.getTypeSymbol()+", "+node.getTypeSymbol().getName()+">");
+        println("var: <" + node.getVarSymbol() + ", " + node.getVarSymbol().getName() + ">");
         if (node.getInit() != null) {
             println("init:");
             node.getInit().accept(this);
         }
         subIndent();
+        
     }
 
     @Override
@@ -202,8 +197,8 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<<FunctionDeclNode>>");
         FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        println("type: <" + functionTypeSymbol.getReturnType() + ", " +functionTypeSymbol.getReturnType().getName() +">");
-        println("name: <" + node.getInstanceSymbol()+", "+node.getInstanceSymbol().getName()+">");
+        println("type: <" + functionTypeSymbol.getReturnType() + ", " + functionTypeSymbol.getReturnType().getName() + ">");
+        println("name: <" + node.getInstanceSymbol() + ", " + node.getInstanceSymbol().getName() + ">");
         println("params:");
         for (Node param : node.getParamList()) {
             param.accept(this);
@@ -211,6 +206,7 @@ public class AstDump implements AstVisitor {
         println("body:");
         node.getBody().accept(this);
         subIndent();
+        
     }
 
 
@@ -221,6 +217,7 @@ public class AstDump implements AstVisitor {
         InstanceSymbol instanceSymbol = node.getInstanceSymbol();
         println("val: <" + instanceSymbol + ", " + instanceSymbol.getName() + ">");
         subIndent();
+        
     }
 
     @Override
@@ -229,6 +226,7 @@ public class AstDump implements AstVisitor {
         println("<StringLiteralNode>");
         println("val: " + node.getVal());
         subIndent();
+        
     }
 
     @Override
@@ -237,6 +235,7 @@ public class AstDump implements AstVisitor {
         println("<BoolLiteralNode>");
         println("Val: " + String.valueOf(node.getVal()));
         subIndent();
+        
     }
 
     @Override
@@ -245,6 +244,7 @@ public class AstDump implements AstVisitor {
         println("<IntLiteralNode>");
         println("val: " + String.valueOf(node.getVal()));
         subIndent();
+        
     }
 
     @Override
@@ -255,6 +255,7 @@ public class AstDump implements AstVisitor {
         for (Node statement : node.getStatements()) {
             statement.accept(this);
         }
+        
     }
 
 
@@ -269,6 +270,7 @@ public class AstDump implements AstVisitor {
         node.getRight().accept(this);
         subIndent();
 
+        
     }
 
     @Override
@@ -279,17 +281,15 @@ public class AstDump implements AstVisitor {
         println("expr: ");
         node.getExpr().accept(this);
         subIndent();
+        
     }
 
     @Override
     public void visit(NewExprNode node) {
         addIndent();
         println("<NewExprNode>");
-        TypeNode createType = node.getCreateType();
-        println("typename: " + createType.getTypename());
-        if (createType instanceof ArrayTypeNode) {
-            println("dim: "+String.valueOf(((ArrayTypeNode) createType).getDim()));
-        }
+        TypeSymbol createType = node.getCreateType();
+        println("type: <" + createType+", "+ createType.getName()+">");
         if (node.getDimArgs().size() != 0) {
             println("dimArgs: ");
             for (Node expr : node.getDimArgs()) {
@@ -297,6 +297,7 @@ public class AstDump implements AstVisitor {
             }
         }
         subIndent();
+        
     }
 
     @Override
@@ -304,5 +305,6 @@ public class AstDump implements AstVisitor {
         addIndent();
         println("<NullLiteralNode>");
         subIndent();
+        
     }
 }

@@ -6,7 +6,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         symbolMap.put("string", new NonArrayTypeSymbol("string"));
         symbolMap.put("bool", new NonArrayTypeSymbol("bool"));
         symbolMap.put("void", new NonArrayTypeSymbol("void"));
-        symbolMap.put("*Construction",new NonArrayTypeSymbol(""));
+        symbolMap.put("*Constructor", new NonArrayTypeSymbol(""));
     }
 
     protected String typename;
@@ -26,23 +26,13 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         }
         String intern = typename.intern();
         Symbol search = symbolMap.get(intern);
-        if (search != null) {
-            throw new RuntimeException("Redeclare a class");
+        if (search == null) {
+            search = new NonArrayTypeSymbol(typename);
+            symbolMap.put(typename.intern(), search);
         }
-        search = new NonArrayTypeSymbol(typename);
-        symbolMap.put(typename.intern(), search);
         return (NonArrayTypeSymbol) search;
     }
-
-    public static NonArrayTypeSymbol getSymbol(String typename) {
-        String intern = typename.intern();
-        Symbol nonArrayTypeSymbol = symbolMap.get(intern);
-        if (nonArrayTypeSymbol == null) {
-            throw new RuntimeException("Get unknown typename");
-        }
-        if (! (nonArrayTypeSymbol instanceof NonArrayTypeSymbol)){
-            throw new RuntimeException("Symbol type mismatch");
-        }
-        return (NonArrayTypeSymbol) symbolMap.get(intern);
+    public static NonArrayTypeSymbol getConstructorType(){
+        return (NonArrayTypeSymbol) symbolMap.get("*Constructor");
     }
 }

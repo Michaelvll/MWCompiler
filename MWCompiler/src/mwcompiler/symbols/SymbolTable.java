@@ -22,11 +22,16 @@ public class SymbolTable {
      */
     public Boolean put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
         TypeSymbol search = currentMap.get(instanceSymbol);
+        if (search != null) {
+            if (!search.getClass().equals(typeSymbol.getClass())) {
+                throw new RuntimeException("ERROR: (Type Checking) Variable and function can not use the same name ");
+            }
+        }
         currentMap.put(instanceSymbol, typeSymbol);
         return search == null;
     }
 
-    public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable){
+    public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
         type2SymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 
@@ -42,4 +47,7 @@ public class SymbolTable {
         return currentMap.get(instanceSymbol);
     }
 
+    public SymbolTable getOuterSymbolTable() {
+        return outerSymbolTable;
+    }
 }

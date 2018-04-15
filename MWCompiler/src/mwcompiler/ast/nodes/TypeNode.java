@@ -1,5 +1,6 @@
 package mwcompiler.ast.nodes;
 
+import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 import mwcompiler.symbols.*;
 
@@ -11,36 +12,37 @@ import mwcompiler.symbols.*;
  * @since 2018-04-06
  */
 
-public abstract class TypeNode extends Node {
+public class TypeNode extends Node {
     //TODO
-    protected String typename;
+    TypeSymbol typeSymbol;
     Location location;
 
-    protected TypeNode(String typename, Location location) {
-        this.typename = typename;
-        this.location = location;
-    }
-
-    public static TypeNode builder(String type, Integer dim, Location pos) {
+    public TypeNode(String type, Integer dim, Location pos) {
         if (dim == 0) {
-            return new NonArrayTypeNode(type, pos);
+            this.typeSymbol = NonArrayTypeSymbol.builder(type);
         } else {
-            return new ArrayTypeNode(type, dim, pos);
+            this.typeSymbol = ArrayTypeSymbol.builder(type, dim);
         }
+        this.location = pos;
     }
 
-    public static TypeNode builder(String type, Location pos) {
-        return new NonArrayTypeNode(type, pos);
+    public TypeNode(String type, Location pos) {
+        this.typeSymbol = NonArrayTypeSymbol.builder(type);
+        this.location = pos;
     }
 
-    public String getTypename() {
-        return this.typename;
-    }
 
-    public abstract TypeSymbol getSymbol();
+    public TypeSymbol getTypeSymbol() {
+        return typeSymbol;
+    }
 
     @Override
     public Location getStartLocation() {
         return location;
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        //Do Nothing
     }
 }

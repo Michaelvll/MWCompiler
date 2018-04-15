@@ -2,32 +2,43 @@ package mwcompiler.symbols.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.SymbolTable;
 
-public class BuildSymbolTable implements AstVisitor {
+public class BuildClassStaticSTAstVisitor implements AstVisitor {
+    private SymbolTable classSymbolTable;
+
+    @Override
+    public void visit(ClassDeclNode node) {
+        classSymbolTable = new SymbolTable(null);
+        SymbolTable.putNamedSymbolTable(node.getClassSymbol(), classSymbolTable);
+        node.getBody().accept(this);
+    }
+
+    @Override
+    public void visit(BlockNode node) {
+        for (Node statement : node.getStatements()) {
+            statement.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(VariableDeclNode node) {
+        classSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
+    }
+
     @Override
     public void visit(ProgramNode node) {
 
     }
 
-    @Override
-    public void visit(ArrayTypeNode node) {
 
-    }
 
-    @Override
-    public void visit(NonArrayTypeNode node) {
-
-    }
-
-    @Override
-    public void visit(VariableDeclNode node) {
-
-    }
 
     @Override
     public void visit(FunctionDeclNode node) {
 
     }
+
 
     @Override
     public void visit(BinaryExprNode node) {
@@ -66,26 +77,6 @@ public class BuildSymbolTable implements AstVisitor {
 
     @Override
     public void visit(IntLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(BlockNode node) {
-
-    }
-
-    @Override
-    public void visit(VoidTypeNode node) {
-
-    }
-
-    @Override
-    public void visit(ClassDeclNode node) {
-
-    }
-
-    @Override
-    public void visit(NullTypeNode node) {
 
     }
 
@@ -133,4 +124,6 @@ public class BuildSymbolTable implements AstVisitor {
     public void visit(ContinueNode node) {
 
     }
+
+    // Unused
 }

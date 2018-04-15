@@ -25,7 +25,7 @@ public class InstanceSymbol extends Symbol {
         this.name = name;
     }
 
-    public  static InstanceSymbol getSymbol(String name) {
+    public  static InstanceSymbol builder(String name) {
         String intern = name.intern();
         Symbol search = symbolMap.get(intern);
         if (search == null) {

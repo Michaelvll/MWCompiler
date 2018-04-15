@@ -10,10 +10,10 @@ public class FunctionTypeSymbol extends TypeSymbol {
     private List<TypeSymbol> params;
 
     private FunctionTypeSymbol(String returnType, String... params) {
-        this.returnType = NonArrayTypeSymbol.getSymbol(returnType);
+        this.returnType = NonArrayTypeSymbol.builder(returnType);
         List<TypeSymbol> typeParams = new ArrayList<>();
         for (String param : params) {
-            typeParams.add(NonArrayTypeSymbol.getSymbol(param));
+            typeParams.add(NonArrayTypeSymbol.builder(param));
         }
         this.params = typeParams;
     }
@@ -24,25 +24,12 @@ public class FunctionTypeSymbol extends TypeSymbol {
     }
 
 
-    public static FunctionTypeSymbol builder(TypeNode returnType, List<TypeNode> params) {
-        List<TypeSymbol> typeParams = new ArrayList<>();
-        TypeSymbol returnTypeSymbol;
-        try {
-            returnTypeSymbol = returnType.getSymbol();
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Unknown function return typename " + returnType.getTypename());
-        }
+    public static FunctionTypeSymbol builder(TypeSymbol returnType, List<TypeSymbol> params) {
+        return new FunctionTypeSymbol(returnType, params);
+    }
 
-        for (Integer index = 0; index < params.size(); ++index) {
-            TypeSymbol typeParam;
-            try {
-                typeParam = params.get(index).getSymbol();
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Unknown parameter(" + String.valueOf(index) + ") typename " + params.get(index).getTypename());
-            }
-            typeParams.add(typeParam);
-        }
-        return new FunctionTypeSymbol(returnTypeSymbol, typeParams);
+    public void setReturnType(TypeSymbol returnType) {
+        this.returnType = returnType;
     }
 
     public TypeSymbol getReturnType() {
