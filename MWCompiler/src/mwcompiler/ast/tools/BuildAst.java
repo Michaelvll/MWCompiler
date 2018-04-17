@@ -1,9 +1,7 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.NonArrayTypeSymbol;
-import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.symbols.*;
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.tree.*;
@@ -20,11 +18,20 @@ import java.util.List;
  */
 public class BuildAst extends MxBaseVisitor<Node> {
 
+    private void buildClassSymbol(MxParser.ProgramContext ctx){
+        for (ParseTree child : ctx.declarator()) {
+            if (child.getChild(0) instanceof MxParser.ClassDeclFieldContext) {
+                NonArrayTypeSymbol.builder(((MxParser.ClassDeclFieldContext) child.getChild(0)).classField().Identifier().getText());
+            }
+        }
+    }
+
 
     @Override
     public Node visitProgram(MxParser.ProgramContext ctx) {
         List<Node> declarators = new ArrayList<>();
         Location programPos = new Location(1, 1);
+        buildClassSymbol(ctx);
         for (ParseTree child : ctx.declarator()) {
             Node childNode = visit(child);
             if (childNode instanceof DeclaratorNode)
@@ -66,18 +73,28 @@ public class BuildAst extends MxBaseVisitor<Node> {
     // Function declaration
     private FunctionDeclNode getFunctionField(TerminalNode identifier,
                                               MxParser.ParamExprFieldContext paramExprFieldContext, MxParser.FunctionBodyContext functionBodyContext) {
+        Location identifierLocation = new Location(identifier);
+        Location paramLocation = new Location(paramExprFieldContext);
+        Location functionBodyLocation = new Location(functionBodyContext);
+        List<VariableDeclNode> params = new ArrayList<>();
+        for (MxParser.ParamExprContext param : paramExprFieldContext.paramExpr()) {
+            params.add((VariableDeclNode) visit(param));
+        }
+        BlockNode body = (BlockNode) visit(functionBodyContext);
         String name = identifier.getText();
+        Symbol search = Symbol.searchSymbol(name);
+        if (search instanceof TypeSymbol) {
+            return new FunctionDeclNode((TypeSymbol) search, InstanceSymbol.constructorSymbol, params, body, null,
+                    identifierLocation,paramLocation,functionBodyLocation);
+        }
+
         InstanceSymbol instanceSymbol;
         try {
             instanceSymbol = InstanceSymbol.builder(name);
         } catch (RuntimeException e) {
             throw new RuntimeException("ERROR: (Building AST)" + e.getMessage() + new Location(identifier).getLocation());
         }
-        List<VariableDeclNode> params = new ArrayList<>();
-        for (MxParser.ParamExprContext param : paramExprFieldContext.paramExpr()) {
-            params.add((VariableDeclNode) visit(param));
-        }
-        BlockNode body = (BlockNode) visit(functionBodyContext);
+
         return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
                 new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
@@ -100,9 +117,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitClassConstructField(MxParser.ClassConstructFieldContext ctx) {
-        FunctionDeclNode node = getFunctionField(ctx.Identifier(), ctx.paramExprField(), ctx.functionBody());
-        node.setReturnType(NonArrayTypeSymbol.getConstructorType(), null);
-        return node;
+        return getFunctionField(ctx.Identifier(), ctx.paramExprField(), ctx.functionBody());
     }
 
     @Override
@@ -341,13 +356,22 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
-        ExprNode caller = (ExprNode) visit(ctx.expr());
         List<ExprNode> args = new ArrayList<>();
         if (ctx.arguments().exprList() != null) {
             for (MxParser.ExprContext expr : ctx.arguments().exprList().expr()) {
                 args.add((ExprNode) visit(expr));
             }
         }
+        // For constructor
+        if (ctx.expr() instanceof MxParser.Identifier_Context) {
+            Symbol symbol =  Symbol.searchSymbol(((MxParser.Identifier_Context) ctx.expr()).Identifier().getText());
+            if (symbol instanceof NonArrayTypeSymbol) {
+                return new ConstructorCallNode((NonArrayTypeSymbol) symbol, args, new Location(ctx.arguments()));
+            }
+        }
+
+        // For normal function
+        ExprNode caller = (ExprNode) visit(ctx.expr());
         return new FunctionCallNode(caller, args, new Location(ctx.arguments()));
     }
 

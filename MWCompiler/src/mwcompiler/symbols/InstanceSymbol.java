@@ -2,9 +2,10 @@ package mwcompiler.symbols;
 
 public class InstanceSymbol extends Symbol {
     public static final InstanceSymbol sizeFunctionIS = new InstanceSymbol("size");
-    public static final InstanceSymbol thisInstanceSybol = new InstanceSymbol("this");
+    public static final InstanceSymbol thisInstanceSymbol = new InstanceSymbol("this");
+    public static final InstanceSymbol constructorSymbol = new InstanceSymbol("~constructor");
     static {
-        symbolMap.put("this", thisInstanceSybol);
+        symbolMap.put("this", thisInstanceSymbol);
         // inner functions
         symbolMap.put("print", new InstanceSymbol( "print"));
         symbolMap.put("println", new InstanceSymbol("println"));

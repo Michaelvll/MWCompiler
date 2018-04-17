@@ -62,6 +62,8 @@ public interface AstVisitor {
 
     void visit(ContinueNode node);
 
+    void visit(ConstructorCallNode node);
+
 
     //TODO
 }
