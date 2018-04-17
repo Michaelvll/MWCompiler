@@ -17,7 +17,7 @@ import java.io.PrintStream;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.symbols.tools.ConstructSymbolTableAstVisitor;
+import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
 import mwcompiler.symbols.tools.TypeCheckAstVisitor;
 import org.apache.commons.cli.*;
 
@@ -123,7 +123,7 @@ public class Mwcc {
     }
 
     private static void typeCheck() {
-        AstVisitor constructSymbolTableAstVisitor = new ConstructSymbolTableAstVisitor();
+        AstVisitor constructSymbolTableAstVisitor = new ForwardRefPreprocessAstVisitor();
         programAstRoot.accept(constructSymbolTableAstVisitor);
         AstVisitor typeNotPresentException= new TypeCheckAstVisitor();
         programAstRoot.accept(typeNotPresentException);

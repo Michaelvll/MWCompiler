@@ -1,6 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.Location;
+
 /**
  * DeclaratorNode.java
  * Declarator extends from Node

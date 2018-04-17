@@ -39,11 +39,12 @@ public class BuildAst extends MxBaseVisitor<Node> {
             if (childNode instanceof DeclaratorNode) {
                 declarators.add(childNode);
                 if (childNode instanceof VariableDeclNode) {
-                    TypeSymbol search = TypeSymbol.searchSymbol(((VariableDeclNode) childNode).getVarSymbol().getName());
+                    VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;
+                    TypeSymbol search = TypeSymbol.searchSymbol(variableDeclNode.getVarSymbol().getName());
                     if (search != null) {
                         throw new RuntimeException("ERROR: (Building AST) Can not use the same name <"
-                                + ((VariableDeclNode) childNode).getVarSymbol().getName() + "> for class and " +
-                                "variable in same scope" + childNode.getStartLocation().getLocation());
+                                + variableDeclNode.getVarSymbol().getName() + "> for class and " +
+                                "variable in same scope" + variableDeclNode.getStartLocation().getLocation());
                     }
                 }
             } else
@@ -171,9 +172,10 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 body.add(visit(declarator));
 
             } else if (statement instanceof FunctionDeclNode) {
+                FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (((FunctionDeclNode) statement).getInstanceSymbol() == InstanceSymbol.constructorSymbol
-                        && !((FunctionDeclNode) statement).getFunctionTypeSymbol().getReturnType().getName().equals(declClass)) {
+                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.constructorSymbol
+                        && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
                     throw new RuntimeException("ERROR: (Building AST) Creator function must have the same name as the class"
                             + new Location(declarator).getLocation());
                 }
@@ -210,8 +212,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
         return new TypeNode(type, ctx.LBRACK().size(), new Location(ctx));
     }
 
-    // Expression
-
+    // Expressions
     @Override
     public Node visitExprField(MxParser.ExprFieldContext ctx) {
         if (ctx.expr() != null) {
@@ -257,62 +258,43 @@ public class BuildAst extends MxBaseVisitor<Node> {
         ExprNode.OPs op;
         Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
-            case MxParser.MUL:
-                op = ExprNode.OPs.MUL;
+            case MxParser.MUL: op = ExprNode.OPs.MUL;
                 break;
-            case MxParser.DIV:
-                op = ExprNode.OPs.DIV;
+            case MxParser.DIV: op = ExprNode.OPs.DIV;
                 break;
-            case MxParser.MOD:
-                op = ExprNode.OPs.MOD;
+            case MxParser.MOD: op = ExprNode.OPs.MOD;
                 break;
-            case MxParser.ADD:
-                op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprNode.OPs.ADD;
                 break;
-            case MxParser.SUB:
-                op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprNode.OPs.SUB;
                 break;
-            case MxParser.LSFT:
-                op = ExprNode.OPs.LSFT;
+            case MxParser.LSFT: op = ExprNode.OPs.LSFT;
                 break;
-            case MxParser.RSFT:
-                op = ExprNode.OPs.RSFT;
+            case MxParser.RSFT: op = ExprNode.OPs.RSFT;
                 break;
-            case MxParser.LT:
-                op = ExprNode.OPs.LT;
+            case MxParser.LT: op = ExprNode.OPs.LT;
                 break;
-            case MxParser.GT:
-                op = ExprNode.OPs.GT;
+            case MxParser.GT: op = ExprNode.OPs.GT;
                 break;
-            case MxParser.LTE:
-                op = ExprNode.OPs.LTE;
+            case MxParser.LTE: op = ExprNode.OPs.LTE;
                 break;
-            case MxParser.GTE:
-                op = ExprNode.OPs.GTE;
+            case MxParser.GTE: op = ExprNode.OPs.GTE;
                 break;
-            case MxParser.EQ:
-                op = ExprNode.OPs.EQ;
+            case MxParser.EQ: op = ExprNode.OPs.EQ;
                 break;
-            case MxParser.NEQ:
-                op = ExprNode.OPs.NEQ;
+            case MxParser.NEQ: op = ExprNode.OPs.NEQ;
                 break;
-            case MxParser.BITAND:
-                op = ExprNode.OPs.BITAND;
+            case MxParser.BITAND: op = ExprNode.OPs.BITAND;
                 break;
-            case MxParser.BITXOR:
-                op = ExprNode.OPs.BITXOR;
+            case MxParser.BITXOR: op = ExprNode.OPs.BITXOR;
                 break;
-            case MxParser.BITOR:
-                op = ExprNode.OPs.BITOR;
+            case MxParser.BITOR: op = ExprNode.OPs.BITOR;
                 break;
-            case MxParser.AND:
-                op = ExprNode.OPs.AND;
+            case MxParser.AND: op = ExprNode.OPs.AND;
                 break;
-            case MxParser.OR:
-                op = ExprNode.OPs.OR;
+            case MxParser.OR: op = ExprNode.OPs.OR;
                 break;
-            case MxParser.ASSIGN:
-                op = ExprNode.OPs.ASSIGN;
+            case MxParser.ASSIGN: op = ExprNode.OPs.ASSIGN;
                 break;
             default:
                 throw new RuntimeException(
@@ -329,11 +311,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
         Location opPos = new Location(ctx.op);
 
         switch (ctx.op.getType()) {
-            case MxParser.INC:
-                op = ExprNode.OPs.INC_SUFF;
+            case MxParser.INC: op = ExprNode.OPs.INC_SUFF;
                 break;
-            case MxParser.DEC:
-                op = ExprNode.OPs.DEC_SUFF;
+            case MxParser.DEC: op = ExprNode.OPs.DEC_SUFF;
                 break;
             default:
                 throw new RuntimeException(
@@ -348,23 +328,17 @@ public class BuildAst extends MxBaseVisitor<Node> {
         ExprNode.OPs op;
         Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
-            case MxParser.INC:
-                op = ExprNode.OPs.INC;
+            case MxParser.INC: op = ExprNode.OPs.INC;
                 break;
-            case MxParser.DEC:
-                op = ExprNode.OPs.DEC;
+            case MxParser.DEC: op = ExprNode.OPs.DEC;
                 break;
-            case MxParser.ADD:
-                op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprNode.OPs.ADD;
                 break;
-            case MxParser.SUB:
-                op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprNode.OPs.SUB;
                 break;
-            case MxParser.NOT:
-                op = ExprNode.OPs.NOT;
+            case MxParser.NOT: op = ExprNode.OPs.NOT;
                 break;
-            case MxParser.BITNOT:
-                op = ExprNode.OPs.BITNOT;
+            case MxParser.BITNOT: op = ExprNode.OPs.BITNOT;
                 break;
             default:
                 throw new RuntimeException("ERROR: (Building AST) Get unexpected operator" + ctx.op.getText()
@@ -403,7 +377,6 @@ public class BuildAst extends MxBaseVisitor<Node> {
     }
 
     // Function Call
-
     @Override
     public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
         List<ExprNode> args = new ArrayList<>();
@@ -426,7 +399,6 @@ public class BuildAst extends MxBaseVisitor<Node> {
     }
 
     // Member Function call
-
     @Override
     public Node visitDotMember_(MxParser.DotMember_Context ctx) {
         ExprNode container = (ExprNode) visit(ctx.expr());

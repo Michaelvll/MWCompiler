@@ -8,6 +8,13 @@ import mwcompiler.symbols.TypeSymbol;
 
 import java.util.List;
 
+/**
+ * NewExprNode.java
+ * New expression node extends ExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class NewExprNode extends ExprNode {
     private TypeSymbol createType;
     private List<ExprNode> dimArgs;
@@ -17,7 +24,7 @@ public class NewExprNode extends ExprNode {
         if (dim == 0) {
             this.createType = NonArrayTypeSymbol.builder(createType);
         } else {
-            this.createType = ArrayTypeSymbol.builder(createType,dim);
+            this.createType = ArrayTypeSymbol.builder(createType, dim);
         }
         this.dimArgs = dimArgs;
     }

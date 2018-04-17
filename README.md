@@ -1,6 +1,6 @@
 # MWCompiler
 
-A Compiler for Mx language @ACM Class, SJTU
+A Compiler for Mx language @ACM Class 2016, SJTU. Written in 2018.
 
 ## Language Feature
 
@@ -27,8 +27,16 @@ In order to make the semantic analysis more explicit, MWcc build an Abstract Syn
 
 After the lexer and parser have finished, MWcc begins AST building by calling [mwcompiler.ast.tools.BuildAstVisitor](./MWCompiler/src/mwcompiler/ast/tools/BuildAstVisitor.java). And the abstract syntex nodes are defined in [mwcompiler.ast.nodes](./MWCompiler/src/mwcompiler/ast/nodes/)
 
-When building the AST, the variables and types are changed to Symbols, in order to make quicker comparison.
+When building the AST, the variables and types are changed to Symbols which are placed in [mwcompiler.symbols](./MWCompiler/src/mwcompiler/symbols), in order to make quicker comparison and convenience.
+
+PS. ERRORs will be throw out through runtime error and WARNINGs will be print into stderr.
+
+#### Forward Reference Preprocessing
+
+In order to support the forward reference of class and functions (including the variables in class), [mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor](./MWCompiler/src/mwcompiler/symbols/tools/ForwardRefPreprocessAstVisitor) builds the Symbol Table for classes, adding variables and functions into it, and add functions into global Symbol Table, before the complete type checking runs.
 
 #### Type Checking
 
-<!-- Complete the symbol table. -->
+Builds Symbol Tables for each block, while type checking is running. This gets rid of variable using before declaration, by type checking and adding maps into symbol table in the order of the code. In [mwcompiler.symbols.tools.TypeCheckingAstVisitor](./MWCompiler/src/mwcompiler/symbols/tools/TypeCheckingAstVisitor),by changing the returnType, each visit can return the type with lvalue or rvalue of the statement.
+
+PS. ERRORs will be throw out through runtime error and WARNINGs will be print into stderr.

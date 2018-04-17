@@ -7,7 +7,11 @@ import mwcompiler.symbols.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConstructSymbolTableAstVisitor implements AstVisitor {
+/**
+ * @author Michael Wu
+ * @since 2018-04-16
+ * */
+public class ForwardRefPreprocessAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
 
@@ -21,16 +25,17 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         return FunctionTypeSymbol.builder(returnTypeSymbol, paramList);
     }
 
-    private void putInner(String returnType, String name, String... params) {
+    // Put builtin functions into Symbol Table
+    private void putBuiltin(String returnType, String name, String... params) {
         currentSymbolTable.put(InstanceSymbol.builder(name), getFunctionType(returnType, params));
     }
 
-    private void initInnerFunction() {
-        putInner("void", "print", "string");
-        putInner("void", "println", "string");
-        putInner("string", "getString");
-        putInner("int", "getInt");
-        putInner("string", "toString", "int");
+    private void initBuiltinFunction() {
+        putBuiltin("void", "print", "string");
+        putBuiltin("void", "println", "string");
+        putBuiltin("string", "getString");
+        putBuiltin("int", "getInt");
+        putBuiltin("string", "toString", "int");
         SymbolTable stringSymbolTable = SymbolTable.getNamedSymbolTable(NonArrayTypeSymbol.builder("string"));
         stringSymbolTable.put(InstanceSymbol.builder("length"), getFunctionType("int"));
         stringSymbolTable.put(InstanceSymbol.builder("substring"), getFunctionType("string", "int", "int"));
@@ -51,7 +56,7 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     public void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
-        initInnerFunction();
+        initBuiltinFunction();
         node.getBlock().accept(this);
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();
         checkMain();

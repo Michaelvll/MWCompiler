@@ -1,7 +1,5 @@
 package mwcompiler.symbols;
 
-import mwcompiler.ast.nodes.TypeNode;
-
 public class NonArrayTypeSymbol extends TypeSymbol {
     public final static NonArrayTypeSymbol intTypeSymbol = new NonArrayTypeSymbol("int");
     public final static NonArrayTypeSymbol stringTypeSymbol = new NonArrayTypeSymbol("string");
@@ -40,10 +38,6 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         }
 
         return (NonArrayTypeSymbol) search;
-    }
-
-    public static NonArrayTypeSymbol getConstructorType() {
-        return (NonArrayTypeSymbol) typeSymbolMap.get("*Constructor");
     }
 
     @Override

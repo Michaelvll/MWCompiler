@@ -11,10 +11,8 @@ import mwcompiler.symbols.*;
  * @author Michael Wu
  * @since 2018-04-06
  */
-
 public class TypeNode extends Node {
-    //TODO
-    TypeSymbol typeSymbol;
+    private TypeSymbol typeSymbol;
     Location location;
 
     public TypeNode(String type, Integer dim, Location pos) {

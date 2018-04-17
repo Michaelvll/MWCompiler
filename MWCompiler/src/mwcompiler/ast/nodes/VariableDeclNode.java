@@ -12,9 +12,7 @@ import mwcompiler.symbols.TypeSymbol;
  * @author Michael Wu
  * @since 2018-04-06
  */
-
-public class VariableDeclNode extends DeclaratorNode{
-    //TODO
+public class VariableDeclNode extends DeclaratorNode {
     private TypeSymbol typeSymbol;
     private InstanceSymbol var;
     private ExprNode init;
@@ -33,7 +31,7 @@ public class VariableDeclNode extends DeclaratorNode{
 
     @Override
     public void accept(AstVisitor visitor) {
-        visitor.visit(this );
+        visitor.visit(this);
     }
 
     public void setType(TypeSymbol typeSymbol, Location typePos) {
@@ -44,6 +42,7 @@ public class VariableDeclNode extends DeclaratorNode{
     public InstanceSymbol getVarSymbol() {
         return var;
     }
+
     public ExprNode getInit() {
         return init;
     }

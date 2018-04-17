@@ -11,12 +11,11 @@ import mwcompiler.ast.tools.Location;
  * @since 2018-04-06
  */
 
-public class ProgramNode extends  Node {
-    //TODO
+public class ProgramNode extends Node {
     private BlockNode block;
     Location location;
 
-    public ProgramNode(BlockNode block, Location pos){
+    public ProgramNode(BlockNode block, Location pos) {
         this.block = block;
         this.location = pos;
     }

@@ -2,7 +2,13 @@ package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
-
+/**
+ * BoolLiteralNode.java
+ * Bool literal node extends from LiteralExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class BoolLiteralNode extends LiteralExprNode {
     public enum BoolVal{
         TRUE, FALSE

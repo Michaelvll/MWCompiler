@@ -6,12 +6,14 @@ import java.util.Hashtable;
 
 public class SymbolTable {
     private static Dictionary<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new Hashtable<>();
+
     static {
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("int"), new SymbolTable(null));
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("string"), new SymbolTable(null));
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("bool"), new SymbolTable(null));
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("void"), new SymbolTable(null));
     }
+
     private Dictionary<InstanceSymbol, TypeSymbol> currentMap = new Hashtable<>();
     private SymbolTable outerSymbolTable;
 
@@ -24,9 +26,8 @@ public class SymbolTable {
      *
      * @param instanceSymbol
      * @param typeSymbol
-     * @return whether the put action overlap the former defined variable symbol in the same scope
      */
-    public Boolean put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
+    public void put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
         TypeSymbol search = currentMap.get(instanceSymbol);
         if (search != null) {
             if (!search.getClass().equals(typeSymbol.getClass())) {
@@ -34,7 +35,6 @@ public class SymbolTable {
             }
         }
         currentMap.put(instanceSymbol, typeSymbol);
-        return search == null;
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {

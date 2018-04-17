@@ -12,13 +12,17 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 import static mwcompiler.symbols.tools.ReturnType.LvalOrRval.LVAL;
 import static mwcompiler.symbols.tools.ReturnType.LvalOrRval.RVAL;
 
-// TODO there may be some problem with construct function
+/**
+ * @author Michael Wu
+ * @since 2018-04-16
+ * */
 public class TypeCheckAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable = null;
     private ReturnType returnType;
     private Integer inLoop = 0;
     private Boolean inClass = false;
 
+    // For Error produce
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
         throw new RuntimeException("ERROR: (Type Checking) Type Mismatch. In binary expression,  <"
                 + lhsType.getName() + "> mismatches <" + rhsType.getName() + ">" + location.getLocation());
@@ -37,6 +41,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         throw new RuntimeException("ERROR: (Type Checking) Can not resolve name <" + name + ">" + location.getLocation());
     }
 
+    // For Symbol Table
     private void getCurrentSymbolTable(BlockNode node) {
         if (node.getCurrentSymbolTable() == null) {
             node.setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
@@ -85,6 +90,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         returnType = currentReturn;
     }
 
+    // Declarations
     @Override
     public void visit(VariableDeclNode node) {
         try {
@@ -103,10 +109,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
                 if (declType != rhsType.typeSymbol) {
                     throwTypeMismatchErr(node.getTypeSymbol(), returnType.typeSymbol, node.getInitPos());
                 }
-//                if (!declType.isPrimitiveType() && rhsType.lvalOrRval == RVAL) {
-//                    throw new RuntimeException("ERROR: (Type Checking) Can not assign a lvalue to <" + declType.getName()
-//                            + "> type variable" + node.getStartLocation().getLocation());
-//                }
+
             } else {
                 if (declType.isPrimitiveType()) {
                     throw new RuntimeException("ERROR: (Type Checking) Assigning null to primitive type is not allowed " + node.getStartLocation().getLocation());
@@ -163,10 +166,11 @@ public class TypeCheckAstVisitor implements AstVisitor {
     }
 
 
+    // Expressions
     @Override
     public void visit(BinaryExprNode node) {
-        ReturnType lhsType = null;
-        ReturnType rhsType = null;
+        ReturnType lhsType;
+        ReturnType rhsType;
         node.getLeft().accept(this);
         lhsType = returnType;
         node.getRight().accept(this);
@@ -295,7 +299,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         returnType = null;
     }
 
-
+    // For arguments type checking
     private void checkArgs(List<ExprNode> args, List<TypeSymbol> params, Location location) {
         if (args.size() != params.size()) {
             throw new RuntimeException("ERROR: (Type Checking) Number of arguments in function caller " +
@@ -313,6 +317,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         }
     }
 
+    // Function calls
     @Override
     public void visit(FunctionCallNode node) {
         node.getCaller().accept(this);
@@ -342,6 +347,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         returnType = new ReturnType(classTypeSymbol, LVAL);
     }
 
+    // Member access
     @Override
     public void visit(DotMemberNode node) {
         node.getContainer().accept(this);
@@ -378,6 +384,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         }
     }
 
+    // Control Flow
     @Override
     public void visit(IfNode node) {
         node.getCondition().accept(this);

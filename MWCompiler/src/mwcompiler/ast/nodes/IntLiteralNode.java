@@ -3,6 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
+/**
+ * IntLiteralNode.java
+ * Int literal node extends from LiteralNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class IntLiteralNode extends LiteralExprNode {
     private Integer val;
 

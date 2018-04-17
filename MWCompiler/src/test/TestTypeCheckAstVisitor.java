@@ -2,7 +2,7 @@ package test;
 
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.symbols.tools.ConstructSymbolTableAstVisitor;
+import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
 import mwcompiler.symbols.tools.TypeCheckAstVisitor;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class TestTypeCheckAstVisitor {
 
     @Test
     public void testDumpAst() {
-        AstVisitor  constructSymbolTableAstVisitor = new ConstructSymbolTableAstVisitor();
+        AstVisitor  constructSymbolTableAstVisitor = new ForwardRefPreprocessAstVisitor();
         program.accept(constructSymbolTableAstVisitor);
         AstVisitor typeNotPresentException= new TypeCheckAstVisitor();
         program.accept(typeNotPresentException);
