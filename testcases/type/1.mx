@@ -1,0 +1,6 @@
+bool a;
+int b;
+int main(){
+    a && b;
+    int[][][] a= new int[3][4][];
+}

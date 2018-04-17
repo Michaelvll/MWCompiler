@@ -1,8 +1,10 @@
 package mwcompiler.symbols;
 
 public class InstanceSymbol extends Symbol {
+    public static final InstanceSymbol sizeFunctionIS = new InstanceSymbol("size");
+    public static final InstanceSymbol thisInstanceSybol = new InstanceSymbol("this");
     static {
-        symbolMap.put("this", new InstanceSymbol("this"));
+        symbolMap.put("this", thisInstanceSybol);
         // inner functions
         symbolMap.put("print", new InstanceSymbol( "print"));
         symbolMap.put("println", new InstanceSymbol("println"));
@@ -10,7 +12,7 @@ public class InstanceSymbol extends Symbol {
         symbolMap.put("getInt", new InstanceSymbol("getInt"));
         symbolMap.put("toString", new InstanceSymbol("toString"));
         // Array
-        symbolMap.put("size", new InstanceSymbol("size"));
+        symbolMap.put("size", sizeFunctionIS);
         // String
         symbolMap.put("length", new InstanceSymbol("length"));
         symbolMap.put("substring",new InstanceSymbol("substring"));
@@ -18,14 +20,13 @@ public class InstanceSymbol extends Symbol {
         symbolMap.put("ord", new InstanceSymbol("ord"));
 
     }
-
     private String name;
 
     private InstanceSymbol(String name) {
         this.name = name;
     }
 
-    public  static InstanceSymbol builder(String name) {
+    public static InstanceSymbol builder(String name) {
         String intern = name.intern();
         Symbol search = symbolMap.get(intern);
         if (search == null) {
@@ -35,20 +36,10 @@ public class InstanceSymbol extends Symbol {
         return (InstanceSymbol) search;
     }
 
-    public static InstanceSymbol solveInstanceSymbol(String name){
-        String intern = name.intern();
-        Symbol search = symbolMap.get(intern);
-        if (search == null) {
-            throw new RuntimeException("Can not resolve "+name);
-        }
-        if (!(search instanceof InstanceSymbol)){
-            throw new RuntimeException("Class name can not be used as instance name "+ name);
-        }
-        return (InstanceSymbol) search;
-    }
-
     @Override
     public String getName() {
         return name;
     }
+
+
 }

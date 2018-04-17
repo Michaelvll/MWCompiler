@@ -1,12 +1,20 @@
 package mwcompiler.symbols;
 
 public class NonArrayTypeSymbol extends TypeSymbol {
+    public final static NonArrayTypeSymbol intTypeSymbol = new NonArrayTypeSymbol("int");
+    public final static NonArrayTypeSymbol stringTypeSymbol = new NonArrayTypeSymbol("string");
+    public final static NonArrayTypeSymbol boolTypeSymbol = new NonArrayTypeSymbol("bool");
+    public final static NonArrayTypeSymbol voidTypeSymbol = new NonArrayTypeSymbol("void");
+    public final static NonArrayTypeSymbol constructorTypeSymbol = new NonArrayTypeSymbol("");
+    public final static NonArrayTypeSymbol nullTypeSymbol = new NonArrayTypeSymbol("null");
+
     static {
-        symbolMap.put("int", new NonArrayTypeSymbol("int"));
-        symbolMap.put("string", new NonArrayTypeSymbol("string"));
-        symbolMap.put("bool", new NonArrayTypeSymbol("bool"));
-        symbolMap.put("void", new NonArrayTypeSymbol("void"));
-        symbolMap.put("*Constructor", new NonArrayTypeSymbol(""));
+        symbolMap.put("int", intTypeSymbol);
+        symbolMap.put("string", stringTypeSymbol);
+        symbolMap.put("bool", boolTypeSymbol);
+        symbolMap.put("void", voidTypeSymbol);
+        symbolMap.put("*Constructor", constructorTypeSymbol);
+        symbolMap.put("null", nullTypeSymbol);
     }
 
     protected String typename;
@@ -32,7 +40,25 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         }
         return (NonArrayTypeSymbol) search;
     }
-    public static NonArrayTypeSymbol getConstructorType(){
+
+    public static NonArrayTypeSymbol getConstructorType() {
         return (NonArrayTypeSymbol) symbolMap.get("*Constructor");
+    }
+
+    @Override
+    public void checkLegal() {
+        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        if (namedSymbolTable == null) {
+            throw new RuntimeException(this.typename);
+        }
+    }
+
+    @Override
+    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        if (namedSymbolTable == null) {
+            throw new RuntimeException("No declared class named " + this.typename);
+        }
+        return namedSymbolTable.findIn(instanceSymbol);
     }
 }

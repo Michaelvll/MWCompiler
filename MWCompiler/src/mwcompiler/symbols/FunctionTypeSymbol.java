@@ -1,7 +1,5 @@
 package mwcompiler.symbols;
 
-import mwcompiler.ast.nodes.TypeNode;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,5 +45,18 @@ public class FunctionTypeSymbol extends TypeSymbol {
             name.append("\t").append(param.getName()).append("\n");
         }
         return String.valueOf(name);
+    }
+
+    @Override
+    public void checkLegal() {
+        returnType.checkLegal();
+        for (TypeSymbol param:params) {
+            param.checkLegal();
+        }
+    }
+
+    @Override
+    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+        throw new RuntimeException("ERROR: (Type Checking) Function does not have a member ");
     }
 }

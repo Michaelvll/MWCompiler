@@ -15,7 +15,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.BuildAstVisitor;
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.BuildAst;
+import mwcompiler.symbols.tools.ConstructSymbolTableAstVisitor;
+import mwcompiler.symbols.tools.TypeCheckAstVisitor;
 import org.apache.commons.cli.*;
 
 import mx_gram.tools.*;
@@ -26,14 +29,15 @@ import org.antlr.v4.runtime.tree.*;
 public class Mwcc {
     private static InputStream in = System.in;
     private static PrintStream out = System.err;
-    private static Node programRoot;
+    private static Node programAstRoot;
 
     /**
      * @param args The entry of Mwcc
      */
     public static void main(String[] args) throws Exception {
         compilerArgSolve(args);
-        BuildAstVisitor buildAstVisitor = buildAst();
+        buildAst();
+        typeCheck();
 
         //        System.err.println("Build No exception!");
     }
@@ -102,20 +106,27 @@ public class Mwcc {
 
     }
 
-    private static BuildAstVisitor buildAst() throws Exception {
-        BuildAstVisitor buildAstVisitor = new BuildAstVisitor();
+    private static void buildAst() throws Exception {
+        BuildAst buildAst = new BuildAst();
         try {
             CharStream input = CharStreams.fromStream(in);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
+            parser.setErrorHandler(new BailErrorStrategy());
             ParseTree tree = parser.program();
-            programRoot = buildAstVisitor.visit(tree);
+            programAstRoot = buildAst.visit(tree);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
         }
-        return buildAstVisitor;
+    }
+
+    private static void typeCheck() {
+        AstVisitor constructSymbolTableAstVisitor = new ConstructSymbolTableAstVisitor();
+        programAstRoot.accept(constructSymbolTableAstVisitor);
+        AstVisitor typeNotPresentException= new TypeCheckAstVisitor();
+        programAstRoot.accept(typeNotPresentException);
     }
 
 }

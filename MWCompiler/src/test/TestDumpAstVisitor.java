@@ -1,15 +1,9 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
+import mwcompiler.ast.tools.BuildAst;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.BuildAstVisitor;
-import mx_gram.tools.MxLexer;
-import mx_gram.tools.MxParser;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,20 +16,15 @@ import org.junit.Test;
  * */
 
 public class TestDumpAstVisitor {
-    private String[] files={"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx","/ast/611.mx"};
+
 
     private Node program;
-    private BuildAstVisitor buildAstVisitor;
+    private BuildAst buildAst;
 
     @Before
     public void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases"+files[5]);
-        MxLexer lexer = new MxLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        MxParser parser = new MxParser(tokens);
-        ParseTree tree = parser.program();
-        buildAstVisitor = new BuildAstVisitor();
-        program = buildAstVisitor.visitProgram((MxParser.ProgramContext) tree);
+        PreBuild.build();
+        program = PreBuild.program;
     }
 
 

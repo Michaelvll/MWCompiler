@@ -1,6 +1,6 @@
 package test;
 
-import mwcompiler.ast.tools.BuildAstVisitor;
+import mwcompiler.ast.tools.BuildAst;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -44,7 +44,7 @@ public class TestProgramNodeVistInit {
     @Test
     public void test() {
         try{
-            BuildAstVisitor builder = new BuildAstVisitor();
+            BuildAst builder = new BuildAst();
             CharStream input = CharStreams.fromFileName(filename);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);

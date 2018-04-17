@@ -26,11 +26,6 @@ public class TypeNode extends Node {
         this.location = pos;
     }
 
-    public TypeNode(String type, Location pos) {
-        this.typeSymbol = NonArrayTypeSymbol.builder(type);
-        this.location = pos;
-    }
-
 
     public TypeSymbol getTypeSymbol() {
         return typeSymbol;
