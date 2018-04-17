@@ -429,7 +429,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
             vardecl = node;
         }else {
             if (ctx.variableField() != null) {
-                vardecl = visit(ctx.variableField());
+                VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
+                vardecl = new BinaryExprNode(new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx.variableField())),
+                    ExprNode.OPs.ASSIGN, variableDeclNode.getInit(),new Location(ctx.variableField()));
             }
         }
 

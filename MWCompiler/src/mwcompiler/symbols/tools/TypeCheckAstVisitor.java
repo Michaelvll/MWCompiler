@@ -363,7 +363,6 @@ public class TypeCheckAstVisitor implements AstVisitor {
         inLoop = true;
         getCurrentSymbolTable(node.getBody());
         if (node.getVarDecl() != null) {
-            if (node.getVarDecl() instanceof VariableDeclNode)
             node.getVarDecl().accept(this);
         }
         if (node.getCondition() != null) {
