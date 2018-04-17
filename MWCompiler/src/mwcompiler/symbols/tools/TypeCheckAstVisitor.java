@@ -16,7 +16,7 @@ import static mwcompiler.symbols.tools.ReturnType.LvalOrRval.RVAL;
 public class TypeCheckAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable = null;
     private ReturnType returnType;
-    private Boolean inLoop = false;
+    private Integer inLoop = 0;
 
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
         throw new RuntimeException("ERROR: (Type Checking) Type Mismatch. In binary expression,  <"
@@ -374,7 +374,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
 
     @Override
     public void visit(LoopNode node) {
-        inLoop = true;
+        ++inLoop;
         getCurrentSymbolTable(node.getBody());
         if (node.getVarDecl() != null) {
             node.getVarDecl().accept(this);
@@ -391,13 +391,13 @@ public class TypeCheckAstVisitor implements AstVisitor {
         }
         node.getBody().accept(this);
 
-        inLoop = false;
+        --inLoop;
         returnType = null;
     }
 
     @Override
     public void visit(BreakNode node) {
-        if (!inLoop) {
+        if (inLoop == 0) {
             throw new RuntimeException("ERROR: (Type Checking) Break statement should not appear out of loop scope "
                     + node.getStartLocation().getLocation());
         }
@@ -416,7 +416,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
 
     @Override
     public void visit(ContinueNode node) {
-        if (!inLoop) {
+        if (inLoop == 0) {
             throw new RuntimeException("ERROR: (Type Checking) Continue statement should not appear out of loop scope "
                     + node.getStartLocation().getLocation());
         }
