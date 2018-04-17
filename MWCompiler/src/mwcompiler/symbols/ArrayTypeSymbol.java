@@ -15,10 +15,10 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     public static ArrayTypeSymbol builder(String name, Integer dim) {
         NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.builder(name);
-        Symbol search = symbolMap.get(combineName(name, dim));
+        TypeSymbol search = typeSymbolMap.get(combineName(name, dim));
         if (search == null) {
             search = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
-            symbolMap.put(combineName(name,dim),search);
+            typeSymbolMap.put(combineName(name,dim),search);
         }
         return (ArrayTypeSymbol) search;
     }

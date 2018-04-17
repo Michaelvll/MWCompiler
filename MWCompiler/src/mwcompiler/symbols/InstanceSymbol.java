@@ -1,24 +1,29 @@
 package mwcompiler.symbols;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 public class InstanceSymbol extends Symbol {
+    static Dictionary<String, InstanceSymbol> instanceSymbolMap = new Hashtable<>();
+
     public static final InstanceSymbol sizeFunctionIS = new InstanceSymbol("size");
     public static final InstanceSymbol thisInstanceSymbol = new InstanceSymbol("this");
     public static final InstanceSymbol constructorSymbol = new InstanceSymbol("~constructor");
     static {
-        symbolMap.put("this", thisInstanceSymbol);
+        instanceSymbolMap.put("this", thisInstanceSymbol);
         // inner functions
-        symbolMap.put("print", new InstanceSymbol( "print"));
-        symbolMap.put("println", new InstanceSymbol("println"));
-        symbolMap.put("getString", new InstanceSymbol("getString"));
-        symbolMap.put("getInt", new InstanceSymbol("getInt"));
-        symbolMap.put("toString", new InstanceSymbol("toString"));
+        instanceSymbolMap.put("print", new InstanceSymbol("print"));
+        instanceSymbolMap.put("println", new InstanceSymbol("println"));
+        instanceSymbolMap.put("getString", new InstanceSymbol("getString"));
+        instanceSymbolMap.put("getInt", new InstanceSymbol("getInt"));
+        instanceSymbolMap.put("toString", new InstanceSymbol("toString"));
         // Array
-        symbolMap.put("size", sizeFunctionIS);
+        instanceSymbolMap.put("size", sizeFunctionIS);
         // String
-        symbolMap.put("length", new InstanceSymbol("length"));
-        symbolMap.put("substring",new InstanceSymbol("substring"));
-        symbolMap.put("parseInt", new InstanceSymbol("parseInt"));
-        symbolMap.put("ord", new InstanceSymbol("ord"));
+        instanceSymbolMap.put("length", new InstanceSymbol("length"));
+        instanceSymbolMap.put("substring", new InstanceSymbol("substring"));
+        instanceSymbolMap.put("parseInt", new InstanceSymbol("parseInt"));
+        instanceSymbolMap.put("ord", new InstanceSymbol("ord"));
 
     }
     private String name;
@@ -29,18 +34,17 @@ public class InstanceSymbol extends Symbol {
 
     public static InstanceSymbol builder(String name) {
         String intern = name.intern();
-        Symbol search = symbolMap.get(intern);
+        InstanceSymbol search = instanceSymbolMap.get(intern);
         if (search == null) {
             search = new InstanceSymbol(intern);
-            symbolMap.put(intern, search);
+            instanceSymbolMap.put(intern, search);
         }
-        return (InstanceSymbol) search;
+        return search;
     }
 
     @Override
     public String getName() {
         return name;
     }
-
 
 }
