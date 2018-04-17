@@ -17,6 +17,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable = null;
     private ReturnType returnType;
     private Integer inLoop = 0;
+    private Boolean inClass = false;
 
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
         throw new RuntimeException("ERROR: (Type Checking) Type Mismatch. In binary expression,  <"
@@ -112,7 +113,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
             }
 
         }
-        if (currentSymbolTable.findIn(node.getVarSymbol()) != null) {
+        if (currentSymbolTable.findIn(node.getVarSymbol()) != null && !inClass) {
             throw new RuntimeException("ERROR: (Type Checking) Redeclare a variable <" + node.getVarSymbol().getName() + "> in the same scope" + node.getStartLocation().getLocation());
         }
         currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
@@ -138,9 +139,14 @@ public class TypeCheckAstVisitor implements AstVisitor {
                 System.err.println("WARNING: (Type Checking) Function <" + node.getInstanceSymbol().getName()
                         + "> has no return statement " + node.getStartLocation().getLocation());
             }
-        } else if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType()) {
-            throw new RuntimeException("ERROR: (Type Checking) Function does not return a value as declared "
-                    + node.getStartLocation().getLocation());
+        } else {
+            if (node.getInstanceSymbol() == InstanceSymbol.constructorSymbol) {
+                throw new RuntimeException("ERROR: (Type Checking) Constructor can not return any value "
+                        + node.getStartLocation().getLocation());
+            }
+            if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType())
+                throw new RuntimeException("ERROR: (Type Checking) Function does not return a value as declared "
+                        + node.getStartLocation().getLocation());
         }
 
         returnType = null;
@@ -148,9 +154,11 @@ public class TypeCheckAstVisitor implements AstVisitor {
 
     @Override
     public void visit(ClassDeclNode node) {
+        inClass = true;
         getCurrentSymbolTable(node.getBody());
         currentSymbolTable.put(InstanceSymbol.thisInstanceSymbol, node.getClassSymbol());
         node.getBody().accept(this);
+        inClass = false;
     }
 
 
@@ -227,12 +235,17 @@ public class TypeCheckAstVisitor implements AstVisitor {
                 if (returnType.typeSymbol != intTypeSymbol) {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
+                if (returnType.lvalOrRval != LVAL) {
+                    throw new RuntimeException("ERROR (Type Checking) Operator <" + node.getOp()
+                            + "> not support for rvalue" + node.getStartLocation().getLocation());
+                }
                 returnType = new ReturnType(intTypeSymbol, RVAL);
                 break;
             case NOT:
                 if (returnType.typeSymbol != boolTypeSymbol) {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
+            
                 returnType = new ReturnType(boolTypeSymbol, RVAL);
                 break;
         }
@@ -282,7 +295,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
     }
 
 
-    private void checkArgs(List<ExprNode> args, List<TypeSymbol> params, Location location){
+    private void checkArgs(List<ExprNode> args, List<TypeSymbol> params, Location location) {
         if (args.size() != params.size()) {
             throw new RuntimeException("ERROR: (Type Checking) Number of arguments in function caller " +
                     "does not match the declaration. " + location.getLocation());
@@ -310,10 +323,14 @@ public class TypeCheckAstVisitor implements AstVisitor {
         FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) returnType.typeSymbol;
         List<ExprNode> args = node.getArgs();
         List<TypeSymbol> params = functionTypeSymbol.getParams();
-        checkArgs(args,params,node.getStartLocation());
-        returnType = new ReturnType(functionTypeSymbol.getReturnType(), RVAL);
+        checkArgs(args, params, node.getStartLocation());
+        if (functionTypeSymbol.getReturnType() instanceof ArrayTypeSymbol)
+            returnType = new ReturnType(functionTypeSymbol.getReturnType(), LVAL);
+        else
+            returnType = new ReturnType(functionTypeSymbol.getReturnType(), RVAL);
 
     }
+
     @Override
     public void visit(ConstructorCallNode node) {
         NonArrayTypeSymbol classTypeSymbol = node.getClassTypeSymbol();

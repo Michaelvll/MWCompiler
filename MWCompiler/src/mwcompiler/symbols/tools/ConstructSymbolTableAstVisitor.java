@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ConstructSymbolTableAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable;
-    private SymbolTable staticClassSymbolTable;
+    private Boolean inClass = false;
 
 
     private FunctionTypeSymbol getFunctionType(String returnType, String... params) {
@@ -59,18 +59,17 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
 
     @Override
     public void visit(ClassDeclNode node) {
-        staticClassSymbolTable = new SymbolTable(null);
+        inClass = true;
+        node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
         if (SymbolTable.getNamedSymbolTable(node.getClassSymbol())!= null ){
             throw new RuntimeException("ERROR: (Type Checking) Redeclare class <"+ node.getClassSymbol().getName()+"> "
                     +node.getStartLocation().getLocation());
         }
-        SymbolTable.putNamedSymbolTable(node.getClassSymbol(), staticClassSymbolTable);
-        node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
+        SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
 
-//        currentSymbolTable.put()//TODO solve the constructor
         node.getBody().accept(this);
-        staticClassSymbolTable = null;
+        inClass = false;
     }
 
     @Override
@@ -87,8 +86,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
 
     @Override
     public void visit(VariableDeclNode node) {
-        if (staticClassSymbolTable != null)
-            staticClassSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
+        if (inClass)
+            currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
     }
 
     @Override
@@ -98,8 +97,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
                     +"> in the same scope "+node.getStartLocation().getLocation());
         }
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
-        if (staticClassSymbolTable != null)
-            staticClassSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+        if (inClass)
+            currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
     }
 
     // Unused
