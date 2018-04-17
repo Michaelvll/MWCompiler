@@ -139,10 +139,9 @@ exprList	: expr (COMMA expr)*;
 creator		: createdName arrayCreatorRest?;
 createdName	: Identifier | primitiveType;
 arrayCreatorRest:
-	LBRACK (
-		RBRACK
-		| expr RBRACK (LBRACK expr RBRACK)* (
-			LBRACK RBRACK
-		)*
-	)
+    creatorInner+
 	;
+
+creatorInner:
+    LBRACK expr? RBRACK
+;

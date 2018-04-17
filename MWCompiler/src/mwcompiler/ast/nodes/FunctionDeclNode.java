@@ -4,12 +4,13 @@ import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.TypeSymbol;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionDeclNode extends DeclaratorNode {
-    private TypeNode returnType;
     private InstanceSymbol instanceSymbol;
     private FunctionTypeSymbol functionTypeSymbol;
     private List<VariableDeclNode> paramList;
@@ -20,9 +21,8 @@ public class FunctionDeclNode extends DeclaratorNode {
     private Location bodyPos;
 
 
-    public FunctionDeclNode(TypeNode returnType, InstanceSymbol instanceSymbol, List<VariableDeclNode> paramList, BlockNode body,
+    public FunctionDeclNode(TypeSymbol returnTypeSymbol, InstanceSymbol instanceSymbol, List<VariableDeclNode> paramList, BlockNode body,
                             Location returnTypePos, Location namePos, Location paramListPos, Location bodyPos) {
-        this.returnType = returnType;
         this.paramList = paramList;
         this.body = body;
         this.instanceSymbol = instanceSymbol;
@@ -31,11 +31,16 @@ public class FunctionDeclNode extends DeclaratorNode {
         this.namePos = namePos;
         this.paramListPos = paramListPos;
         this.bodyPos = bodyPos;
+        List<TypeSymbol> typeParams = new ArrayList<>();
+        for (VariableDeclNode node : paramList) {
+            typeParams.add(node.getTypeSymbol());
+        }
+        this.functionTypeSymbol = FunctionTypeSymbol.builder(returnTypeSymbol, typeParams);
     }
 
-    public void setReturnType(TypeNode returnType, Location returnTypePos) {
-        this.returnType = returnType;
+    public void setReturnType(TypeSymbol returnTypeSymbol, Location returnTypePos) {
         this.returnTypePos = returnTypePos;
+        this.functionTypeSymbol.setReturnType(returnTypeSymbol);
     }
 
 
@@ -68,23 +73,10 @@ public class FunctionDeclNode extends DeclaratorNode {
         return body;
     }
 
-    public TypeNode getReturnType() {
-        return returnType;
-    }
-
     public InstanceSymbol getInstanceSymbol() {
         return instanceSymbol;
     }
 
-    @Override
-    public void transform2Symbol() {
-        List<TypeNode> params = new ArrayList<>();
-        for (VariableDeclNode variableDeclNode : paramList) {
-            params.add(variableDeclNode.getType());
-        }
-       this.functionTypeSymbol = FunctionTypeSymbol.builder(returnType, params);
-
-    }
 
     @Override
     public Location getStartLocation() {

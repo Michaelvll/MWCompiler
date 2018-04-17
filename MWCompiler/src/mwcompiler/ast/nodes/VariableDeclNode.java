@@ -15,7 +15,6 @@ import mwcompiler.symbols.TypeSymbol;
 
 public class VariableDeclNode extends DeclaratorNode{
     //TODO
-    private TypeNode type;
     private TypeSymbol typeSymbol;
     private InstanceSymbol var;
     private ExprNode init;
@@ -23,9 +22,9 @@ public class VariableDeclNode extends DeclaratorNode{
     private Location varPos;
     private Location initPos;
 
-    public VariableDeclNode(TypeNode type, String var, ExprNode init, Location typePos, Location varPos, Location initPos) {
-        this.type = type;
-        this.var = InstanceSymbol.getSymbol(var);
+    public VariableDeclNode(TypeSymbol typeSymbol, String var, ExprNode init, Location typePos, Location varPos, Location initPos) {
+        this.typeSymbol = typeSymbol;
+        this.var = InstanceSymbol.builder(var);
         this.init = init;
         this.typePos = typePos;
         this.varPos = varPos;
@@ -37,19 +36,14 @@ public class VariableDeclNode extends DeclaratorNode{
         visitor.visit(this );
     }
 
-    public void setType(TypeNode type, Location typePos) {
-        this.type = type;
+    public void setType(TypeSymbol typeSymbol, Location typePos) {
+        this.typeSymbol = typeSymbol;
         this.typePos = typePos;
     }
 
-    public InstanceSymbol getVar() {
+    public InstanceSymbol getVarSymbol() {
         return var;
     }
-
-    public TypeNode getType() {
-        return type;
-    }
-
     public ExprNode getInit() {
         return init;
     }
@@ -68,11 +62,6 @@ public class VariableDeclNode extends DeclaratorNode{
 
     public TypeSymbol getTypeSymbol() {
         return typeSymbol;
-    }
-
-    @Override
-    public void transform2Symbol() {
-        typeSymbol = type.getSymbol();
     }
 
     @Override

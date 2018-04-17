@@ -1,12 +1,20 @@
 package mwcompiler.symbols;
 
 public class NonArrayTypeSymbol extends TypeSymbol {
+    public final static NonArrayTypeSymbol intTypeSymbol = new NonArrayTypeSymbol("int");
+    public final static NonArrayTypeSymbol stringTypeSymbol = new NonArrayTypeSymbol("string");
+    public final static NonArrayTypeSymbol boolTypeSymbol = new NonArrayTypeSymbol("bool");
+    public final static NonArrayTypeSymbol voidTypeSymbol = new NonArrayTypeSymbol("void");
+    public final static NonArrayTypeSymbol constructorTypeSymbol = new NonArrayTypeSymbol("");
+    public final static NonArrayTypeSymbol nullTypeSymbol = new NonArrayTypeSymbol("null");
+
     static {
-        symbolMap.put("int", new NonArrayTypeSymbol("int"));
-        symbolMap.put("string", new NonArrayTypeSymbol("string"));
-        symbolMap.put("bool", new NonArrayTypeSymbol("bool"));
-        symbolMap.put("void", new NonArrayTypeSymbol("void"));
-        symbolMap.put("*Construction",new NonArrayTypeSymbol(""));
+        symbolMap.put("int", intTypeSymbol);
+        symbolMap.put("string", stringTypeSymbol);
+        symbolMap.put("bool", boolTypeSymbol);
+        symbolMap.put("void", voidTypeSymbol);
+        symbolMap.put("*Constructor", constructorTypeSymbol);
+        symbolMap.put("null", nullTypeSymbol);
     }
 
     protected String typename;
@@ -26,23 +34,31 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         }
         String intern = typename.intern();
         Symbol search = symbolMap.get(intern);
-        if (search != null) {
-            throw new RuntimeException("Redeclare a class");
+        if (search == null) {
+            search = new NonArrayTypeSymbol(typename);
+            symbolMap.put(typename.intern(), search);
         }
-        search = new NonArrayTypeSymbol(typename);
-        symbolMap.put(typename.intern(), search);
         return (NonArrayTypeSymbol) search;
     }
 
-    public static NonArrayTypeSymbol getSymbol(String typename) {
-        String intern = typename.intern();
-        Symbol nonArrayTypeSymbol = symbolMap.get(intern);
-        if (nonArrayTypeSymbol == null) {
-            throw new RuntimeException("Get unknown typename");
+    public static NonArrayTypeSymbol getConstructorType() {
+        return (NonArrayTypeSymbol) symbolMap.get("*Constructor");
+    }
+
+    @Override
+    public void checkLegal() {
+        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        if (namedSymbolTable == null) {
+            throw new RuntimeException(this.typename);
         }
-        if (! (nonArrayTypeSymbol instanceof NonArrayTypeSymbol)){
-            throw new RuntimeException("Symbol type mismatch");
+    }
+
+    @Override
+    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        if (namedSymbolTable == null) {
+            throw new RuntimeException("No declared class named " + this.typename);
         }
-        return (NonArrayTypeSymbol) symbolMap.get(intern);
+        return namedSymbolTable.findIn(instanceSymbol);
     }
 }

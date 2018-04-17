@@ -1,6 +1,8 @@
 package mwcompiler.symbols;
 
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;
@@ -12,13 +14,13 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     public static ArrayTypeSymbol builder(String name, Integer dim) {
-        NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.getSymbol(name);
-        if (nonArrayTypeSymbol == null) {
-            throw new RuntimeException("Declaring array for unknown typename");
+        NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.builder(name);
+        Symbol search = symbolMap.get(combineName(name, dim));
+        if (search == null) {
+            search = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
+            symbolMap.put(combineName(name,dim),search);
         }
-        ArrayTypeSymbol arrayTypeSymbol = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
-        symbolMap.put(combineName(name, dim), arrayTypeSymbol);
-        return arrayTypeSymbol;
+        return (ArrayTypeSymbol) search;
     }
 
     private ArrayTypeSymbol(NonArrayTypeSymbol nonArrayTypeSymbol, Integer dim) {
@@ -26,17 +28,34 @@ public class ArrayTypeSymbol extends TypeSymbol {
         this.dim = dim;
     }
 
-    public static ArrayTypeSymbol getSymbol(String name, Integer dim) {
-        Symbol search = symbolMap.get(combineName(name, dim));
-        if (search == null) {
-            search = builder(name, dim);
+    public NonArrayTypeSymbol getNonArrayTypeSymbol() {
+        return nonArrayTypeSymbol;
+    }
+
+    public Integer getDim() {
+        return dim;
+    }
+
+    @Override
+    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+        if (instanceSymbol == InstanceSymbol.sizeFunctionIS) {
+            List<TypeSymbol> params = new ArrayList<>();
+            return FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params);
         }
-        return (ArrayTypeSymbol) search;
+        throw new RuntimeException("ERROR: (Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
     }
 
 
     @Override
     public String getName() {
         return combineName(this.nonArrayTypeSymbol.getName(), dim);
+    }
+
+    @Override
+    public void checkLegal() {
+        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this.nonArrayTypeSymbol);
+        if (namedSymbolTable == null){
+            throw new RuntimeException(this.getName());
+        }
     }
 }
