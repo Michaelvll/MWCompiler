@@ -410,17 +410,29 @@ public class BuildAst extends MxBaseVisitor<Node> {
     // Loop statement
     @Override
     public Node visitForField(MxParser.ForFieldContext ctx) {
-        ExprNode vardecl = null;
+        Node vardecl = null;
         ExprNode condition = null;
         ExprNode step = null;
         BlockNode body = (BlockNode) visit(ctx.body());
         Location vardeclPos = null;
         Location conditionPos = null;
         Location stepPos = null;
-        if (ctx.vardecl != null) {
-            vardecl = (ExprNode) visit(ctx.vardecl);
-            vardeclPos = new Location(ctx.vardecl);
+        if (ctx.type() != null) {
+            vardeclPos = new Location(ctx.type());
+            if (ctx.variableField() == null) {
+                throw new RuntimeException("ERROR: (Building AST) Syntax Error. Condition field in for should contain " +
+                        "complete variable declaration or initialization "+new Location(ctx.type()).getLocation());
+            }
+            VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
+            TypeNode typeNode = (TypeNode) visit(ctx.type());
+            node.setType(typeNode.getTypeSymbol(), vardeclPos);
+            vardecl = node;
+        }else {
+            if (ctx.variableField() != null) {
+                vardecl = visit(ctx.variableField());
+            }
         }
+
         if (ctx.cond != null) {
             condition = (ExprNode) visit(ctx.cond);
             conditionPos = new Location(ctx.cond);

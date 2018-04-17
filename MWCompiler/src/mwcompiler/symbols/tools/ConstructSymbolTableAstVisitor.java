@@ -27,7 +27,7 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
 
     private void initInnerFunction() {
         putInner("void", "print", "string");
-        putInner("void", "println");
+        putInner("void", "println", "string");
         putInner("string", "getString");
         putInner("int", "getInt");
         putInner("string", "toString", "int");
@@ -35,7 +35,7 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         stringSymbolTable.put(InstanceSymbol.builder("length"), getFunctionType("int"));
         stringSymbolTable.put(InstanceSymbol.builder("substring"), getFunctionType("string", "int", "int"));
         stringSymbolTable.put(InstanceSymbol.builder("parseInt"), getFunctionType("int"));
-        stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "pos"));
+        stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
     }
 
     @Override
@@ -74,6 +74,10 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
 
     @Override
     public void visit(FunctionDeclNode node) {
+        if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
+            throw new RuntimeException("ERROR: (Type Checking) Redeclare function <"+ node.getInstanceSymbol().getName()
+                    +"> in the same scope "+node.getStartLocation().getLocation());
+        }
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
         if (staticClassSymbolTable != null)
             staticClassSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());

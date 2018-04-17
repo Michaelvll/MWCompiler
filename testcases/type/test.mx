@@ -1,0 +1,22 @@
+int a(int x) {
+	int x = 0;
+	return x;
+}
+
+int main() {
+	return 0;
+}
+
+
+
+/*!! metadata:
+=== comment ===
+var-4-5140309552-wancheng.mx
+=== assert ===
+failure_compile
+=== phase ===
+semantic pretest
+=== is_public ===
+True
+
+!!*/
