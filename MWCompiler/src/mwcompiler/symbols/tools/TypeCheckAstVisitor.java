@@ -103,9 +103,10 @@ public class TypeCheckAstVisitor implements AstVisitor {
                 if (declType != rhsType.typeSymbol) {
                     throwTypeMismatchErr(node.getTypeSymbol(), returnType.typeSymbol, node.getInitPos());
                 }
-                if (!declType.isPrimitiveType() && rhsType.lvalOrRval == RVAL) {
-                    throw new RuntimeException("ERROR: (Type Checking) Can not assign a lvalue to <" + declType.getName() + "> type variable" + node.getStartLocation().getLocation());
-                }
+//                if (!declType.isPrimitiveType() && rhsType.lvalOrRval == RVAL) {
+//                    throw new RuntimeException("ERROR: (Type Checking) Can not assign a lvalue to <" + declType.getName()
+//                            + "> type variable" + node.getStartLocation().getLocation());
+//                }
             } else {
                 if (declType.isPrimitiveType()) {
                     throw new RuntimeException("ERROR: (Type Checking) Assigning null to primitive type is not allowed " + node.getStartLocation().getLocation());
@@ -141,10 +142,10 @@ public class TypeCheckAstVisitor implements AstVisitor {
             }
         } else {
             if (node.getInstanceSymbol() == InstanceSymbol.constructorSymbol) {
-                throw new RuntimeException("ERROR: (Type Checking) Constructor can not return any value "
-                        + node.getStartLocation().getLocation());
-            }
-            if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType())
+                if (blockReturn.typeSymbol != voidTypeSymbol)
+                    throw new RuntimeException("ERROR: (Type Checking) Constructor can not return any value "
+                            + node.getStartLocation().getLocation());
+            } else if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType())
                 throw new RuntimeException("ERROR: (Type Checking) Function does not return a value as declared "
                         + node.getStartLocation().getLocation());
         }
@@ -245,7 +246,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
                 if (returnType.typeSymbol != boolTypeSymbol) {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
-            
+
                 returnType = new ReturnType(boolTypeSymbol, RVAL);
                 break;
         }
