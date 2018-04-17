@@ -60,20 +60,17 @@ public class TypeCheckAstVisitor implements AstVisitor {
             if (statement instanceof ReturnNode) {
                 currentReturn = returnType;
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <return> will never be executed"
-                            + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <return> will never be executed"+ statement.getStartLocation().getLocation());
                 }
                 break;
             } else if (statement instanceof BreakNode) {
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <break> will never be executed"
-                            + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <break> will never be executed"+ statement.getStartLocation().getLocation());
                 }
                 break;
             } else if (statement instanceof ContinueNode) {
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <continue> will never be executed"
-                            + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <continue> will never be executed"+ statement.getStartLocation().getLocation());
                 }
                 break;
             }
@@ -115,8 +112,9 @@ public class TypeCheckAstVisitor implements AstVisitor {
         node.getBody().accept(this);
         ReturnType blockReturn = returnType;
         if (blockReturn == null) {
-            if (node.getFunctionTypeSymbol().getReturnType() != voidTypeSymbol)
+            if (node.getFunctionTypeSymbol().getReturnType() != voidTypeSymbol) {
                 System.err.println("WARNING: (Type Checking) Function <"+ node.getInstanceSymbol().getName() + "> has no return statement " + node.getStartLocation().getLocation());
+            }
         } else if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType()) {
             throw new RuntimeException("ERROR: (Type Checking) Function does not return a value as declared "
                     + node.getStartLocation().getLocation());

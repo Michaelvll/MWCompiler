@@ -1,6 +1,5 @@
 package mwcompiler.ast.nodes;
 
-import com.sun.org.apache.xpath.internal.operations.Lt;
 import mwcompiler.ast.tools.Location;
 
 /**
