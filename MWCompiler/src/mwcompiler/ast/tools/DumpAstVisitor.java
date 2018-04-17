@@ -177,6 +177,20 @@ public class DumpAstVisitor implements AstVisitor{
         
     }
 
+    @Override
+    public void visit(ConstructorCallNode node) {
+        addIndent();
+        println("<ConstructorCallNode>");
+        println("type: <"+node.getClassTypeSymbol() + ", "+ node.getClassTypeSymbol().getName()+">");
+        if (!node.getArgs().isEmpty()) {
+            println("args: ");
+            for (ExprNode arg : node.getArgs()) {
+                arg.accept(this);
+            }
+        }
+        subIndent();
+    }
+
 
     @Override
     public void visit(VariableDeclNode node) {

@@ -1,11 +1,12 @@
 package mwcompiler.symbols;
 
+import mwcompiler.ast.nodes.TypeNode;
+
 public class NonArrayTypeSymbol extends TypeSymbol {
     public final static NonArrayTypeSymbol intTypeSymbol = new NonArrayTypeSymbol("int");
     public final static NonArrayTypeSymbol stringTypeSymbol = new NonArrayTypeSymbol("string");
     public final static NonArrayTypeSymbol boolTypeSymbol = new NonArrayTypeSymbol("bool");
     public final static NonArrayTypeSymbol voidTypeSymbol = new NonArrayTypeSymbol("void");
-    public final static NonArrayTypeSymbol constructorTypeSymbol = new NonArrayTypeSymbol("");
     public final static NonArrayTypeSymbol nullTypeSymbol = new NonArrayTypeSymbol("null");
 
     static {
@@ -13,7 +14,6 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         symbolMap.put("string", stringTypeSymbol);
         symbolMap.put("bool", boolTypeSymbol);
         symbolMap.put("void", voidTypeSymbol);
-        symbolMap.put("*Constructor", constructorTypeSymbol);
         symbolMap.put("null", nullTypeSymbol);
     }
 
@@ -38,6 +38,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
             search = new NonArrayTypeSymbol(typename);
             symbolMap.put(typename.intern(), search);
         }
+
         return (NonArrayTypeSymbol) search;
     }
 

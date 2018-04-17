@@ -38,18 +38,37 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
     }
 
+    private void checkMain(){
+        FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable.findIn(InstanceSymbol.builder("main"));
+        if (mainTypeSymbol == null) {
+            throw new RuntimeException("ERROR: (Type Checking) Main function is needed.");
+        }else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol || mainTypeSymbol.getParams().size()!=0){
+            throw new RuntimeException("ERROR: (Type Checking) Main function must return int and have no parameters.");
+        }
+    }
+
     @Override
     public void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
         initInnerFunction();
         node.getBlock().accept(this);
+        currentSymbolTable = node.getBlock().getCurrentSymbolTable();
+        checkMain();
     }
 
     @Override
     public void visit(ClassDeclNode node) {
         staticClassSymbolTable = new SymbolTable(null);
+        if (SymbolTable.getNamedSymbolTable(node.getClassSymbol())!= null ){
+            throw new RuntimeException("ERROR: (Type Checking) Redeclare class <"+ node.getClassSymbol().getName()+"> "
+                    +node.getStartLocation().getLocation());
+        }
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), staticClassSymbolTable);
+        node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
+        currentSymbolTable = node.getBody().getCurrentSymbolTable();
+
+//        currentSymbolTable.put()//TODO solve the constructor
         node.getBody().accept(this);
         staticClassSymbolTable = null;
     }
@@ -84,6 +103,11 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     }
 
     // Unused
+    @Override
+    public void visit(ConstructorCallNode node) {
+
+    }
+
     @Override
     public void visit(BinaryExprNode node) {
 
@@ -168,6 +192,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     public void visit(ContinueNode node) {
 
     }
+
+
 
     // Unused
 }
