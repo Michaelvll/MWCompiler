@@ -38,11 +38,11 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
     }
 
-    private void checkMain(){
+    private void checkMain() {
         FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable.findIn(InstanceSymbol.builder("main"));
         if (mainTypeSymbol == null) {
             throw new RuntimeException("ERROR: (Type Checking) Main function is needed.");
-        }else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol || mainTypeSymbol.getParams().size()!=0){
+        } else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol || mainTypeSymbol.getParams().size() != 0) {
             throw new RuntimeException("ERROR: (Type Checking) Main function must return int and have no parameters.");
         }
     }
@@ -61,9 +61,9 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     public void visit(ClassDeclNode node) {
         inClass = true;
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
-        if (SymbolTable.getNamedSymbolTable(node.getClassSymbol())!= null ){
-            throw new RuntimeException("ERROR: (Type Checking) Redeclare class <"+ node.getClassSymbol().getName()+"> "
-                    +node.getStartLocation().getLocation());
+        if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
+            throw new RuntimeException("ERROR: (Type Checking) Redeclare class <" + node.getClassSymbol().getName() + "> "
+                    + node.getStartLocation().getLocation());
         }
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
@@ -86,15 +86,21 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
 
     @Override
     public void visit(VariableDeclNode node) {
-        if (inClass)
+        if (inClass) {
+            TypeSymbol search = currentSymbolTable.findIn(node.getVarSymbol());
+            if (search != null) {
+                throw new RuntimeException("ERROR: (Type Checking) Redeclare a variable <"
+                        + node.getVarSymbol().getName() + "> in the same scope" + node.getStartLocation().getLocation());
+            }
             currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
+        }
     }
 
     @Override
     public void visit(FunctionDeclNode node) {
         if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
-            throw new RuntimeException("ERROR: (Type Checking) Redeclare function <"+ node.getInstanceSymbol().getName()
-                    +"> in the same scope "+node.getStartLocation().getLocation());
+            throw new RuntimeException("ERROR: (Type Checking) Redeclare function <" + node.getInstanceSymbol().getName()
+                    + "> in the same scope " + node.getStartLocation().getLocation());
         }
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
         if (inClass)
@@ -191,7 +197,6 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     public void visit(ContinueNode node) {
 
     }
-
 
 
     // Unused
