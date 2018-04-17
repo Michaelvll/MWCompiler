@@ -20,6 +20,10 @@ public class IdentifierExprNode extends ExprNode {
         super(pos);
         this.instanceSymbol = InstanceSymbol.builder(name);
     }
+    public IdentifierExprNode(InstanceSymbol instanceSymbol, Location pos) {
+        super(pos);
+        this.instanceSymbol = instanceSymbol;
+    }
 
 
     @Override

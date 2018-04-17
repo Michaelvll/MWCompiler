@@ -17,7 +17,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         symbolMap.put("null", nullTypeSymbol);
     }
 
-    protected String typename;
+    private String typename;
 
     private NonArrayTypeSymbol(String typename) {
         this.typename = typename;

@@ -4,7 +4,7 @@ import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
 public class LoopNode extends Node {
-    private ExprNode varDecl;
+    private Node varDecl;
     private ExprNode condition;
     private ExprNode step;
     private BlockNode body;
@@ -12,7 +12,7 @@ public class LoopNode extends Node {
     private Location conditionPos;
     private Location stepPos;
 
-    public LoopNode(ExprNode varDecl, ExprNode condition, ExprNode step, BlockNode body,
+    public LoopNode(Node varDecl, ExprNode condition, ExprNode step, BlockNode body,
                     Location varDeclPos, Location conditionPos, Location stepPos) {
         this.varDecl = varDecl;
         this.condition = condition;
@@ -30,7 +30,7 @@ public class LoopNode extends Node {
         visitor.visit(this);
     }
 
-    public ExprNode getVarDecl() {
+    public Node getVarDecl() {
         return varDecl;
     }
 

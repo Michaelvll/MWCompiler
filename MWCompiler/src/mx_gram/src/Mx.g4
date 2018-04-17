@@ -78,7 +78,7 @@ jump:
 	| CONTINUE		# ContinueJump_
 	;
 forField:
-	FOR LPAREN vardecl = expr? SEMI cond = expr? SEMI step = expr? RPAREN body
+	FOR LPAREN type? variableField? SEMI  cond = expr? SEMI step = expr? RPAREN body
 	;
 whileField : WHILE LPAREN cond = expr RPAREN body;
 
