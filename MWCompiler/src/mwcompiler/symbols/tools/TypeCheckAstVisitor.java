@@ -181,7 +181,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
 
         switch (node.getOp()) {
             case ASSIGN:
-                if (lhsType.lvalOrRval == RVAL) {
+                if (lhsType.lvalOrRval == RVAL || node.getLeft() instanceof FunctionCallNode) {
                     throw new RuntimeException("ERROR: (Type Checking) Can not assign to a Rvalue "
                             + node.getStartLocation().getLocation());
                 }
