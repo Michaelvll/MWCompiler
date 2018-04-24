@@ -6,7 +6,6 @@ public class CompileError extends RuntimeException {
     private String message;
 
     public CompileError(String stage, String msg, Location location, String expr) {
-        if (expr == null) throw new RuntimeException(msg + " no expr");
         this.message = Colors.RED + "ERROR: " + Colors.BLACK + "(" + Colors.GREEN + stage + Colors.BLACK + ") " + msg
                 + " " + Colors.BLUE + (location != null ? location.getLocation() : "") + "\n\t"
                 + Colors.BLACK + expr;
