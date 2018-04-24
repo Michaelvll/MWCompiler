@@ -31,7 +31,7 @@ public class SymbolTable {
         TypeSymbol search = currentMap.get(instanceSymbol);
         if (search != null) {
             if (!search.getClass().equals(typeSymbol.getClass())) {
-                throw new RuntimeException("ERROR: (Type Checking) Variable and function can not use the same name ");
+                throw new RuntimeException("(Type Checking) Variable and function can not use the same name ");
             }
         }
         currentMap.put(instanceSymbol, typeSymbol);

@@ -4,6 +4,7 @@ import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 import mwcompiler.symbols.*;
+import mwcompiler.utility.CompileError;
 
 import java.util.List;
 
@@ -15,30 +16,31 @@ import static mwcompiler.symbols.tools.ReturnType.LvalOrRval.RVAL;
 /**
  * @author Michael Wu
  * @since 2018-04-16
- * */
+ */
 public class TypeCheckAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable = null;
     private ReturnType returnType;
     private Integer inLoop = 0;
     private Boolean inClass = false;
+    private String stage = "Type Checking";
 
     // For Error produce
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
-        throw new RuntimeException("ERROR: (Type Checking) Type Mismatch. In binary expression,  <"
-                + lhsType.getName() + "> mismatches <" + rhsType.getName() + ">" + location.getLocation());
+        throw new CompileError(stage, "Type Mismatch. In binary expression,  <"
+                + lhsType.getName() + "> mismatches <" + rhsType.getName() + ">", location, null);
     }
 
     private void throwNoSuchType(String typename, Location location) {
-        throw new RuntimeException("ERROR: (Type Checking) Get an unknown type <" + typename + ">" + location.getLocation());
+        throw new CompileError(stage, "Get an unknown type <" + typename + ">", location, null);
     }
 
     private void throwNotSupport(ExprNode.OPs op, TypeSymbol typename, Location location) {
-        throw new RuntimeException("ERROR: (Type Checking) Operator <" + op.toString()
-                + "> not support for the type <" + typename.getName() + ">" + location.getLocation());
+        throw new CompileError(stage, "Operator <" + op.toString()
+                + "> not support for the type <" + typename.getName() + ">", location, null);
     }
 
     private void throwUndefined(String name, Location location) {
-        throw new RuntimeException("ERROR: (Type Checking) Can not resolve name <" + name + ">" + location.getLocation());
+        throw new CompileError(stage, "Can not resolve name <" + name + ">", location, null);
     }
 
     // For Symbol Table
@@ -70,17 +72,17 @@ public class TypeCheckAstVisitor implements AstVisitor {
             if (statement instanceof ReturnNode) {
                 currentReturn = returnType;
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <return> will never be executed" + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <return> will never be executed" + statement.getStartLocation());
                 }
                 break;
             } else if (statement instanceof BreakNode) {
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <break> will never be executed" + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <break> will never be executed" + statement.getStartLocation());
                 }
                 break;
             } else if (statement instanceof ContinueNode) {
                 if (index < statementNum - 1) {
-                    System.err.println("WARNING: (Type Checking) statements after <continue> will never be executed" + statement.getStartLocation().getLocation());
+                    System.err.println("WARNING: (Type Checking) statements after <continue> will never be executed" + statement.getStartLocation());
                 }
                 break;
             }
@@ -100,7 +102,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         }
         TypeSymbol declType = node.getTypeSymbol();
         if (declType == voidTypeSymbol || declType == nullTypeSymbol) {
-            throw new RuntimeException("ERROR: (Type Checking) Can not declare a variable as type " + declType.getName());
+            throw new CompileError(stage, "Can not declare a variable as type <" + declType.getName()+">", node.getTypePos(), null);
         }
         if (node.getInit() != null) {
             node.getInit().accept(this);
@@ -112,13 +114,13 @@ public class TypeCheckAstVisitor implements AstVisitor {
 
             } else {
                 if (declType.isPrimitiveType()) {
-                    throw new RuntimeException("ERROR: (Type Checking) Assigning null to primitive type is not allowed " + node.getStartLocation().getLocation());
+                    throw new CompileError(stage, "Assigning null to primitive type is not allowed ", node.getStartLocation(), null);
                 }
             }
 
         }
         if (currentSymbolTable.findIn(node.getVarSymbol()) != null && !inClass) {
-            throw new RuntimeException("ERROR: (Type Checking) Redeclare a variable <" + node.getVarSymbol().getName() + "> in the same scope" + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Redeclare a variable <" + node.getVarSymbol().getName() + "> in the same scope", node.getStartLocation(), null);
         }
         currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
 
@@ -146,11 +148,11 @@ public class TypeCheckAstVisitor implements AstVisitor {
         } else {
             if (node.getInstanceSymbol() == InstanceSymbol.constructorSymbol) {
                 if (blockReturn.typeSymbol != voidTypeSymbol)
-                    throw new RuntimeException("ERROR: (Type Checking) Constructor can not return any value "
-                            + node.getStartLocation().getLocation());
+                    throw new CompileError(stage, "Constructor can not return any value "
+                            , node.getStartLocation(), null);
             } else if (blockReturn.typeSymbol != node.getFunctionTypeSymbol().getReturnType())
-                throw new RuntimeException("ERROR: (Type Checking) Function does not return a value as declared "
-                        + node.getStartLocation().getLocation());
+                throw new CompileError(stage, "Function does not return a value as declared "
+                        , node.getStartLocation(), null);
         }
 
         returnType = null;
@@ -187,8 +189,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
         switch (node.getOp()) {
             case ASSIGN:
                 if (lhsType.lvalOrRval == RVAL || node.getLeft() instanceof FunctionCallNode) {
-                    throw new RuntimeException("ERROR: (Type Checking) Can not assign to a Rvalue "
-                            + node.getStartLocation().getLocation());
+                    throw new CompileError(stage, "Can not assign to a Rvalue "
+                            , node.getStartLocation(), null);
                 }
                 if (((lhsType.typeSymbol instanceof ArrayTypeSymbol || !lhsType.typeSymbol.isPrimitiveType()) && rhsType.typeSymbol == nullTypeSymbol)
                         || lhsType.typeSymbol == rhsType.typeSymbol) {
@@ -241,8 +243,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
                 if (returnType.lvalOrRval != LVAL) {
-                    throw new RuntimeException("ERROR (Type Checking) Operator <" + node.getOp()
-                            + "> not support for rvalue" + node.getStartLocation().getLocation());
+                    throw new CompileError(stage, "ERROR (Type Checking) Operator <" + node.getOp()
+                            + "> not support for rvalue", node.getStartLocation(), null);
                 }
                 returnType = new ReturnType(intTypeSymbol, RVAL);
                 break;
@@ -302,17 +304,17 @@ public class TypeCheckAstVisitor implements AstVisitor {
     // For arguments type checking
     private void checkArgs(List<ExprNode> args, List<TypeSymbol> params, Location location) {
         if (args.size() != params.size()) {
-            throw new RuntimeException("ERROR: (Type Checking) Number of arguments in function caller " +
-                    "does not match the declaration. " + location.getLocation());
+            throw new CompileError(stage, "Number of arguments in function caller " +
+                    "does not match the declaration. ", location, null);
         }
         for (Integer index = 0; index < args.size(); ++index) {
             args.get(index).accept(this);
             ReturnType argType = returnType;
             TypeSymbol paramType = params.get(index);
             if (argType.typeSymbol != paramType && argType.typeSymbol != nullTypeSymbol) {
-                throw new RuntimeException("ERROR: (Type Checking) Type Mismatch. Argument (" + String.valueOf(index + 1)
+                throw new CompileError(stage, "Type Mismatch. Argument (" + String.valueOf(index + 1)
                         + "), type <" + argType.typeSymbol.getName() + "> mismatches <" + paramType.getName() + "> "
-                        + location.getLocation());
+                        , location, null);
             }
         }
     }
@@ -322,9 +324,9 @@ public class TypeCheckAstVisitor implements AstVisitor {
     public void visit(FunctionCallNode node) {
         node.getCaller().accept(this);
         if (!(returnType.typeSymbol instanceof FunctionTypeSymbol)) {
-            throw new RuntimeException("ERROR: (Type Checking) A non function name <"
-                    + returnType.typeSymbol.getName() + "> is not callable " +
-                    node.getStartLocation().getLocation());
+            throw new CompileError(stage, "A non function name <"
+                    + returnType.typeSymbol.getName() + "> is not callable ",
+                    node.getStartLocation(), null);
         }
         FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) returnType.typeSymbol;
         List<ExprNode> args = node.getArgs();
@@ -356,7 +358,7 @@ public class TypeCheckAstVisitor implements AstVisitor {
         try {
             memberType = container.typeSymbol.findIn(node.getMember().getInstanceSymbol());
         } catch (RuntimeException e) {
-            throw new RuntimeException("ERROR: (Type Checking) " + e.getMessage() + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "" + e.getMessage(), node.getStartLocation(), null);
         }
         returnType = new ReturnType(memberType, LVAL);
 
@@ -369,12 +371,12 @@ public class TypeCheckAstVisitor implements AstVisitor {
         node.getSubscript().accept(this);
         ReturnType subscript = returnType;
         if (!(container.typeSymbol instanceof ArrayTypeSymbol)) {
-            throw new RuntimeException("ERROR: (Type Checking) Non array type can not get member using subscript, <"
-                    + container.typeSymbol.getName() + "> " + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Non array type can not get member using subscript, <"
+                    + container.typeSymbol.getName() + "> ", node.getStartLocation(), null);
         }
         if (subscript.typeSymbol != intTypeSymbol) {
-            throw new RuntimeException("ERROR: (Type Checking) The subscript must have int type "
-                    + node.getSubscript().getStartLocation().getLocation());
+            throw new CompileError(stage, "The subscript must have int type "
+                    , node.getSubscript().getStartLocation(), null);
         }
         ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) container.typeSymbol;
         if (arrayTypeSymbol.getDim() - 1 == 0) {
@@ -390,8 +392,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
         node.getCondition().accept(this);
         ReturnType cond = returnType;
         if (cond.typeSymbol != boolTypeSymbol) {
-            throw new RuntimeException("ERROR: (Type Checking) If condition must be a bool type, not "
-                    + cond.typeSymbol.getName() + node.getLocation().getLocation());
+            throw new CompileError(stage, "If condition must be a bool type, not "
+                    + cond.typeSymbol.getName(), node.getStartLocation(), null);
         }
         node.getBody().accept(this);
         returnType = null;
@@ -407,8 +409,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
         if (node.getCondition() != null) {
             node.getCondition().accept(this);
             if (returnType.typeSymbol != boolTypeSymbol) {
-                throw new RuntimeException("ERROR: (Type Checking) Condition statement in for loop should be bool type "
-                        + node.getConditionPos().getLocation());
+                throw new CompileError(stage, "Condition statement in for loop should be bool type "
+                        , node.getConditionPos(), null);
             }
         }
         if (node.getStep() != null) {
@@ -423,8 +425,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
     @Override
     public void visit(BreakNode node) {
         if (inLoop == 0) {
-            throw new RuntimeException("ERROR: (Type Checking) Break statement should not appear out of loop scope "
-                    + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Break statement should not appear out of loop scope "
+                    , node.getStartLocation(), null);
         }
         returnType = null;
     }
@@ -442,8 +444,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
     @Override
     public void visit(ContinueNode node) {
         if (inLoop == 0) {
-            throw new RuntimeException("ERROR: (Type Checking) Continue statement should not appear out of loop scope "
-                    + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Continue statement should not appear out of loop scope "
+                    , node.getStartLocation(), null);
         }
         returnType = null;
     }

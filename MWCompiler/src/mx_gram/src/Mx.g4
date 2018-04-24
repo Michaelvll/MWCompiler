@@ -10,9 +10,6 @@
 grammar Mx;
 
 import CommonMxLexer;
-// options {
-// 	tokenVocab = CommonMxLexer;
-// }
 
 program : declarator* EOF;
 

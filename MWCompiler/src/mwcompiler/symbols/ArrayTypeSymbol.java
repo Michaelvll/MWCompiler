@@ -42,7 +42,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
             List<TypeSymbol> params = new ArrayList<>();
             return FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params);
         }
-        throw new RuntimeException("ERROR: (Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
+        throw new RuntimeException("(Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
     }
 
 

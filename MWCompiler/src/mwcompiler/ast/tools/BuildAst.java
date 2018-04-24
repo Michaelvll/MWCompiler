@@ -2,6 +2,7 @@ package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.*;
+import mwcompiler.utility.CompileError;
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.tree.*;
@@ -19,6 +20,7 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
  * @since 2018-04-06
  */
 public class BuildAst extends MxBaseVisitor<Node> {
+    private String stage = "Building Ast";
 
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
         for (ParseTree child : ctx.declarator()) {
@@ -42,15 +44,14 @@ public class BuildAst extends MxBaseVisitor<Node> {
                     VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;
                     TypeSymbol search = TypeSymbol.searchSymbol(variableDeclNode.getVarSymbol().getName());
                     if (search != null) {
-                        throw new RuntimeException("ERROR: (Building AST) Can not use the same name <"
+                        throw new CompileError(stage, "Can not use the same name <"
                                 + variableDeclNode.getVarSymbol().getName() + "> for class and " +
-                                "variable in same scope" + variableDeclNode.getStartLocation().getLocation());
+                                "variable in same scope", variableDeclNode.getStartLocation(), ctx.getText());
                     }
                 }
             } else
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected statement when visiting the global scope "
-                                + programPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected statement when visiting the global scope", programPos, null);
         }
         BlockNode block = new BlockNode(declarators, programPos);
         return new ProgramNode(block, new Location(ctx));
@@ -106,8 +107,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
         try {
             instanceSymbol = InstanceSymbol.builder(name);
         } catch (RuntimeException e) {
-            throw new RuntimeException(
-                    "ERROR: (Building AST)" + e.getMessage() + new Location(identifier).getLocation());
+            throw new CompileError(
+                    stage, e.getMessage(), new Location(identifier), null);
         }
 
         return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
@@ -176,12 +177,12 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 body.add(visit(declarator));
                 if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.constructorSymbol
                         && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
-                    throw new RuntimeException("ERROR: (Building AST) Creator function must have the same name as the class"
-                            + new Location(declarator).getLocation());
+                    throw new CompileError(stage, "Creator function must have the same name as the class"
+                            , new Location(declarator), null);
                 }
             } else {
-                throw new RuntimeException("ERROR: (Building AST) Unexpected statement found in Class declaration "
-                        + declClassPos.getLocation());
+                throw new CompileError(stage, "Unexpected statement found in Class declaration"
+                        , declClassPos, null);
             }
         }
         BlockNode block = new BlockNode(body, bodyPos);
@@ -189,7 +190,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
         try {
             classDeclNode = new ClassDeclNode(declClass, block, declClassPos);
         } catch (RuntimeException e) {
-            throw new RuntimeException("ERROR: (Building AST) " + e.getMessage() + declClassPos.getLocation());
+            throw new CompileError(stage, e.getMessage(), declClassPos, null);
         }
         return classDeclNode;
     }
@@ -241,8 +242,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 node = new NullLiteralNode(literalPos);
                 break;
             default:
-                throw new RuntimeException("ERROR: (Building AST) Get unexpected literal typename when visiting literal "
-                        + literalPos.getLocation());
+                throw new CompileError(stage, "Get unexpected literal typename when visiting literal"
+                        , literalPos, null);
         }
         return node;
     }
@@ -297,8 +298,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
             case MxParser.ASSIGN: op = ExprNode.OPs.ASSIGN;
                 break;
             default:
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected operator at BinaryExpression " + opPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected operator at BinaryExpression ", opPos, null);
         }
         return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)), op, (ExprNode) this.visit(ctx.expr(1)), opPos);
     }
@@ -316,8 +317,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
             case MxParser.DEC: op = ExprNode.OPs.DEC_SUFF;
                 break;
             default:
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected op at SuffixIncDec " + opPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected op at SuffixIncDec", opPos, null);
 
         }
         return new UnaryExprNode(op, node, new Location(ctx.op));
@@ -341,8 +342,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
             case MxParser.BITNOT: op = ExprNode.OPs.BITNOT;
                 break;
             default:
-                throw new RuntimeException("ERROR: (Building AST) Get unexpected operator" + ctx.op.getText()
-                        + " in unary expression " + opPos.getLocation());
+                throw new CompileError(stage, "Get unexpected operator" + ctx.op.getText()
+                        + " in unary expression", opPos, null);
         }
         return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), opPos);
     }
@@ -365,9 +366,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 MxParser.ExprContext exprContext = creatorInnerContext.get(index).expr();
                 if (exprContext != null) {
                     if (index != dimArgs.size()) {
-                        throw new RuntimeException(
-                                "ERROR: (Building AST) Syntax ERROR: Expect a ']'," + " but a illegal expression start "
-                                        + new Location(creatorInnerContext.get(index)).getLocation());
+                        throw new CompileError(
+                                stage, "Syntax Expect a ']'," + " but a illegal expression start",
+                                new Location(creatorInnerContext.get(index)), ctx.getText());
                     }
                     dimArgs.add((ExprNode) visit(exprContext));
                 }
@@ -466,8 +467,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
         if (ctx.type() != null) {
             vardeclPos = new Location(ctx.type());
             if (ctx.variableField() == null) {
-                throw new RuntimeException("ERROR: (Building AST) Syntax Error. Condition field in for should contain "
-                        + "complete variable declaration or initialization " + new Location(ctx.type()).getLocation());
+                throw new CompileError(stage, "Syntax Error. Condition field in for should contain "
+                        + "complete variable declaration or initialization", new Location(ctx.type()), null);
             }
             VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
             TypeNode typeNode = (TypeNode) visit(ctx.type());
