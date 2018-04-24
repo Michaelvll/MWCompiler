@@ -1,20 +1,10 @@
 package mwcompiler.symbols;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionTypeSymbol extends TypeSymbol {
     private TypeSymbol returnType;
     private List<TypeSymbol> params;
-
-    private FunctionTypeSymbol(String returnType, String... params) {
-        this.returnType = NonArrayTypeSymbol.builder(returnType);
-        List<TypeSymbol> typeParams = new ArrayList<>();
-        for (String param : params) {
-            typeParams.add(NonArrayTypeSymbol.builder(param));
-        }
-        this.params = typeParams;
-    }
 
     private FunctionTypeSymbol(TypeSymbol returnType, List<TypeSymbol> params) {
         this.returnType = returnType;
@@ -57,6 +47,6 @@ public class FunctionTypeSymbol extends TypeSymbol {
 
     @Override
     public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
-        throw new RuntimeException("ERROR: (Type Checking) Function does not have a member ");
+        throw new RuntimeException("(Type Checking) Function does not have a member ");
     }
 }

@@ -10,6 +10,13 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * FunctionDeclNode.java
+ * Function declaration node extends from DeclaratorNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class FunctionDeclNode extends DeclaratorNode {
     private InstanceSymbol instanceSymbol;
     private FunctionTypeSymbol functionTypeSymbol;
@@ -47,10 +54,6 @@ public class FunctionDeclNode extends DeclaratorNode {
     @Override
     public void accept(AstVisitor visitor) {
         visitor.visit(this);
-    }
-
-    public Location getReturnTypePos() {
-        return returnTypePos;
     }
 
     public Location getNamePos() {

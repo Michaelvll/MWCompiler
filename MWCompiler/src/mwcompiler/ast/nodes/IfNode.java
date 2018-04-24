@@ -3,7 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
-
+/**
+ * IfNode.java
+ * If node extends from Node
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class IfNode extends Node {
     private ExprNode condition;
     private BlockNode body;

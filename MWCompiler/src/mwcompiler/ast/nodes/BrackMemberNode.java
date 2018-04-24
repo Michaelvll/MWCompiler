@@ -3,6 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
+/**
+ * BrackMemberNode.java
+ * Bracket member node extends from ExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class BrackMemberNode extends ExprNode {
     private ExprNode container;
     private ExprNode subscript;

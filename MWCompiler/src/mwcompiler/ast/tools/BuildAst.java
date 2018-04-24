@@ -2,6 +2,7 @@ package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.*;
+import mwcompiler.utility.CompileError;
 import mx_gram.tools.*;
 
 import org.antlr.v4.runtime.tree.*;
@@ -19,6 +20,7 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
  * @since 2018-04-06
  */
 public class BuildAst extends MxBaseVisitor<Node> {
+    private String stage = "Building Ast";
 
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
         for (ParseTree child : ctx.declarator()) {
@@ -39,17 +41,17 @@ public class BuildAst extends MxBaseVisitor<Node> {
             if (childNode instanceof DeclaratorNode) {
                 declarators.add(childNode);
                 if (childNode instanceof VariableDeclNode) {
-                    TypeSymbol search = TypeSymbol.searchSymbol(((VariableDeclNode) childNode).getVarSymbol().getName());
+                    VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;
+                    TypeSymbol search = TypeSymbol.searchSymbol(variableDeclNode.getVarSymbol().getName());
                     if (search != null) {
-                        throw new RuntimeException("ERROR: (Building AST) Can not use the same name <"
-                                + ((VariableDeclNode) childNode).getVarSymbol().getName() + "> for class and " +
-                                "variable in same scope" + childNode.getStartLocation().getLocation());
+                        throw new CompileError(stage, "Can not use the same name <"
+                                + variableDeclNode.getVarSymbol().getName() + "> for class and " +
+                                "variable in same scope", variableDeclNode.getStartLocation(), ctx.getText());
                     }
                 }
             } else
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected statement when visiting the global scope "
-                                + programPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected statement when visiting the global scope", programPos, null);
         }
         BlockNode block = new BlockNode(declarators, programPos);
         return new ProgramNode(block, new Location(ctx));
@@ -105,8 +107,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
         try {
             instanceSymbol = InstanceSymbol.builder(name);
         } catch (RuntimeException e) {
-            throw new RuntimeException(
-                    "ERROR: (Building AST)" + e.getMessage() + new Location(identifier).getLocation());
+            throw new CompileError(
+                    stage, e.getMessage(), new Location(identifier), null);
         }
 
         return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
@@ -171,15 +173,16 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 body.add(visit(declarator));
 
             } else if (statement instanceof FunctionDeclNode) {
+                FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (((FunctionDeclNode) statement).getInstanceSymbol() == InstanceSymbol.constructorSymbol
-                        && !((FunctionDeclNode) statement).getFunctionTypeSymbol().getReturnType().getName().equals(declClass)) {
-                    throw new RuntimeException("ERROR: (Building AST) Creator function must have the same name as the class"
-                            + new Location(declarator).getLocation());
+                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.constructorSymbol
+                        && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
+                    throw new CompileError(stage, "Creator function must have the same name as the class"
+                            , new Location(declarator), null);
                 }
             } else {
-                throw new RuntimeException("ERROR: (Building AST) Unexpected statement found in Class declaration "
-                        + declClassPos.getLocation());
+                throw new CompileError(stage, "Unexpected statement found in Class declaration"
+                        , declClassPos, null);
             }
         }
         BlockNode block = new BlockNode(body, bodyPos);
@@ -187,7 +190,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
         try {
             classDeclNode = new ClassDeclNode(declClass, block, declClassPos);
         } catch (RuntimeException e) {
-            throw new RuntimeException("ERROR: (Building AST) " + e.getMessage() + declClassPos.getLocation());
+            throw new CompileError(stage, e.getMessage(), declClassPos, null);
         }
         return classDeclNode;
     }
@@ -210,8 +213,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
         return new TypeNode(type, ctx.LBRACK().size(), new Location(ctx));
     }
 
-    // Expression
-
+    // Expressions
     @Override
     public Node visitExprField(MxParser.ExprFieldContext ctx) {
         if (ctx.expr() != null) {
@@ -240,8 +242,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 node = new NullLiteralNode(literalPos);
                 break;
             default:
-                throw new RuntimeException("ERROR: (Building AST) Get unexpected literal typename when visiting literal "
-                        + literalPos.getLocation());
+                throw new CompileError(stage, "Get unexpected literal typename when visiting literal"
+                        , literalPos, null);
         }
         return node;
     }
@@ -257,66 +259,47 @@ public class BuildAst extends MxBaseVisitor<Node> {
         ExprNode.OPs op;
         Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
-            case MxParser.MUL:
-                op = ExprNode.OPs.MUL;
+            case MxParser.MUL: op = ExprNode.OPs.MUL;
                 break;
-            case MxParser.DIV:
-                op = ExprNode.OPs.DIV;
+            case MxParser.DIV: op = ExprNode.OPs.DIV;
                 break;
-            case MxParser.MOD:
-                op = ExprNode.OPs.MOD;
+            case MxParser.MOD: op = ExprNode.OPs.MOD;
                 break;
-            case MxParser.ADD:
-                op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprNode.OPs.ADD;
                 break;
-            case MxParser.SUB:
-                op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprNode.OPs.SUB;
                 break;
-            case MxParser.LSFT:
-                op = ExprNode.OPs.LSFT;
+            case MxParser.LSFT: op = ExprNode.OPs.LSFT;
                 break;
-            case MxParser.RSFT:
-                op = ExprNode.OPs.RSFT;
+            case MxParser.RSFT: op = ExprNode.OPs.RSFT;
                 break;
-            case MxParser.LT:
-                op = ExprNode.OPs.LT;
+            case MxParser.LT: op = ExprNode.OPs.LT;
                 break;
-            case MxParser.GT:
-                op = ExprNode.OPs.GT;
+            case MxParser.GT: op = ExprNode.OPs.GT;
                 break;
-            case MxParser.LTE:
-                op = ExprNode.OPs.LTE;
+            case MxParser.LTE: op = ExprNode.OPs.LTE;
                 break;
-            case MxParser.GTE:
-                op = ExprNode.OPs.GTE;
+            case MxParser.GTE: op = ExprNode.OPs.GTE;
                 break;
-            case MxParser.EQ:
-                op = ExprNode.OPs.EQ;
+            case MxParser.EQ: op = ExprNode.OPs.EQ;
                 break;
-            case MxParser.NEQ:
-                op = ExprNode.OPs.NEQ;
+            case MxParser.NEQ: op = ExprNode.OPs.NEQ;
                 break;
-            case MxParser.BITAND:
-                op = ExprNode.OPs.BITAND;
+            case MxParser.BITAND: op = ExprNode.OPs.BITAND;
                 break;
-            case MxParser.BITXOR:
-                op = ExprNode.OPs.BITXOR;
+            case MxParser.BITXOR: op = ExprNode.OPs.BITXOR;
                 break;
-            case MxParser.BITOR:
-                op = ExprNode.OPs.BITOR;
+            case MxParser.BITOR: op = ExprNode.OPs.BITOR;
                 break;
-            case MxParser.AND:
-                op = ExprNode.OPs.AND;
+            case MxParser.AND: op = ExprNode.OPs.AND;
                 break;
-            case MxParser.OR:
-                op = ExprNode.OPs.OR;
+            case MxParser.OR: op = ExprNode.OPs.OR;
                 break;
-            case MxParser.ASSIGN:
-                op = ExprNode.OPs.ASSIGN;
+            case MxParser.ASSIGN: op = ExprNode.OPs.ASSIGN;
                 break;
             default:
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected operator at BinaryExpression " + opPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected operator at BinaryExpression ", opPos, null);
         }
         return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)), op, (ExprNode) this.visit(ctx.expr(1)), opPos);
     }
@@ -329,15 +312,13 @@ public class BuildAst extends MxBaseVisitor<Node> {
         Location opPos = new Location(ctx.op);
 
         switch (ctx.op.getType()) {
-            case MxParser.INC:
-                op = ExprNode.OPs.INC_SUFF;
+            case MxParser.INC: op = ExprNode.OPs.INC_SUFF;
                 break;
-            case MxParser.DEC:
-                op = ExprNode.OPs.DEC_SUFF;
+            case MxParser.DEC: op = ExprNode.OPs.DEC_SUFF;
                 break;
             default:
-                throw new RuntimeException(
-                        "ERROR: (Building AST) Get unexpected op at SuffixIncDec " + opPos.getLocation());
+                throw new CompileError(
+                        stage, "Get unexpected op at SuffixIncDec", opPos, null);
 
         }
         return new UnaryExprNode(op, node, new Location(ctx.op));
@@ -348,27 +329,21 @@ public class BuildAst extends MxBaseVisitor<Node> {
         ExprNode.OPs op;
         Location opPos = new Location(ctx.op);
         switch (ctx.op.getType()) {
-            case MxParser.INC:
-                op = ExprNode.OPs.INC;
+            case MxParser.INC: op = ExprNode.OPs.INC;
                 break;
-            case MxParser.DEC:
-                op = ExprNode.OPs.DEC;
+            case MxParser.DEC: op = ExprNode.OPs.DEC;
                 break;
-            case MxParser.ADD:
-                op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprNode.OPs.ADD;
                 break;
-            case MxParser.SUB:
-                op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprNode.OPs.SUB;
                 break;
-            case MxParser.NOT:
-                op = ExprNode.OPs.NOT;
+            case MxParser.NOT: op = ExprNode.OPs.NOT;
                 break;
-            case MxParser.BITNOT:
-                op = ExprNode.OPs.BITNOT;
+            case MxParser.BITNOT: op = ExprNode.OPs.BITNOT;
                 break;
             default:
-                throw new RuntimeException("ERROR: (Building AST) Get unexpected operator" + ctx.op.getText()
-                        + " in unary expression " + opPos.getLocation());
+                throw new CompileError(stage, "Get unexpected operator" + ctx.op.getText()
+                        + " in unary expression", opPos, null);
         }
         return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), opPos);
     }
@@ -391,9 +366,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 MxParser.ExprContext exprContext = creatorInnerContext.get(index).expr();
                 if (exprContext != null) {
                     if (index != dimArgs.size()) {
-                        throw new RuntimeException(
-                                "ERROR: (Building AST) Syntax ERROR: Expect a ']'," + " but a illegal expression start "
-                                        + new Location(creatorInnerContext.get(index)).getLocation());
+                        throw new CompileError(
+                                stage, "Syntax Expect a ']'," + " but a illegal expression start",
+                                new Location(creatorInnerContext.get(index)), ctx.getText());
                     }
                     dimArgs.add((ExprNode) visit(exprContext));
                 }
@@ -403,7 +378,6 @@ public class BuildAst extends MxBaseVisitor<Node> {
     }
 
     // Function Call
-
     @Override
     public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
         List<ExprNode> args = new ArrayList<>();
@@ -426,7 +400,6 @@ public class BuildAst extends MxBaseVisitor<Node> {
     }
 
     // Member Function call
-
     @Override
     public Node visitDotMember_(MxParser.DotMember_Context ctx) {
         ExprNode container = (ExprNode) visit(ctx.expr());
@@ -494,8 +467,8 @@ public class BuildAst extends MxBaseVisitor<Node> {
         if (ctx.type() != null) {
             vardeclPos = new Location(ctx.type());
             if (ctx.variableField() == null) {
-                throw new RuntimeException("ERROR: (Building AST) Syntax Error. Condition field in for should contain "
-                        + "complete variable declaration or initialization " + new Location(ctx.type()).getLocation());
+                throw new CompileError(stage, "Syntax Error. Condition field in for should contain "
+                        + "complete variable declaration or initialization", new Location(ctx.type()), null);
             }
             VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
             TypeNode typeNode = (TypeNode) visit(ctx.type());

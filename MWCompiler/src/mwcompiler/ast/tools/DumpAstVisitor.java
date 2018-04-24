@@ -8,7 +8,8 @@ import mwcompiler.symbols.TypeSymbol;
 import java.io.PrintStream;
 import java.util.List;
 
-public class DumpAstVisitor implements AstVisitor{
+// A tool for dumping the AST to the stdout
+public class DumpAstVisitor implements AstVisitor {
     private String indent;
     private PrintStream out;
 
@@ -59,7 +60,7 @@ public class DumpAstVisitor implements AstVisitor{
             declarator.accept(this);
         }
         subIndent();
-        
+
     }
 
 
@@ -68,7 +69,7 @@ public class DumpAstVisitor implements AstVisitor{
         addIndent();
         println("<EmptyExprNode>");
         subIndent();
-        
+
     }
 
     @Override
@@ -84,7 +85,7 @@ public class DumpAstVisitor implements AstVisitor{
             }
         }
         subIndent();
-        
+
     }
 
     @Override
@@ -95,7 +96,7 @@ public class DumpAstVisitor implements AstVisitor{
         node.getContainer().accept(this);
         println("member: <" + node.getMember().getInstanceSymbol() + ", " + node.getMember().getInstanceSymbol().getName() + ">");
         subIndent();
-        
+
     }
 
     @Override
@@ -107,7 +108,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("subscript: ");
         node.getSubscript().accept(this);
         subIndent();
-        
+
     }
 
     @Override
@@ -125,7 +126,7 @@ public class DumpAstVisitor implements AstVisitor{
             node.getElseCondition().accept(this);
         }
         subIndent();
-        
+
     }
 
     @Override
@@ -146,7 +147,7 @@ public class DumpAstVisitor implements AstVisitor{
         }
         node.getBody().accept(this);
         subIndent();
-        
+
     }
 
     @Override
@@ -154,7 +155,7 @@ public class DumpAstVisitor implements AstVisitor{
         addIndent();
         println("<BreakNode>");
         subIndent();
-        
+
     }
 
     @Override
@@ -166,7 +167,7 @@ public class DumpAstVisitor implements AstVisitor{
             node.getReturnVal().accept(this);
         }
         subIndent();
-        
+
     }
 
     @Override
@@ -174,14 +175,14 @@ public class DumpAstVisitor implements AstVisitor{
         addIndent();
         println("<ContinueNode>");
         subIndent();
-        
+
     }
 
     @Override
     public void visit(ConstructorCallNode node) {
         addIndent();
         println("<ConstructorCallNode>");
-        println("type: <"+node.getClassTypeSymbol() + ", "+ node.getClassTypeSymbol().getName()+">");
+        println("type: <" + node.getClassTypeSymbol() + ", " + node.getClassTypeSymbol().getName() + ">");
         if (!node.getArgs().isEmpty()) {
             println("args: ");
             for (ExprNode arg : node.getArgs()) {
@@ -196,14 +197,14 @@ public class DumpAstVisitor implements AstVisitor{
     public void visit(VariableDeclNode node) {
         addIndent();
         println("<VariableDeclNode>");
-        println("type: <"+node.getTypeSymbol()+", "+node.getTypeSymbol().getName()+">");
+        println("type: <" + node.getTypeSymbol() + ", " + node.getTypeSymbol().getName() + ">");
         println("var: <" + node.getVarSymbol() + ", " + node.getVarSymbol().getName() + ">");
         if (node.getInit() != null) {
             println("init:");
             node.getInit().accept(this);
         }
         subIndent();
-        
+
     }
 
     @Override
@@ -220,7 +221,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("body:");
         node.getBody().accept(this);
         subIndent();
-        
+
     }
 
 
@@ -231,7 +232,7 @@ public class DumpAstVisitor implements AstVisitor{
         InstanceSymbol instanceSymbol = node.getInstanceSymbol();
         println("val: <" + instanceSymbol + ", " + instanceSymbol.getName() + ">");
         subIndent();
-        
+
     }
 
     @Override
@@ -240,7 +241,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("<StringLiteralNode>");
         println("val: " + node.getVal());
         subIndent();
-        
+
     }
 
     @Override
@@ -249,7 +250,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("<BoolLiteralNode>");
         println("Val: " + String.valueOf(node.getVal()));
         subIndent();
-        
+
     }
 
     @Override
@@ -258,7 +259,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("<IntLiteralNode>");
         println("val: " + String.valueOf(node.getVal()));
         subIndent();
-        
+
     }
 
     @Override
@@ -269,7 +270,7 @@ public class DumpAstVisitor implements AstVisitor{
         for (Node statement : node.getStatements()) {
             statement.accept(this);
         }
-        
+
     }
 
 
@@ -284,7 +285,7 @@ public class DumpAstVisitor implements AstVisitor{
         node.getRight().accept(this);
         subIndent();
 
-        
+
     }
 
     @Override
@@ -295,7 +296,7 @@ public class DumpAstVisitor implements AstVisitor{
         println("expr: ");
         node.getExpr().accept(this);
         subIndent();
-        
+
     }
 
     @Override
@@ -303,7 +304,7 @@ public class DumpAstVisitor implements AstVisitor{
         addIndent();
         println("<NewExprNode>");
         TypeSymbol createType = node.getCreateType();
-        println("type: <" + createType+", "+ createType.getName()+">");
+        println("type: <" + createType + ", " + createType.getName() + ">");
         if (node.getDimArgs().size() != 0) {
             println("dimArgs: ");
             for (Node expr : node.getDimArgs()) {
@@ -311,7 +312,7 @@ public class DumpAstVisitor implements AstVisitor{
             }
         }
         subIndent();
-        
+
     }
 
     @Override
@@ -319,6 +320,6 @@ public class DumpAstVisitor implements AstVisitor{
         addIndent();
         println("<NullLiteralNode>");
         subIndent();
-        
+
     }
 }

@@ -17,8 +17,11 @@ import java.io.PrintStream;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.symbols.tools.ConstructSymbolTableAstVisitor;
+import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
 import mwcompiler.symbols.tools.TypeCheckAstVisitor;
+import mwcompiler.utility.CompileError;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.commons.cli.*;
 
 import mx_gram.tools.*;
@@ -122,11 +125,18 @@ public class Mwcc {
         }
     }
 
+
+
     private static void typeCheck() {
-        AstVisitor constructSymbolTableAstVisitor = new ConstructSymbolTableAstVisitor();
-        programAstRoot.accept(constructSymbolTableAstVisitor);
-        AstVisitor typeNotPresentException= new TypeCheckAstVisitor();
-        programAstRoot.accept(typeNotPresentException);
+        try {
+            AstVisitor constructSymbolTableAstVisitor = new ForwardRefPreprocessAstVisitor();
+            programAstRoot.accept(constructSymbolTableAstVisitor);
+            AstVisitor typeNotPresentException = new TypeCheckAstVisitor();
+            programAstRoot.accept(typeNotPresentException);
+        } catch (CompileError e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
 }

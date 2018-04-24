@@ -3,6 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
+/**
+ * DotMemberNode.java
+ * Dot member node extends from ExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class DotMemberNode extends ExprNode {
     private ExprNode container;
     private IdentifierExprNode member;

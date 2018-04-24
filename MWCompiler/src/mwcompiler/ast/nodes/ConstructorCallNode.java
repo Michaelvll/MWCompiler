@@ -6,6 +6,13 @@ import mwcompiler.symbols.NonArrayTypeSymbol;
 
 import java.util.List;
 
+/**
+ * ConstructorCallNode.java
+ * Constructor call node extends from ExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-17
+ */
 public class ConstructorCallNode extends ExprNode {
     private NonArrayTypeSymbol classTypeSymbol;
     private List<ExprNode> args;

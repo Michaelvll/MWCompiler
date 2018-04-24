@@ -3,6 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
+/**
+ * LoopNode.java
+ * Loop node extends Node
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class LoopNode extends Node {
     private Node varDecl;
     private ExprNode condition;
@@ -22,7 +29,6 @@ public class LoopNode extends Node {
         this.conditionPos = conditionPos;
         this.stepPos = stepPos;
     }
-
 
 
     @Override

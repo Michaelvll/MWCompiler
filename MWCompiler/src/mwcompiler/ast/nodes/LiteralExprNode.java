@@ -10,7 +10,6 @@ import mwcompiler.ast.tools.Location;
  * @since 2018-04-11
  */
 public abstract class LiteralExprNode extends ExprNode {
-
     LiteralExprNode(Location pos) {
         super(pos);
     }

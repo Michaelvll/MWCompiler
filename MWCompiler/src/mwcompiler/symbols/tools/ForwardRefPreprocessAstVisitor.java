@@ -2,14 +2,21 @@ package mwcompiler.symbols.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
 import mwcompiler.symbols.*;
+import mwcompiler.utility.CompileError;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConstructSymbolTableAstVisitor implements AstVisitor {
+/**
+ * @author Michael Wu
+ * @since 2018-04-16
+ */
+public class ForwardRefPreprocessAstVisitor implements AstVisitor {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
+    private String stage = "Symbol Table Pre-building";
 
 
     private FunctionTypeSymbol getFunctionType(String returnType, String... params) {
@@ -21,16 +28,17 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         return FunctionTypeSymbol.builder(returnTypeSymbol, paramList);
     }
 
-    private void putInner(String returnType, String name, String... params) {
+    // Put builtin functions into Symbol Table
+    private void putBuiltin(String returnType, String name, String... params) {
         currentSymbolTable.put(InstanceSymbol.builder(name), getFunctionType(returnType, params));
     }
 
-    private void initInnerFunction() {
-        putInner("void", "print", "string");
-        putInner("void", "println", "string");
-        putInner("string", "getString");
-        putInner("int", "getInt");
-        putInner("string", "toString", "int");
+    private void initBuiltinFunction() {
+        putBuiltin("void", "print", "string");
+        putBuiltin("void", "println", "string");
+        putBuiltin("string", "getString");
+        putBuiltin("int", "getInt");
+        putBuiltin("string", "toString", "int");
         SymbolTable stringSymbolTable = SymbolTable.getNamedSymbolTable(NonArrayTypeSymbol.builder("string"));
         stringSymbolTable.put(InstanceSymbol.builder("length"), getFunctionType("int"));
         stringSymbolTable.put(InstanceSymbol.builder("substring"), getFunctionType("string", "int", "int"));
@@ -41,9 +49,9 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     private void checkMain() {
         FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable.findIn(InstanceSymbol.builder("main"));
         if (mainTypeSymbol == null) {
-            throw new RuntimeException("ERROR: (Type Checking) Main function is needed.");
+            throw new CompileError(stage, "Main function is needed.", null, null);
         } else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol || mainTypeSymbol.getParams().size() != 0) {
-            throw new RuntimeException("ERROR: (Type Checking) Main function must return int and have no parameters.");
+            throw new CompileError(stage, "Main function must return int and have no parameters.", null, null);
         }
     }
 
@@ -51,7 +59,7 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     public void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
-        initInnerFunction();
+        initBuiltinFunction();
         node.getBlock().accept(this);
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();
         checkMain();
@@ -62,8 +70,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         inClass = true;
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
         if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
-            throw new RuntimeException("ERROR: (Type Checking) Redeclare class <" + node.getClassSymbol().getName() + "> "
-                    + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Redeclare class <" + node.getClassSymbol().getName() + "> "
+                    , node.getStartLocation(), null);
         }
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
@@ -89,8 +97,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
         if (inClass) {
             TypeSymbol search = currentSymbolTable.findIn(node.getVarSymbol());
             if (search != null) {
-                throw new RuntimeException("ERROR: (Type Checking) Redeclare a variable <"
-                        + node.getVarSymbol().getName() + "> in the same scope" + node.getStartLocation().getLocation());
+                throw new CompileError(stage, "Redeclare a variable <"
+                        + node.getVarSymbol().getName() + "> in the same scope", node.getStartLocation(), null);
             }
             currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
         }
@@ -99,8 +107,8 @@ public class ConstructSymbolTableAstVisitor implements AstVisitor {
     @Override
     public void visit(FunctionDeclNode node) {
         if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
-            throw new RuntimeException("ERROR: (Type Checking) Redeclare function <" + node.getInstanceSymbol().getName()
-                    + "> in the same scope " + node.getStartLocation().getLocation());
+            throw new CompileError(stage, "Redeclare function <" + node.getInstanceSymbol().getName()
+                    + "> in the same scope ", node.getStartLocation(), null);
         }
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
         if (inClass)
