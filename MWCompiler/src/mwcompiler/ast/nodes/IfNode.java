@@ -16,10 +16,11 @@ public class IfNode extends Node {
     private IfNode elseCondition;
     private Location location;
 
-    public IfNode(ExprNode condition, BlockNode body, Location pos) {
+    public IfNode(ExprNode condition, BlockNode body, Location pos, String text) {
         this.condition = condition;
         this.body = body;
         this.location = pos;
+        super.setText(text);
     }
 
 
@@ -52,4 +53,5 @@ public class IfNode extends Node {
     public void setElseCondition(IfNode elseCondition) {
         this.elseCondition = elseCondition;
     }
+
 }

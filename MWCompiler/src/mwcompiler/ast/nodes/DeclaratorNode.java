@@ -11,6 +11,5 @@ import mwcompiler.ast.tools.Location;
  */
 
 public abstract class DeclaratorNode extends Node {
-    //TODO
     public abstract Location getStartLocation();
 }

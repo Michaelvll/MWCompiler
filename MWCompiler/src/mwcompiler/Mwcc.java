@@ -1,11 +1,3 @@
-/**
- * Mwcc.java
- * The main class of mwcompiler for Mx language
- *
- * @author Michael Wu
- * @version 1.0
- * @since 2018-04-05
- */
 package mwcompiler;
 
 import java.io.FileInputStream;
@@ -17,9 +9,13 @@ import java.io.PrintStream;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.BuildAst;
+import mwcompiler.symbols.Symbol;
 import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
 import mwcompiler.symbols.tools.TypeCheckAstVisitor;
+import mwcompiler.utility.Colors;
 import mwcompiler.utility.CompileError;
+import mwcompiler.utility.CompileWarining;
+import mwcompiler.utility.ParserErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.commons.cli.*;
@@ -29,20 +25,27 @@ import mx_gram.tools.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+/**
+ * Mwcc.java
+ * The main class of mwcompiler for Mx language
+ *
+ * @author Michael Wu
+ * @version 1.0
+ * @since 2018-04-05
+ */
 public class Mwcc {
     private static InputStream in = System.in;
     private static PrintStream out = System.err;
     private static Node programAstRoot;
+    private static Integer warningLevel = 0;
 
     /**
      * @param args The entry of Mwcc
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         compilerArgSolve(args);
         buildAst();
         typeCheck();
-
-        //        System.err.println("Build No exception!");
     }
 
     private static void compilerArgSolve(String[] args) {
@@ -55,6 +58,9 @@ public class Mwcc {
                 .type(String.class).argName("Output File").build();
         options.addOption(output);
 
+        Option warning = new Option("W", "Wall", false, "Print warnings to stderr");
+        options.addOption(warning);
+
         Option help = new Option("h", "help", false, "Print help message (this message)");
         options.addOption(help);
 
@@ -65,8 +71,13 @@ public class Mwcc {
         String outputFile = null;
         String[] restArgs;
         try {
+            System.err.print(Colors.BLACK);
             cmd = parser.parse(options, args);
             restArgs = cmd.getArgs();
+            if (cmd.hasOption("h")) {
+                formatter.printHelp("MWcc [options] <File>", options);
+                System.exit(0);
+            }
             if (cmd.hasOption("i")) {
                 inputFile = cmd.getOptionValue("i");
                 if (restArgs.length > 0) {
@@ -88,6 +99,10 @@ public class Mwcc {
             } else {
                 System.err.println("No output file specified, output redirected to stderr");
             }
+            if (cmd.hasOption("Wall")) {
+                warningLevel = 1;
+            }
+
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());
             formatter.printHelp("Mwcc [Options] <File>", options);
@@ -109,22 +124,27 @@ public class Mwcc {
 
     }
 
-    private static void buildAst() throws Exception {
+    private static void buildAst() {
         BuildAst buildAst = new BuildAst();
         try {
             CharStream input = CharStreams.fromStream(in);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
-            parser.setErrorHandler(new BailErrorStrategy());
+//            parser.setErrorHandler(new BailErrorStrategy());
+            parser.removeErrorListeners();
+            parser.addErrorListener(new ParserErrorListener());
             ParseTree tree = parser.program();
+            buildAst.setToken(tokens);
             programAstRoot = buildAst.visit(tree);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
+        } catch (CompileError e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
-
 
 
     private static void typeCheck() {
@@ -136,6 +156,9 @@ public class Mwcc {
         } catch (CompileError e) {
             System.err.println(e.getMessage());
             System.exit(1);
+        }
+        if (warningLevel > 0) {
+            CompileWarining.printWarings();
         }
     }
 

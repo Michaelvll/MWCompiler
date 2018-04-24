@@ -27,7 +27,6 @@ public class FunctionDeclNode extends DeclaratorNode {
     private Location paramListPos;
     private Location bodyPos;
 
-
     public FunctionDeclNode(TypeSymbol returnTypeSymbol, InstanceSymbol instanceSymbol, List<VariableDeclNode> paramList, BlockNode body,
                             Location returnTypePos, Location namePos, Location paramListPos, Location bodyPos) {
         this.paramList = paramList;
@@ -89,4 +88,5 @@ public class FunctionDeclNode extends DeclaratorNode {
     public FunctionTypeSymbol getFunctionTypeSymbol() {
         return functionTypeSymbol;
     }
+
 }

@@ -102,4 +102,4 @@ fragment EscapeSequence		: '\\' [btnfr"'\\];
 
 LINE_COMMENT		: '//' .*? '\n' -> skip;
 MULTILINE_COMMENT	: '/*' .*? '*/' -> skip;
-WS					: [ \t\r\n]+ -> skip;
+WS					: [ \t\r\n]+ -> channel(HIDDEN);
