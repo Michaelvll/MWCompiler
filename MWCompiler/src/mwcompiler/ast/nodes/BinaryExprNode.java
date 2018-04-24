@@ -1,3 +1,8 @@
+package mwcompiler.ast.nodes;
+
+import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.Location;
+
 /**
  * BinaryExprNode.java
  * BinaryExpr extends from ExprNode
@@ -5,18 +10,14 @@
  * @author Michael Wu
  * @since 2018-04-06
  */
-package mwcompiler.ast.nodes;
-
-import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
 
 public class BinaryExprNode extends ExprNode {
-    //TODO
     private OPs op;
     private ExprNode left, right;
 
-    public BinaryExprNode(ExprNode left, OPs op, ExprNode right, Location pos) {
+    public BinaryExprNode(ExprNode left, OPs op, ExprNode right, Location pos, String text) {
         super(pos);
+        super.setText(text);
         this.op = op;
         this.left = left;
         this.right = right;

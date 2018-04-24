@@ -3,7 +3,6 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
-import java.util.List;
 /**
  * ProgramNode.java
  * The root Node of AST
@@ -12,18 +11,17 @@ import java.util.List;
  * @since 2018-04-06
  */
 
-public class ProgramNode extends  Node {
-    //TODO
-    private BlockNode declarators;
+public class ProgramNode extends Node {
+    private BlockNode block;
     Location location;
 
-    public ProgramNode(BlockNode declarators, Location pos){
-        this.declarators = declarators;
+    public ProgramNode(BlockNode block, Location pos) {
+        this.block = block;
         this.location = pos;
     }
 
-    public BlockNode getDeclarators() {
-        return declarators;
+    public BlockNode getBlock() {
+        return block;
     }
 
     @Override

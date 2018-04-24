@@ -12,13 +12,17 @@ import mwcompiler.ast.nodes.*;
 public interface AstVisitor {
     void visit(ProgramNode node);
 
-    void visit(ArrayTypeNode node);
+    // Block
+    void visit(BlockNode node);
 
-    void visit(NonArrayTypeNode node);
+    // Type and declarations
+    // There is no need to visit TypeNodes as they there will be TypeSymbols in the upper node
 
     void visit(VariableDeclNode node);
 
     void visit(FunctionDeclNode node);
+
+    void visit(ClassDeclNode node);
 
 
     // Expressions
@@ -39,14 +43,6 @@ public interface AstVisitor {
 
     void visit(IntLiteralNode node);
 
-    // Block
-    void visit(BlockNode node);
-
-    void visit(VoidTypeNode node);
-
-    void visit(ClassDeclNode node);
-
-    void visit(NullTypeNode node);
 
     void visit(EmptyExprNode node);
 
@@ -66,6 +62,6 @@ public interface AstVisitor {
 
     void visit(ContinueNode node);
 
+    void visit(ConstructorCallNode node);
 
-    //TODO
 }

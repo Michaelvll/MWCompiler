@@ -1,6 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.Location;
+
 /**
  * DeclaratorNode.java
  * Declarator extends from Node
@@ -10,6 +11,5 @@ import mwcompiler.ast.tools.Location;
  */
 
 public abstract class DeclaratorNode extends Node {
-    //TODO
     public abstract Location getStartLocation();
 }

@@ -10,9 +10,6 @@
 grammar Mx;
 
 import CommonMxLexer;
-// options {
-// 	tokenVocab = CommonMxLexer;
-// }
 
 program : declarator* EOF;
 
@@ -78,7 +75,7 @@ jump:
 	| CONTINUE		# ContinueJump_
 	;
 forField:
-	FOR LPAREN vardecl = expr? SEMI cond = expr? SEMI step = expr? RPAREN body
+	FOR LPAREN type? variableField? SEMI  cond = expr? SEMI step = expr? RPAREN body
 	;
 whileField : WHILE LPAREN cond = expr RPAREN body;
 
@@ -139,10 +136,9 @@ exprList	: expr (COMMA expr)*;
 creator		: createdName arrayCreatorRest?;
 createdName	: Identifier | primitiveType;
 arrayCreatorRest:
-	LBRACK (
-		RBRACK
-		| expr RBRACK (LBRACK expr RBRACK)* (
-			LBRACK RBRACK
-		)*
-	)
+    creatorInner+
 	;
+
+creatorInner:
+    LBRACK expr? RBRACK
+;

@@ -1,0 +1,17 @@
+
+int main() {
+    string institute = "zhiyuan";
+    for (; institute; ) {
+    }
+}
+
+/*!! metadata:
+=== comment ===
+ctrflow-5-5120309049-liaochao.mx
+=== assert ===
+failure_compile
+=== phase ===
+semantic pretest
+=== is_public ===
+True
+!!*/

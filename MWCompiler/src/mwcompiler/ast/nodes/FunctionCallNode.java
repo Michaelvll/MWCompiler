@@ -5,14 +5,22 @@ import mwcompiler.ast.tools.Location;
 
 import java.util.List;
 
+/**
+ * FunctionCallNode.java
+ * Function call node extends from ExprNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class FunctionCallNode extends ExprNode {
     private ExprNode caller;
     private List<ExprNode> args;
 
-    public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos) {
+    public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos, String text) {
         super(pos);
         this.caller = caller;
         this.args = args;
+        super.setText(text);
     }
 
     @Override

@@ -10,8 +10,6 @@ import mwcompiler.ast.tools.Location;
  * @since 2018-04-06
  */
 public abstract class ExprNode extends Node {
-    //TODO
-
     private Location location;
 
     ExprNode(Location pos) {
@@ -20,25 +18,28 @@ public abstract class ExprNode extends Node {
 
     public enum OPs {
         // Binary
-        ADD, SUB,
-        MUL, DIV, MOD,
-        LSFT, RSFT,
-        LT, GT, LTE, GTE,
-        EQ, NEQ,
-        BITAND, BITXOR, BITOR,
-        AND, OR, ASSIGN,
+        ADD, SUB,// int string
+        MUL, DIV, MOD,//int
+        LSFT, RSFT,// int
+        LT, GT, LTE, GTE,// int string
+        EQ, NEQ,// class int string bool
+        BITAND, BITXOR, BITOR, // int
+        AND, OR, // bool
+        ASSIGN, // all
         // Unary
         // ADD, SUB
-        INC_SUFF,
-        DEC_SUFF,
-        INC, DEC,
-        NOT, BITNOT,
+        INC_SUFF, DEC_SUFF, //int
+        INC, DEC, //int
+        NOT,//bool
+        BITNOT,//int
         // NEW
         NEW
     }
+
 
     @Override
     public Location getStartLocation() {
         return location;
     }
+
 }

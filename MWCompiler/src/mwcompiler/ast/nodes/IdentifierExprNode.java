@@ -12,19 +12,17 @@ import mwcompiler.symbols.InstanceSymbol;
  * @since 2018-04-06
  */
 public class IdentifierExprNode extends ExprNode {
-    //TODO
-
-    private String instanceName;
     private InstanceSymbol instanceSymbol;
 
-    public IdentifierExprNode(String name, Location pos) {
+    public IdentifierExprNode(String name, Location pos, String text) {
         super(pos);
-        this.instanceName = name;
+        this.instanceSymbol = InstanceSymbol.builder(name);
+        super.setText(text);
     }
 
-    @Override
-    public void transform2Symbol() {
-        this.instanceSymbol = InstanceSymbol.solveInstanceSymbol(this.instanceName);
+    public IdentifierExprNode(InstanceSymbol instanceSymbol, Location pos) {
+        super(pos);
+        this.instanceSymbol = instanceSymbol;
     }
 
 

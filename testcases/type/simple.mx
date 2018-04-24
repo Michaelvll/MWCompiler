@@ -1,0 +1,11 @@
+class A{
+    string hello(){
+        return "hello";
+    }
+}
+int main(){
+    A A;
+    println(A.hello());
+    
+
+}

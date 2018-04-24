@@ -3,6 +3,13 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
+/**
+ * ContinueNode.java
+ * Continue node extends from JumpNode
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class ContinueNode extends JumpNode {
 
     public ContinueNode(Location pos) {

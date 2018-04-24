@@ -7,5 +7,5 @@
 
 set -e
 cd "$(dirname "$0")"
-#cat > program.txt   # save everything in stdin to program.txt
-java -cp ./lib/*:./bin mwcompiler.Mwcc -i $1 -o $2
+cat > program.txt   # save everything in stdin to program.txt
+java -cp ./lib/*:./bin mwcompiler.Mwcc -i program.txt -o program.out

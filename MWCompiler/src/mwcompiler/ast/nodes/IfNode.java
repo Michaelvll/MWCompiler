@@ -3,17 +3,24 @@ package mwcompiler.ast.nodes;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.Location;
 
-
+/**
+ * IfNode.java
+ * If node extends from Node
+ *
+ * @author Michael Wu
+ * @since 2018-04-13
+ */
 public class IfNode extends Node {
     private ExprNode condition;
     private BlockNode body;
     private IfNode elseCondition;
     private Location location;
 
-    public IfNode(ExprNode condition, BlockNode body, Location pos) {
+    public IfNode(ExprNode condition, BlockNode body, Location pos, String text) {
         this.condition = condition;
         this.body = body;
         this.location = pos;
+        super.setText(text);
     }
 
 
@@ -46,4 +53,5 @@ public class IfNode extends Node {
     public void setElseCondition(IfNode elseCondition) {
         this.elseCondition = elseCondition;
     }
+
 }

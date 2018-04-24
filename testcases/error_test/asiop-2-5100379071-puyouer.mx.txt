@@ -1,0 +1,16 @@
+int main() {
+    int a;
+    int b;
+    a = 0 = b;
+}
+
+/*!! metadata:
+=== comment ===
+asiop-2-5100379071-puyouer.mx
+=== assert ===
+failure_compile
+=== phase ===
+semantic pretest
+=== is_public ===
+True
+!!*/
