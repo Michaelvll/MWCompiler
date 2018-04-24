@@ -401,7 +401,8 @@ public class TypeCheckAstVisitor implements AstVisitor {
                     + cond.typeSymbol.getName(), node.getStartLocation(), node.getText());
         }
         node.getBody().accept(this);
-        node.getElseCondition().accept(this);
+        if (node.getElseCondition() != null)
+            node.getElseCondition().accept(this);
         returnType = null;
     }
 

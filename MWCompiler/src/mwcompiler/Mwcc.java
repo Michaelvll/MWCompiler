@@ -125,7 +125,7 @@ public class Mwcc {
     }
 
     private static void buildAst() {
-        BuildAst buildAst = new BuildAst();
+        BuildAst buildAst;
         try {
             CharStream input = CharStreams.fromStream(in);
             MxLexer lexer = new MxLexer(input);
@@ -135,7 +135,7 @@ public class Mwcc {
             parser.removeErrorListeners();
             parser.addErrorListener(new ParserErrorListener());
             ParseTree tree = parser.program();
-            buildAst.setToken(tokens);
+            buildAst = new BuildAst(tokens);
             programAstRoot = buildAst.visit(tree);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());

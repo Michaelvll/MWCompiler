@@ -26,6 +26,10 @@ public class BuildAst extends MxBaseVisitor<Node> {
     private String stage = "Building Ast";
     private TokenStream token;
 
+    public BuildAst(TokenStream token){
+        this.token = token;
+    }
+
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
         for (ParseTree child : ctx.declarator()) {
             if (child.getChild(0) instanceof MxParser.ClassDeclFieldContext) {
