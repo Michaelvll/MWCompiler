@@ -394,11 +394,13 @@ public class TypeCheckAstVisitor implements AstVisitor {
     // Control Flow
     @Override
     public void visit(IfNode node) {
-        node.getCondition().accept(this);
-        ReturnType cond = returnType;
-        if (cond.typeSymbol != boolTypeSymbol) {
-            throw new CompileError(stage, "If condition must be a bool type, not "
-                    + cond.typeSymbol.getName(), node.getStartLocation(), node.getText());
+        if (node.getCondition() != null) {
+            node.getCondition().accept(this);
+            ReturnType cond = returnType;
+            if (cond.typeSymbol != boolTypeSymbol) {
+                throw new CompileError(stage, "If condition must be a bool type, not "
+                        + cond.typeSymbol.getName(), node.getStartLocation(), node.getText());
+            }
         }
         node.getBody().accept(this);
         if (node.getElseCondition() != null)
