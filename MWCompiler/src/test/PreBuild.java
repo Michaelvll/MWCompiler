@@ -16,7 +16,7 @@ public class PreBuild {
     public static Node program;
 
     public static void build() throws Exception {
-        CharStream input = CharStreams.fromFileName("../testcases" + astBuild[4]);
+        CharStream input = CharStreams.fromFileName("../testcases" + typeCheck[0]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MxParser parser = new MxParser(tokens);
