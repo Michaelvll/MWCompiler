@@ -10,7 +10,16 @@ import mwcompiler.ast.tools.*;
  * @since 2018-04-06
  */
 public abstract class Node {
+    private String text;
     public abstract Location getStartLocation();
     public abstract void accept(AstVisitor visitor);
+
+    public void setText(String text){
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
 }
 

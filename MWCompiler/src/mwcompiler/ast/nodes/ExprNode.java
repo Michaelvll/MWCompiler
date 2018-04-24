@@ -10,8 +10,6 @@ import mwcompiler.ast.tools.Location;
  * @since 2018-04-06
  */
 public abstract class ExprNode extends Node {
-    //TODO
-
     private Location location;
 
     ExprNode(Location pos) {
@@ -43,4 +41,5 @@ public abstract class ExprNode extends Node {
     public Location getStartLocation() {
         return location;
     }
+
 }

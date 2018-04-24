@@ -2,9 +2,12 @@ package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.*;
+import mwcompiler.utility.Colors;
 import mwcompiler.utility.CompileError;
 import mx_gram.tools.*;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.*;
 
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
  */
 public class BuildAst extends MxBaseVisitor<Node> {
     private String stage = "Building Ast";
+    private TokenStream token;
 
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
         for (ParseTree child : ctx.declarator()) {
@@ -29,6 +33,10 @@ public class BuildAst extends MxBaseVisitor<Node> {
                         ((MxParser.ClassDeclFieldContext) child.getChild(0)).classField().Identifier().getText());
             }
         }
+    }
+
+    private String getFirstLine(ParserRuleContext ctx) {
+        return token.getText(ctx).split("\r?\n")[0];
     }
 
     @Override
@@ -44,14 +52,14 @@ public class BuildAst extends MxBaseVisitor<Node> {
                     VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;
                     TypeSymbol search = TypeSymbol.searchSymbol(variableDeclNode.getVarSymbol().getName());
                     if (search != null) {
-                        throw new CompileError(stage, "Can not use the same name <"
+                        throw new CompileError(stage, "Can not use the same name <" + Colors.GREEN
                                 + variableDeclNode.getVarSymbol().getName() + "> for class and " +
-                                "variable in same scope", variableDeclNode.getStartLocation(), ctx.getText());
+                                "variable in same scope", variableDeclNode.getStartLocation(), token.getText(ctx));
                     }
                 }
             } else
                 throw new CompileError(
-                        stage, "Get unexpected statement when visiting the global scope", programPos, null);
+                        stage, "Get unexpected statement when visiting the global scope", programPos, childNode.getText());
         }
         BlockNode block = new BlockNode(declarators, programPos);
         return new ProgramNode(block, new Location(ctx));
@@ -63,6 +71,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
         VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
         TypeNode typeNode = (TypeNode) visit(ctx.type());
         node.setType(typeNode.getTypeSymbol(), new Location(ctx.type()));
+        node.setText(token.getText(ctx));
         return node;
     }
 
@@ -108,18 +117,20 @@ public class BuildAst extends MxBaseVisitor<Node> {
             instanceSymbol = InstanceSymbol.builder(name);
         } catch (RuntimeException e) {
             throw new CompileError(
-                    stage, e.getMessage(), new Location(identifier), null);
+                    stage, e.getMessage(), new Location(identifier), name);
         }
 
         return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
                 new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
 
+
     @Override
     public Node visitTypeFunction_(MxParser.TypeFunction_Context ctx) {
         TypeNode returnTypeNode = (TypeNode) visit(ctx.type());
         FunctionDeclNode node = (FunctionDeclNode) visit(ctx.functionField());
         node.setReturnType(returnTypeNode.getTypeSymbol(), new Location(ctx.type()));
+        node.setText(getFirstLine(ctx));
         return node;
     }
 
@@ -128,12 +139,15 @@ public class BuildAst extends MxBaseVisitor<Node> {
         TypeSymbol returnType = NonArrayTypeSymbol.builder("void");
         FunctionDeclNode node = (FunctionDeclNode) visit(ctx.functionField());
         node.setReturnType(returnType, new Location(ctx.VOID()));
+        node.setText(getFirstLine(ctx));
         return node;
     }
 
     @Override
     public Node visitClassConstructField(MxParser.ClassConstructFieldContext ctx) {
-        return getFunctionField(ctx.Identifier(), ctx.paramExprField(), ctx.functionBody());
+        FunctionDeclNode node = getFunctionField(ctx.Identifier(), ctx.paramExprField(), ctx.functionBody());
+        node.setText(getFirstLine(ctx));
+        return node;
     }
 
     @Override
@@ -158,7 +172,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitClassDeclField(MxParser.ClassDeclFieldContext ctx) {
-        return visit(ctx.classField());
+        ClassDeclNode node = (ClassDeclNode) visit(ctx.classField());
+        node.setText(getFirstLine(ctx));
+        return node;
     }
 
     @Override
@@ -178,19 +194,19 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.constructorSymbol
                         && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
-                            , new Location(declarator), null);
+                            , new Location(declarator), functionDeclNode.getText());
                 }
             } else {
                 throw new CompileError(stage, "Unexpected statement found in Class declaration"
-                        , declClassPos, null);
+                        , declClassPos, statement.getText());
             }
         }
         BlockNode block = new BlockNode(body, bodyPos);
         ClassDeclNode classDeclNode;
         try {
             classDeclNode = new ClassDeclNode(declClass, block, declClassPos);
-        } catch (RuntimeException e) {
-            throw new CompileError(stage, e.getMessage(), declClassPos, null);
+        } catch (CompileError e) {
+            throw new CompileError(stage, e.getMessage(), declClassPos, getFirstLine(ctx));
         }
         return classDeclNode;
     }
@@ -217,10 +233,11 @@ public class BuildAst extends MxBaseVisitor<Node> {
     @Override
     public Node visitExprField(MxParser.ExprFieldContext ctx) {
         if (ctx.expr() != null) {
-            return visit(ctx.expr());
-        } else {
-            return new EmptyExprNode(new Location(ctx));
+            ExprNode node = (ExprNode) visit(ctx.expr());
+            node.setText(token.getText(ctx));
+            return node;
         }
+        return new EmptyExprNode(new Location(ctx));
     }
 
     @Override
@@ -243,14 +260,14 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 break;
             default:
                 throw new CompileError(stage, "Get unexpected literal typename when visiting literal"
-                        , literalPos, null);
+                        , literalPos, token.getText(ctx));
         }
         return node;
     }
 
     @Override
     public Node visitIdentifier_(MxParser.Identifier_Context ctx) {
-        return new IdentifierExprNode(ctx.getText(), new Location(ctx));
+        return new IdentifierExprNode(ctx.getText(), new Location(ctx), token.getText(ctx));
     }
 
     // Binary Expression
@@ -299,9 +316,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 break;
             default:
                 throw new CompileError(
-                        stage, "Get unexpected operator at BinaryExpression ", opPos, null);
+                        stage, "Get unexpected operator at BinaryExpression ", opPos, token.getText(ctx));
         }
-        return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)), op, (ExprNode) this.visit(ctx.expr(1)), opPos);
+        return new BinaryExprNode((ExprNode) this.visit(ctx.expr(0)), op, (ExprNode) this.visit(ctx.expr(1)), opPos, token.getText(ctx));
     }
 
     // Unary Expression
@@ -318,10 +335,10 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 break;
             default:
                 throw new CompileError(
-                        stage, "Get unexpected op at SuffixIncDec", opPos, null);
+                        stage, "Get unexpected op at SuffixIncDec", opPos, token.getText(ctx));
 
         }
-        return new UnaryExprNode(op, node, new Location(ctx.op));
+        return new UnaryExprNode(op, node, new Location(ctx.op), token.getText(ctx));
     }
 
     @Override
@@ -343,9 +360,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 break;
             default:
                 throw new CompileError(stage, "Get unexpected operator" + ctx.op.getText()
-                        + " in unary expression", opPos, null);
+                        + " in unary expression", opPos, token.getText(ctx));
         }
-        return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), opPos);
+        return new UnaryExprNode(op, (ExprNode) visit(ctx.expr()), opPos, token.getText(ctx));
     }
 
     // New
@@ -368,7 +385,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
                     if (index != dimArgs.size()) {
                         throw new CompileError(
                                 stage, "Syntax Expect a ']'," + " but a illegal expression start",
-                                new Location(creatorInnerContext.get(index)), ctx.getText());
+                                new Location(creatorInnerContext.get(index)), token.getText(ctx));
                     }
                     dimArgs.add((ExprNode) visit(exprContext));
                 }
@@ -396,14 +413,14 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
         // For normal function
         ExprNode caller = (ExprNode) visit(ctx.expr());
-        return new FunctionCallNode(caller, args, new Location(ctx.arguments()));
+        return new FunctionCallNode(caller, args, new Location(ctx.arguments()), token.getText(ctx));
     }
 
     // Member Function call
     @Override
     public Node visitDotMember_(MxParser.DotMember_Context ctx) {
         ExprNode container = (ExprNode) visit(ctx.expr());
-        IdentifierExprNode member = new IdentifierExprNode(ctx.Identifier().getText(), new Location(ctx.Identifier()));
+        IdentifierExprNode member = new IdentifierExprNode(ctx.Identifier().getText(), new Location(ctx.Identifier()), token.getText(ctx));
         return new DotMemberNode(container, member, new Location(ctx.DOT()));
     }
 
@@ -416,7 +433,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitThis_(MxParser.This_Context ctx) {
-        return new IdentifierExprNode("this", new Location(ctx.THIS()));
+        return new IdentifierExprNode("this", new Location(ctx.THIS()), token.getText(ctx));
     }
 
     @Override
@@ -429,7 +446,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
     public Node visitConditionField(MxParser.ConditionFieldContext ctx) {
         ExprNode condition = (ExprNode) visit(ctx.cond);
         BlockNode body = (BlockNode) visit(ctx.body());
-        IfNode ifNode = new IfNode(condition, body, new Location(ctx.IF()));
+        IfNode ifNode = new IfNode(condition, body, new Location(ctx.IF()), getFirstLine(ctx));
         IfNode prevCond = ifNode;
         if (ctx.elseifConditionField().size() != 0) {
             for (MxParser.ElseifConditionFieldContext field : ctx.elseifConditionField()) {
@@ -446,12 +463,12 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitElseifConditionField(MxParser.ElseifConditionFieldContext ctx) {
-        return new IfNode((ExprNode) visit(ctx.cond), (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()));
+        return new IfNode((ExprNode) visit(ctx.cond), (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()), getFirstLine(ctx));
     }
 
     @Override
     public Node visitElseConditionField(MxParser.ElseConditionFieldContext ctx) {
-        return new IfNode(null, (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()));
+        return new IfNode(null, (BlockNode) visit(ctx.body()), new Location(ctx.ELSE()), getFirstLine(ctx));
     }
 
     // Loop statement
@@ -479,7 +496,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
                 VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
                 vardecl = new BinaryExprNode(
                         new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx.variableField())),
-                        ExprNode.OPs.ASSIGN, variableDeclNode.getInit(), new Location(ctx.variableField()));
+                        ExprNode.OPs.ASSIGN, variableDeclNode.getInit(), new Location(ctx.variableField()), token.getText(ctx));
             }
         }
 
@@ -491,7 +508,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
             step = (ExprNode) visit(ctx.step);
             stepPos = new Location(ctx.step);
         }
-        return new LoopNode(vardecl, condition, step, body, vardeclPos, conditionPos, stepPos);
+        return new LoopNode(vardecl, condition, step, body, vardeclPos, conditionPos, stepPos, getFirstLine(ctx));
     }
 
     @Override
@@ -503,7 +520,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
             condition = (ExprNode) visit(ctx.cond);
             condPos = new Location(ctx.cond);
         }
-        return new LoopNode(null, condition, null, body, null, condPos, null);
+        return new LoopNode(null, condition, null, body, null, condPos, null, getFirstLine(ctx));
     }
 
     @Override
@@ -520,7 +537,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitJumpField(MxParser.JumpFieldContext ctx) {
-        return visit(ctx.jump());
+        ExprNode node = (ExprNode) visit(ctx.jump());
+        node.setText(token.getText(ctx));
+        return node;
     }
 
     @Override
@@ -539,5 +558,9 @@ public class BuildAst extends MxBaseVisitor<Node> {
     @Override
     public Node visitContinueJump_(MxParser.ContinueJump_Context ctx) {
         return new ContinueNode(new Location(ctx));
+    }
+
+    public void setToken(TokenStream token) {
+        this.token = token;
     }
 }

@@ -67,4 +67,5 @@ public class VariableDeclNode extends DeclaratorNode {
     public Location getStartLocation() {
         return typePos;
     }
+
 }

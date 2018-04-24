@@ -15,10 +15,11 @@ public class UnaryExprNode extends ExprNode {
     private OPs op;
     private ExprNode expr;
 
-    public UnaryExprNode(OPs op, ExprNode expr, Location pos) {
+    public UnaryExprNode(OPs op, ExprNode expr, Location pos, String text) {
         super(pos);
         this.op = op;
         this.expr = expr;
+        super.setText(text);
     }
 
 

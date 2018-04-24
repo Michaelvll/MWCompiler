@@ -20,7 +20,7 @@ public class LoopNode extends Node {
     private Location stepPos;
 
     public LoopNode(Node varDecl, ExprNode condition, ExprNode step, BlockNode body,
-                    Location varDeclPos, Location conditionPos, Location stepPos) {
+                    Location varDeclPos, Location conditionPos, Location stepPos, String text) {
         this.varDecl = varDecl;
         this.condition = condition;
         this.step = step;
@@ -28,6 +28,7 @@ public class LoopNode extends Node {
         this.varDeclPos = varDeclPos;
         this.conditionPos = conditionPos;
         this.stepPos = stepPos;
+        super.setText(text);
     }
 
 
