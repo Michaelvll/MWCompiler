@@ -51,14 +51,12 @@ public class TestErrorPrintTest {
         this.filename = filename;
     }
 
-    @Before
-    public void build() throws Exception {
-        PreBuild.build(filename);
-        program = PreBuild.program;
-    }
+
 
     @Test
-    public void test() {
+    public void test() throws Exception {
+        PreBuild.build(filename);
+        program = PreBuild.program;
         try {
             AstVisitor constructSymbolTableAstVisitor = new ForwardRefPreprocessAstVisitor();
             program.accept(constructSymbolTableAstVisitor);

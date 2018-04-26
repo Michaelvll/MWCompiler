@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 /**
  * IfNode.java
@@ -16,11 +16,10 @@ public class IfNode extends Node {
     private IfNode elseCondition;
     private Location location;
 
-    public IfNode(ExprNode condition, BlockNode body, Location pos, String text) {
+    public IfNode(ExprNode condition, BlockNode body, Location pos) {
         this.condition = condition;
         this.body = body;
         this.location = pos;
-        super.setText(text);
     }
 
 

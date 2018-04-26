@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 import java.util.List;
 
@@ -16,11 +16,10 @@ public class FunctionCallNode extends ExprNode {
     private ExprNode caller;
     private List<ExprNode> args;
 
-    public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos, String text) {
+    public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos) {
         super(pos);
         this.caller = caller;
         this.args = args;
-        super.setText(text);
     }
 
     @Override

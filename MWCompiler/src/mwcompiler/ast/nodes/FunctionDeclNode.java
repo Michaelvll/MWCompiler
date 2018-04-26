@@ -1,12 +1,11 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 

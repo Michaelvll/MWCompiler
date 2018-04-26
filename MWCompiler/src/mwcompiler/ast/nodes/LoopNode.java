@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 /**
  * LoopNode.java
@@ -15,20 +15,21 @@ public class LoopNode extends Node {
     private ExprNode condition;
     private ExprNode step;
     private BlockNode body;
+    private Location forPos;
     private Location varDeclPos;
     private Location conditionPos;
     private Location stepPos;
 
-    public LoopNode(Node varDecl, ExprNode condition, ExprNode step, BlockNode body,
-                    Location varDeclPos, Location conditionPos, Location stepPos, String text) {
+    public LoopNode(Node varDecl, ExprNode condition, ExprNode step, BlockNode body, Location forPos,
+                    Location varDeclPos, Location conditionPos, Location stepPos) {
         this.varDecl = varDecl;
         this.condition = condition;
         this.step = step;
         this.body = body;
+        this.forPos = forPos;
         this.varDeclPos = varDeclPos;
         this.conditionPos = conditionPos;
         this.stepPos = stepPos;
-        super.setText(text);
     }
 
 
@@ -67,6 +68,6 @@ public class LoopNode extends Node {
 
     @Override
     public Location getStartLocation() {
-        return varDeclPos;
+        return forPos;
     }
 }
