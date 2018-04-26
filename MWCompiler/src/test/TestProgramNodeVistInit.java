@@ -50,7 +50,7 @@ public class TestProgramNodeVistInit {
             MxParser parser = new MxParser(tokens);
             parser.setErrorHandler(new BailErrorStrategy());
             ParseTree tree = parser.program();
-            BuildAst builder = new BuildAst(tokens);
+            BuildAst builder = new BuildAst();
             builder.visit(tree);
         }catch (Exception e) {
             assertNull(e);

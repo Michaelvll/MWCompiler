@@ -2,9 +2,9 @@ package mwcompiler.symbols.tools;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.*;
-import mwcompiler.utility.Colors;
+import mwcompiler.utility.StringProcess;
 import mwcompiler.utility.CompileError;
 
 import java.util.ArrayList;
@@ -47,12 +47,13 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
         stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
     }
 
+    private Location mainLocation;
     private void checkMain() {
         FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable.findIn(InstanceSymbol.builder("main"));
         if (mainTypeSymbol == null) {
-            throw new CompileError(stage, "Main function is needed.", new Location(1, 1), "main");
+            throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol || mainTypeSymbol.getParams().size() != 0) {
-            throw new CompileError(stage, "Main function must return int and have no parameters.", null, null);
+            throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
         }
     }
 
@@ -71,8 +72,8 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
         inClass = true;
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
         if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
-            throw new CompileError(stage, "Redeclare class " + Colors.getRefString(node.getClassSymbol().getName())
-                    , node.getStartLocation(), node.getText());
+            throw new CompileError(stage, "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName())
+                    , node.getStartLocation());
         }
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
@@ -98,8 +99,8 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
         if (inClass) {
             TypeSymbol search = currentSymbolTable.findIn(node.getVarSymbol());
             if (search != null) {
-                throw new CompileError(stage, "Redeclare a variable " + Colors.getRefString(node.getVarSymbol().getName()) +
-                        "in the same scope", node.getStartLocation(), node.getText());
+                throw new CompileError(stage, "Redeclare a variable " + StringProcess.getRefString(node.getVarSymbol().getName()) +
+                        "in the same scope", node.getStartLocation());
             }
             currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
         }
@@ -108,9 +109,10 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
     @Override
     public void visit(FunctionDeclNode node) {
         if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
-            throw new CompileError(stage, "Redeclare function " + Colors.getRefString(node.getInstanceSymbol().getName()) +
-                    "in the same scope ", node.getStartLocation(), node.getText());
+            throw new CompileError(stage, "Redeclare function " + StringProcess.getRefString(node.getInstanceSymbol().getName()) +
+                    "in the same scope ", node.getStartLocation());
         }
+        if (node.getInstanceSymbol().getName().equals("main")) mainLocation = node.getStartLocation();
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
         if (inClass)
             currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());

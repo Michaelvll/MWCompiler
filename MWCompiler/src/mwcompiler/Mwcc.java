@@ -9,15 +9,13 @@ import java.io.PrintStream;
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.symbols.Symbol;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
 import mwcompiler.symbols.tools.TypeCheckAstVisitor;
-import mwcompiler.utility.Colors;
+import mwcompiler.utility.StringProcess;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.CompileWarining;
 import mwcompiler.utility.ParserErrorListener;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.commons.cli.*;
 
 import mx_gram.tools.*;
@@ -71,7 +69,7 @@ public class Mwcc {
         String outputFile = null;
         String[] restArgs;
         try {
-            System.err.print(Colors.BLACK);
+            System.err.print(StringProcess.BLACK);
             cmd = parser.parse(options, args);
             restArgs = cmd.getArgs();
             if (cmd.hasOption("h")) {
@@ -131,11 +129,12 @@ public class Mwcc {
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
+            StringProcess.setTokens(tokens);
 //            parser.setErrorHandler(new BailErrorStrategy());
             parser.removeErrorListeners();
             parser.addErrorListener(new ParserErrorListener());
             ParseTree tree = parser.program();
-            buildAst = new BuildAst(tokens);
+            buildAst = new BuildAst();
             programAstRoot = buildAst.visit(tree);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());

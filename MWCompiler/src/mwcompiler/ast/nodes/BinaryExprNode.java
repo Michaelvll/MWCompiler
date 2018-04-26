@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 /**
  * BinaryExprNode.java
@@ -15,9 +15,8 @@ public class BinaryExprNode extends ExprNode {
     private OPs op;
     private ExprNode left, right;
 
-    public BinaryExprNode(ExprNode left, OPs op, ExprNode right, Location pos, String text) {
+    public BinaryExprNode(ExprNode left, OPs op, ExprNode right, Location pos) {
         super(pos);
-        super.setText(text);
         this.op = op;
         this.left = left;
         this.right = right;

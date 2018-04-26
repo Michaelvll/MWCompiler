@@ -1,8 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
-import mwcompiler.symbols.Symbol;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.SymbolTable;
 
 import java.util.List;

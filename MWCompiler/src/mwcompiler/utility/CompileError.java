@@ -1,14 +1,16 @@
 package mwcompiler.utility;
 
-import mwcompiler.ast.tools.Location;
-
 public class CompileError extends RuntimeException {
     private String message;
 
-    public CompileError(String stage, String msg, Location location, String expr) {
-        this.message = Colors.RED + "ERROR: " + Colors.BLACK + "(" + Colors.GREEN + stage + Colors.BLACK + ") " + msg
-                + " " + Colors.BLUE + (location != null ? location.getLocation() : "") + "\n\t"
-                + Colors.BLACK + expr;
+
+    public CompileError(String stage, String msg, Location location) {
+        assert location != null;
+        this.message = StringProcess.getErrWarning("Error", stage, msg, location);
+    }
+
+    CompileError(String stage, String msg, int line, int charPosInline) {
+        this.message = StringProcess.getErrWarning("Error", stage, msg, line, charPosInline);
     }
 
     @Override

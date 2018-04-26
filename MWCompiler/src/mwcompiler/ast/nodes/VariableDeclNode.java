@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
 

@@ -2,6 +2,8 @@ package test;
 
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.BuildAst;
+import mwcompiler.utility.Location;
+import mwcompiler.utility.StringProcess;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
 import org.antlr.v4.runtime.CharStream;
@@ -19,9 +21,10 @@ public class PreBuild {
         CharStream input = CharStreams.fromFileName("../testcases" + typeCheck[0]);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
+        StringProcess.setTokens(tokens);
         MxParser parser = new MxParser(tokens);
         ParseTree tree = parser.program();
-        buildAst = new BuildAst(tokens);
+        buildAst = new BuildAst();
         program = buildAst.visit(tree);
     }
 
@@ -29,9 +32,10 @@ public class PreBuild {
         CharStream input = CharStreams.fromFileName(filename);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
+        StringProcess.setTokens(tokens);
         MxParser parser = new MxParser(tokens);
         ParseTree tree = parser.program();
-        buildAst = new BuildAst(tokens);
+        buildAst = new BuildAst();
         program = buildAst.visit(tree);
     }
 }

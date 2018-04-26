@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 import mwcompiler.symbols.InstanceSymbol;
 
 /**
@@ -14,10 +14,9 @@ import mwcompiler.symbols.InstanceSymbol;
 public class IdentifierExprNode extends ExprNode {
     private InstanceSymbol instanceSymbol;
 
-    public IdentifierExprNode(String name, Location pos, String text) {
+    public IdentifierExprNode(String name, Location pos) {
         super(pos);
         this.instanceSymbol = InstanceSymbol.builder(name);
-        super.setText(text);
     }
 
     public IdentifierExprNode(InstanceSymbol instanceSymbol, Location pos) {

@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 /**
  * JumpNode.java

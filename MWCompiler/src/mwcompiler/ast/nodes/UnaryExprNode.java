@@ -1,7 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.Location;
+import mwcompiler.utility.Location;
 
 /**
  * UnaryExprNode.java
@@ -15,11 +15,10 @@ public class UnaryExprNode extends ExprNode {
     private OPs op;
     private ExprNode expr;
 
-    public UnaryExprNode(OPs op, ExprNode expr, Location pos, String text) {
+    public UnaryExprNode(OPs op, ExprNode expr, Location pos) {
         super(pos);
         this.op = op;
         this.expr = expr;
-        super.setText(text);
     }
 
 
