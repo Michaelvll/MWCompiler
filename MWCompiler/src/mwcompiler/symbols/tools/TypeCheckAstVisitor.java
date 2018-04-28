@@ -249,6 +249,10 @@ public class TypeCheckAstVisitor implements AstVisitor<ReturnType> {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
                 return new ReturnType(boolTypeSymbol, RVAL);
+            case ADD: case SUB:
+                if (exprType.typeSymbol != intTypeSymbol)
+                    throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
+                return new ReturnType(intTypeSymbol, RVAL);
             default:
                 throw new RuntimeException("Compiler Bug: Undefined unary op");
         }
