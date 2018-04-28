@@ -9,59 +9,59 @@ import mwcompiler.ast.nodes.*;
  * @author Michael Wu
  * @since 2018-04-06
  */
-public interface AstVisitor {
-    void visit(ProgramNode node);
+public interface AstVisitor<ReturnType> {
+    ReturnType visit(ProgramNode node);
 
     // Block
-    void visit(BlockNode node);
+    ReturnType visit(BlockNode node);
 
     // Type and declarations
     // There is no need to visit TypeNodes as they there will be TypeSymbols in the upper node
 
-    void visit(VariableDeclNode node);
+    ReturnType visit(VariableDeclNode node);
 
-    void visit(FunctionDeclNode node);
+    ReturnType visit(FunctionDeclNode node);
 
-    void visit(ClassDeclNode node);
+    ReturnType visit(ClassDeclNode node);
 
 
     // Expressions
-    void visit(BinaryExprNode node);
+    ReturnType visit(BinaryExprNode node);
 
-    void visit(UnaryExprNode node);
+    ReturnType visit(UnaryExprNode node);
 
-    void visit(IdentifierExprNode node);
+    ReturnType visit(IdentifierExprNode node);
 
-    void visit(NewExprNode node);
+    ReturnType visit(NewExprNode node);
 
-    void visit(NullLiteralNode node);
+    ReturnType visit(NullLiteralNode node);
 
     // Literals
-    void visit(StringLiteralNode node);
+    ReturnType visit(StringLiteralNode node);
 
-    void visit(BoolLiteralNode node);
+    ReturnType visit(BoolLiteralNode node);
 
-    void visit(IntLiteralNode node);
+    ReturnType visit(IntLiteralNode node);
 
 
-    void visit(EmptyExprNode node);
+    ReturnType visit(EmptyExprNode node);
 
-    void visit(FunctionCallNode node);
+    ReturnType visit(FunctionCallNode node);
 
-    void visit(DotMemberNode node);
+    ReturnType visit(DotMemberNode node);
 
-    void visit(BrackMemberNode node);
+    ReturnType visit(BrackMemberNode node);
 
-    void visit(IfNode node);
+    ReturnType visit(IfNode node);
 
-    void visit(LoopNode node);
+    ReturnType visit(LoopNode node);
 
-    void visit(BreakNode node);
+    ReturnType visit(BreakNode node);
 
-    void visit(ReturnNode node);
+    ReturnType visit(ReturnNode node);
 
-    void visit(ContinueNode node);
+    ReturnType visit(ContinueNode node);
 
-    void visit(ConstructorCallNode node);
+    ReturnType visit(ConstructorCallNode node);
 
 }

@@ -35,7 +35,8 @@ public class TypeNode extends Node {
     }
 
     @Override
-    public void accept(AstVisitor visitor) {
+    public <T> T accept(AstVisitor<T> visitor) {
         //Do Nothing
+        return null;
     }
 }
