@@ -8,10 +8,9 @@ import java.io.PrintStream;
 
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.utility.Location;
-import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
-import mwcompiler.symbols.tools.TypeCheckAstVisitor;
+import mwcompiler.frontend.BuildAst;
+import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
+import mwcompiler.frontend.TypeCheckAstVisitor;
 import mwcompiler.utility.StringProcess;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.CompileWarining;

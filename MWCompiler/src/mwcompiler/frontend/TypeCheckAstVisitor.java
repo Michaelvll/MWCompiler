@@ -1,7 +1,8 @@
-package mwcompiler.symbols.tools;
+package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.tools.ReturnType;
 import mwcompiler.utility.Location;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.StringProcess;

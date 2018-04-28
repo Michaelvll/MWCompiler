@@ -48,6 +48,9 @@ public class StringProcess {
     }
 
     static String getErrWarning(String errType, String stage, String msg, Location location) {
+        if (location == null) {
+            return RED + errType + ": " + BLACK + "(" + GREEN + stage + BLACK + ") " + msg;
+        }
         return RED + errType + ": " + BLACK + "(" + GREEN + stage + BLACK + ") " + msg + " " + BLUE
                 + location.toString() + "\n\t" + getBefore(location) + getMiddle(location) + getAfter(location);
     }

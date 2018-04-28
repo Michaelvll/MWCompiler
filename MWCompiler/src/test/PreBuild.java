@@ -1,8 +1,7 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.utility.Location;
+import mwcompiler.frontend.BuildAst;
 import mwcompiler.utility.StringProcess;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;

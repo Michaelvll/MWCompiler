@@ -1,7 +1,7 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.BuildAst;
+import mwcompiler.frontend.BuildAst;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.ast.tools.AstVisitor;
 import org.junit.Before;

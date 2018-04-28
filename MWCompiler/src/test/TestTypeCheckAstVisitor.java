@@ -2,8 +2,8 @@ package test;
 
 import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.symbols.tools.ForwardRefPreprocessAstVisitor;
-import mwcompiler.symbols.tools.TypeCheckAstVisitor;
+import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
+import mwcompiler.frontend.TypeCheckAstVisitor;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.CompileWarining;
 import org.junit.Before;

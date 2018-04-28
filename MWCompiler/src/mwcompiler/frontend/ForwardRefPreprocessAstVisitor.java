@@ -1,11 +1,12 @@
-package mwcompiler.symbols.tools;
+package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.tools.AstBaseVisitor;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.utility.Location;
 import mwcompiler.symbols.*;
-import mwcompiler.utility.StringProcess;
 import mwcompiler.utility.CompileError;
+import mwcompiler.utility.Location;
+import mwcompiler.utility.StringProcess;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  * @author Michael Wu
  * @since 2018-04-16
  */
-public class ForwardRefPreprocessAstVisitor implements AstVisitor {
+public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
@@ -48,6 +49,7 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
     }
 
     private Location mainLocation;
+
     private void checkMain() {
         FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable.findIn(InstanceSymbol.builder("main"));
         if (mainTypeSymbol == null) {
@@ -117,98 +119,4 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
         if (inClass)
             currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
     }
-
-    // Unused
-    @Override
-    public void visit(ConstructorCallNode node) {
-
-    }
-
-    @Override
-    public void visit(BinaryExprNode node) {
-
-    }
-
-    @Override
-    public void visit(UnaryExprNode node) {
-
-    }
-
-    @Override
-    public void visit(IdentifierExprNode node) {
-
-    }
-
-    @Override
-    public void visit(NewExprNode node) {
-
-    }
-
-    @Override
-    public void visit(NullLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(StringLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(BoolLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(IntLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(EmptyExprNode node) {
-
-    }
-
-    @Override
-    public void visit(FunctionCallNode node) {
-
-    }
-
-    @Override
-    public void visit(DotMemberNode node) {
-
-    }
-
-    @Override
-    public void visit(BrackMemberNode node) {
-
-    }
-
-    @Override
-    public void visit(IfNode node) {
-
-    }
-
-    @Override
-    public void visit(LoopNode node) {
-
-    }
-
-    @Override
-    public void visit(BreakNode node) {
-
-    }
-
-    @Override
-    public void visit(ReturnNode node) {
-
-    }
-
-    @Override
-    public void visit(ContinueNode node) {
-
-    }
-
-
-    // Unused
 }

@@ -1,4 +1,4 @@
-package mwcompiler.ast.tools;
+package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.symbols.*;
@@ -435,7 +435,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
     public Node visitConditionField(MxParser.ConditionFieldContext ctx) {
         ExprNode condition = (ExprNode) visit(ctx.cond);
         BlockNode body = (BlockNode) visit(ctx.body());
-        IfNode ifNode = new IfNode(condition, body, new Location(ctx));
+        IfNode ifNode = new IfNode(condition, body, new Location(ctx.cond));
         IfNode prevCond = ifNode;
         if (ctx.elseifConditionField().size() != 0) {
             for (MxParser.ElseifConditionFieldContext field : ctx.elseifConditionField()) {
@@ -452,7 +452,7 @@ public class BuildAst extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitElseifConditionField(MxParser.ElseifConditionFieldContext ctx) {
-        return new IfNode((ExprNode) visit(ctx.cond), (BlockNode) visit(ctx.body()), new Location(ctx));
+        return new IfNode((ExprNode) visit(ctx.cond), (BlockNode) visit(ctx.body()), new Location(ctx.cond));
     }
 
     @Override
