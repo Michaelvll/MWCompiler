@@ -3,121 +3,122 @@ package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ir.nodes.IRNode;
 
-public class BuildIR implements AstVisitor {
+public class BuildIR implements AstVisitor<IRNode> {
 
     @Override
-    public void visit(ProgramNode node) {
-
+    public IRNode visit(ProgramNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BlockNode node) {
-
+    public IRNode visit(BlockNode node) {
+        return null;
     }
 
     @Override
-    public void visit(VariableDeclNode node) {
-
+    public IRNode visit(VariableDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(FunctionDeclNode node) {
-
+    public IRNode visit(FunctionDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ClassDeclNode node) {
-
+    public IRNode visit(ClassDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BinaryExprNode node) {
-
+    public IRNode visit(BinaryExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(UnaryExprNode node) {
-
+    public IRNode visit(UnaryExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IdentifierExprNode node) {
-
+    public IRNode visit(IdentifierExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(NewExprNode node) {
-
+    public IRNode visit(NewExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(NullLiteralNode node) {
-
+    public IRNode visit(NullLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(StringLiteralNode node) {
-
+    public IRNode visit(StringLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BoolLiteralNode node) {
-
+    public IRNode visit(BoolLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IntLiteralNode node) {
-
+    public IRNode visit(IntLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(EmptyExprNode node) {
-
+    public IRNode visit(EmptyExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(FunctionCallNode node) {
-
+    public IRNode visit(FunctionCallNode node) {
+        return null;
     }
 
     @Override
-    public void visit(DotMemberNode node) {
-
+    public IRNode visit(DotMemberNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BrackMemberNode node) {
-
+    public IRNode visit(BrackMemberNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IfNode node) {
-
+    public IRNode visit(IfNode node) {
+        return null;
     }
 
     @Override
-    public void visit(LoopNode node) {
-
+    public IRNode visit(LoopNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BreakNode node) {
-
+    public IRNode visit(BreakNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ReturnNode node) {
-
+    public IRNode visit(ReturnNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ContinueNode node) {
-
+    public IRNode visit(ContinueNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ConstructorCallNode node) {
-
+    public IRNode visit(ConstructorCallNode node) {
+        return null;
     }
 }

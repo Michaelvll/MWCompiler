@@ -2,119 +2,119 @@ package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
 
-public class AstBaseVisitor implements AstVisitor {
+public class AstBaseVisitor<T> implements AstVisitor<T> {
     @Override
-    public void visit(ProgramNode node) {
-
+    public T visit(ProgramNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BlockNode node) {
-
+    public T visit(BlockNode node) {
+        return null;
     }
 
     @Override
-    public void visit(VariableDeclNode node) {
-
+    public T visit(VariableDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(FunctionDeclNode node) {
-
+    public T visit(FunctionDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ClassDeclNode node) {
-
+    public T visit(ClassDeclNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BinaryExprNode node) {
-
+    public T visit(BinaryExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(UnaryExprNode node) {
-
+    public T visit(UnaryExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IdentifierExprNode node) {
-
+    public T visit(IdentifierExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(NewExprNode node) {
-
+    public T visit(NewExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(NullLiteralNode node) {
-
+    public T visit(NullLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(StringLiteralNode node) {
-
+    public T visit(StringLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BoolLiteralNode node) {
-
+    public T visit(BoolLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IntLiteralNode node) {
-
+    public T visit(IntLiteralNode node) {
+        return null;
     }
 
     @Override
-    public void visit(EmptyExprNode node) {
-
+    public T visit(EmptyExprNode node) {
+        return null;
     }
 
     @Override
-    public void visit(FunctionCallNode node) {
-
+    public T visit(FunctionCallNode node) {
+        return null;
     }
 
     @Override
-    public void visit(DotMemberNode node) {
-
+    public T visit(DotMemberNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BrackMemberNode node) {
-
+    public T visit(BrackMemberNode node) {
+        return null;
     }
 
     @Override
-    public void visit(IfNode node) {
-
+    public T visit(IfNode node) {
+        return null;
     }
 
     @Override
-    public void visit(LoopNode node) {
-
+    public T visit(LoopNode node) {
+        return null;
     }
 
     @Override
-    public void visit(BreakNode node) {
-
+    public T visit(BreakNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ReturnNode node) {
-
+    public T visit(ReturnNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ContinueNode node) {
-
+    public T visit(ContinueNode node) {
+        return null;
     }
 
     @Override
-    public void visit(ConstructorCallNode node) {
-
+    public T visit(ConstructorCallNode node) {
+        return null;
     }
 }
