@@ -12,6 +12,6 @@ import mwcompiler.utility.Location;
  */
 public abstract class Node {
     public abstract Location getStartLocation();
-    public abstract void accept(AstVisitor visitor);
+    public abstract <T> T accept(AstVisitor<T> visitor);
 }
 

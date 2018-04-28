@@ -1,6 +1,7 @@
 package mwcompiler.symbols.tools;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.tools.AstBaseVisitor;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.utility.Location;
 import mwcompiler.symbols.*;
@@ -14,7 +15,7 @@ import java.util.List;
  * @author Michael Wu
  * @since 2018-04-16
  */
-public class ForwardRefPreprocessAstVisitor implements AstVisitor {
+public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
@@ -58,17 +59,18 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
     }
 
     @Override
-    public void visit(ProgramNode node) {
+    public Void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
         initBuiltinFunction();
         node.getBlock().accept(this);
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();
         checkMain();
+        return null;
     }
 
     @Override
-    public void visit(ClassDeclNode node) {
+    public Void visit(ClassDeclNode node) {
         inClass = true;
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
         if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
@@ -80,10 +82,11 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
 
         node.getBody().accept(this);
         inClass = false;
+        return null;
     }
 
     @Override
-    public void visit(BlockNode node) {
+    public Void visit(BlockNode node) {
         if (node.getCurrentSymbolTable() == null) {
             currentSymbolTable = new SymbolTable(currentSymbolTable);
             node.setCurrentSymbolTable(currentSymbolTable);
@@ -92,10 +95,11 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
             statement.accept(this);
         }
         currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
+        return null;
     }
 
     @Override
-    public void visit(VariableDeclNode node) {
+    public Void visit(VariableDeclNode node) {
         if (inClass) {
             TypeSymbol search = currentSymbolTable.findIn(node.getVarSymbol());
             if (search != null) {
@@ -104,10 +108,11 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
             }
             currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
         }
+        return null;
     }
 
     @Override
-    public void visit(FunctionDeclNode node) {
+    public Void visit(FunctionDeclNode node) {
         if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
             throw new CompileError(stage, "Redeclare function " + StringProcess.getRefString(node.getInstanceSymbol().getName()) +
                     "in the same scope ", node.getStartLocation());
@@ -116,99 +121,6 @@ public class ForwardRefPreprocessAstVisitor implements AstVisitor {
         currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
         if (inClass)
             currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+        return null;
     }
-
-    // Unused
-    @Override
-    public void visit(ConstructorCallNode node) {
-
-    }
-
-    @Override
-    public void visit(BinaryExprNode node) {
-
-    }
-
-    @Override
-    public void visit(UnaryExprNode node) {
-
-    }
-
-    @Override
-    public void visit(IdentifierExprNode node) {
-
-    }
-
-    @Override
-    public void visit(NewExprNode node) {
-
-    }
-
-    @Override
-    public void visit(NullLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(StringLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(BoolLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(IntLiteralNode node) {
-
-    }
-
-    @Override
-    public void visit(EmptyExprNode node) {
-
-    }
-
-    @Override
-    public void visit(FunctionCallNode node) {
-
-    }
-
-    @Override
-    public void visit(DotMemberNode node) {
-
-    }
-
-    @Override
-    public void visit(BrackMemberNode node) {
-
-    }
-
-    @Override
-    public void visit(IfNode node) {
-
-    }
-
-    @Override
-    public void visit(LoopNode node) {
-
-    }
-
-    @Override
-    public void visit(BreakNode node) {
-
-    }
-
-    @Override
-    public void visit(ReturnNode node) {
-
-    }
-
-    @Override
-    public void visit(ContinueNode node) {
-
-    }
-
-
-    // Unused
 }

@@ -24,8 +24,8 @@ public class ConstructorCallNode extends ExprNode {
     }
 
     @Override
-    public void accept(AstVisitor visitor) {
-        visitor.visit(this);
+    public <T> T accept(AstVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     public NonArrayTypeSymbol getClassTypeSymbol() {
