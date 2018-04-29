@@ -2,7 +2,6 @@ package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstBaseVisitor;
-import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.Location;
@@ -19,6 +18,14 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
+
+    public void apply(Node node) {
+        visit(node);
+    }
+
+    private void visit(Node node){
+        node.accept(this);
+    }
 
     private FunctionTypeSymbol getFunctionType(String returnType, String... params) {
         TypeSymbol returnTypeSymbol = NonArrayTypeSymbol.builder(returnType);
@@ -65,7 +72,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
         initBuiltinFunction();
-        node.getBlock().accept(this);
+        visit(node.getBlock());
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();
         checkMain();
         return null;
@@ -83,7 +90,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
 
-        node.getBody().accept(this);
+        visit(node.getBody());
         inClass = false;
         return null;
     }
@@ -95,7 +102,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             node.setCurrentSymbolTable(currentSymbolTable);
         }
         for (Node statement : node.getStatements()) {
-            statement.accept(this);
+            visit(statement);
         }
         currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
         return null;

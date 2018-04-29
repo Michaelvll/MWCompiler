@@ -26,6 +26,14 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     private Boolean inClass = false;
     private String stage = "Type Checking";
 
+    public void apply(Node node){
+        visit(node);
+    }
+
+    private ExprReturnType visit(Node node) {
+        return node.accept(this);
+    }
+
     // For Error produce
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
         throw new CompileError(stage,
@@ -61,7 +69,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
 
     @Override
     public ExprReturnType visit(ProgramNode node) {
-        return node.getBlock().accept(this);
+        return visit(node.getBlock());
     }
 
     @Override
@@ -72,7 +80,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
         Integer statementNum = node.getStatements().size();
         for (Integer index = 0; index < statementNum; ++index) {
             Node statement = statements.get(index);
-            ExprReturnType stmtReturn = statement.accept(this);
+            ExprReturnType stmtReturn = visit(statement);
             if (statement instanceof ReturnNode) {
                 currentReturn = stmtReturn;
                 if (index < statementNum - 1) {
@@ -119,7 +127,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
                     node.getTypePos());
         }
         if (node.getInit() != null) {
-            ExprReturnType rhsType = node.getInit().accept(this);
+            ExprReturnType rhsType = visit(node.getInit());
             if (rhsType.typeSymbol != nullTypeSymbol) {
                 if (declType != rhsType.typeSymbol) {
                     throwTypeMismatchErr(node.getTypeSymbol(), rhsType.typeSymbol, node.getInitPos());
@@ -151,9 +159,9 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
         }
         getCurrentSymbolTable(node.getBody());
         for (VariableDeclNode param : node.getParamList()) {
-            param.accept(this);
+            visit(param);
         }
-        ExprReturnType blockReturn = node.getBody().accept(this);
+        ExprReturnType blockReturn = visit(node.getBody());
         if (blockReturn == null) {
             if (node.getFunctionTypeSymbol().getReturnType() != voidTypeSymbol
                     && node.getInstanceSymbol() != InstanceSymbol.constructorSymbol) {
@@ -179,7 +187,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
         inClass = true;
         getCurrentSymbolTable(node.getBody());
         currentSymbolTable.put(InstanceSymbol.thisInstanceSymbol, node.getClassSymbol());
-        node.getBody().accept(this);
+        visit(node.getBody());
         inClass = false;
         return null;
     }
@@ -187,8 +195,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     // Expressions
     @Override
     public ExprReturnType visit(BinaryExprNode node) {
-        ExprReturnType lhsType = node.getLeft().accept(this);
-        ExprReturnType rhsType = node.getRight().accept(this);
+        ExprReturnType lhsType = visit(node.getLeft());
+        ExprReturnType rhsType = visit(node.getRight());
 
         if (node.getOp() != ASSIGN && node.getOp() != EQ && node.getOp() != NEQ
                 && lhsType.typeSymbol != rhsType.typeSymbol) {
@@ -253,7 +261,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
 
     @Override
     public ExprReturnType visit(UnaryExprNode node) {
-        ExprReturnType exprType = node.getExpr().accept(this);
+        ExprReturnType exprType = visit(node.getExpr());
         switch (node.getOp()) {
         case INC:
         case DEC:
@@ -332,7 +340,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
                     "Number of arguments in function caller " + "does not match the declaration. ", location);
         }
         for (Integer index = 0; index < args.size(); ++index) {
-            ExprReturnType argType = args.get(index).accept(this);
+            ExprReturnType argType = visit(args.get(index));
             TypeSymbol paramType = params.get(index);
             if (argType.typeSymbol != paramType && argType.typeSymbol != nullTypeSymbol) {
                 throw new CompileError(stage,
@@ -347,7 +355,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     // Function calls
     @Override
     public ExprReturnType visit(FunctionCallNode node) {
-        ExprReturnType callerType = node.getCaller().accept(this);
+        ExprReturnType callerType = visit(node.getCaller());
         if (!(callerType.typeSymbol instanceof FunctionTypeSymbol)) {
             throw new CompileError(stage, "A non function name "
                     + StringProcess.getRefString(callerType.typeSymbol.getName()) + "is not callable ",
@@ -377,7 +385,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     // Member access
     @Override
     public ExprReturnType visit(DotMemberNode node) {
-        ExprReturnType container = node.getContainer().accept(this);
+        ExprReturnType container = visit(node.getContainer());
         TypeSymbol memberType;
         memberType = container.typeSymbol.findIn(node.getMember().getInstanceSymbol());
         return new ExprReturnType(memberType, LVAL);
@@ -385,8 +393,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
 
     @Override
     public ExprReturnType visit(BrackMemberNode node) {
-        ExprReturnType container = node.getContainer().accept(this);
-        ExprReturnType subscript = node.getSubscript().accept(this);
+        ExprReturnType container = visit(node.getContainer());
+        ExprReturnType subscript = visit(node.getSubscript());
         if (!(container.typeSymbol instanceof ArrayTypeSymbol)) {
             throw new CompileError(stage, "Non array type can not get member using subscript, "
                     + StringProcess.getRefString(container.typeSymbol.getName()), node.getStartLocation());
@@ -406,15 +414,15 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     @Override
     public ExprReturnType visit(IfNode node) {
         if (node.getCondition() != null) {
-            ExprReturnType cond = node.getCondition().accept(this);
+            ExprReturnType cond = visit(node.getCondition());
             if (cond.typeSymbol != boolTypeSymbol) {
                 throw new CompileError(stage, "If condition must be a bool type, not " + cond.typeSymbol.getName(),
                         node.getStartLocation());
             }
         }
-        node.getBody().accept(this);
+        visit(node.getBody());
         if (node.getElseCondition() != null)
-            node.getElseCondition().accept(this);
+            visit(node.getElseCondition());
         return null;
     }
 
@@ -423,18 +431,18 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
         ++inLoop;
         getCurrentSymbolTable(node.getBody());
         if (node.getVarDecl() != null) {
-            node.getVarDecl().accept(this);
+            visit(node.getVarDecl());
         }
         if (node.getCondition() != null) {
-            if (node.getCondition().accept(this).typeSymbol != boolTypeSymbol) {
+            if (visit(node.getCondition()).typeSymbol != boolTypeSymbol) {
                 throw new CompileError(stage, "Condition statement in for loop should be bool type ",
                         node.getConditionPos());
             }
         }
         if (node.getStep() != null) {
-            node.getStep().accept(this);
+            visit(node.getStep());
         }
-        node.getBody().accept(this);
+        visit(node.getBody());
 
         --inLoop;
         return null;
@@ -452,7 +460,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     @Override
     public ExprReturnType visit(ReturnNode node) {
         if (node.getReturnVal() != null) {
-            return new ExprReturnType(node.getReturnVal().accept(this).typeSymbol, RVAL);
+            return new ExprReturnType(visit(node.getReturnVal()).typeSymbol, RVAL);
         }
         return new ExprReturnType(voidTypeSymbol, RVAL);
     }

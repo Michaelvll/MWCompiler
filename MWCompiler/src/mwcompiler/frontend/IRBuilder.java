@@ -5,7 +5,15 @@ import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ir.nodes.IRNode;
 
-public class BuildIR implements AstVisitor<IRNode> {
+public class IRBuilder implements AstVisitor<IRNode> {
+
+    public IRNode build(Node node) {
+        return visit(node);
+    }
+
+    private IRNode visit(Node node) {
+        return node.accept(this);
+    }
 
     @Override
     public IRNode visit(ProgramNode node) {
