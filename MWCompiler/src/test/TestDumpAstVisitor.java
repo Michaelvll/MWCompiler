@@ -1,11 +1,12 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.BuildAst;
-import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.ast.tools.DumpAstVisitor;
+import mwcompiler.frontend.AstBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import test.tools.PreBuild;
 
 /**
  * TestDumpAstVisitor.java
@@ -13,13 +14,13 @@ import org.junit.Test;
  *
  * @author Michael Wu
  * @since 2018-04-11
- * */
+ */
 
 public class TestDumpAstVisitor {
 
 
     private Node program;
-    private BuildAst buildAst;
+    private AstBuilder astBuilder;
 
     @Before
     public void build() throws Exception {
@@ -30,7 +31,7 @@ public class TestDumpAstVisitor {
 
     @Test
     public void testDumpAst() {
-        AstVisitor dump = new DumpAstVisitor();
+        AstVisitor<Void> dump = new DumpAstVisitor();
         program.accept(dump);
 
     }

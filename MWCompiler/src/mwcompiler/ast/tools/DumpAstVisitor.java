@@ -13,6 +13,14 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     private String indent;
     private PrintStream out;
 
+    public void apply(Node node) {
+        visit(node);
+    }
+
+    private void visit(Node node) {
+        node.accept(this);
+    }
+
     public DumpAstVisitor() {
         indent = "";
         this.out = new PrintStream(System.out);
@@ -45,7 +53,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<<ProgramNode>>");
         List<Node> declarators = node.getBlock().getStatements();
         for (Node declarator : declarators) {
-            declarator.accept(this);
+            visit(declarator);
         }
         return null;
     }
@@ -57,7 +65,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("name: <" + node.getClassSymbol() + ", " + node.getClassSymbol().getName() + ">");
         println("body:");
         for (Node declarator : node.getBody().getStatements()) {
-            declarator.accept(this);
+            visit(declarator);
         }
         subIndent();
         return null;
@@ -77,11 +85,11 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         addIndent();
         println("<FunctionCallNode>");
         println("caller:");
-        node.getCaller().accept(this);
+        visit(node.getCaller());
         if (!node.getArgs().isEmpty()) {
             println("args: ");
             for (ExprNode arg : node.getArgs()) {
-                arg.accept(this);
+                visit(arg);
             }
         }
         subIndent();
@@ -93,7 +101,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         addIndent();
         println("<DotMemberNode>");
         println("container: ");
-        node.getContainer().accept(this);
+        visit(node.getContainer());
         println("member: <" + node.getMember().getInstanceSymbol() + ", " + node.getMember().getInstanceSymbol().getName() + ">");
         subIndent();
         return null;
@@ -104,9 +112,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         addIndent();
         println("<BrackMemberNode>");
         println("container: ");
-        node.getContainer().accept(this);
+        visit(node.getContainer());
         println("subscript: ");
-        node.getSubscript().accept(this);
+        visit(node.getSubscript());
         subIndent();
         return null;
     }
@@ -117,13 +125,13 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<IfNode>");
         if (node.getCondition() != null) {
             println("cond: ");
-            node.getCondition().accept(this);
+            visit(node.getCondition());
         }
         println("body: ");
-        node.getBody().accept(this);
+        visit(node.getBody());
         if (node.getElseCondition() != null) {
             println("else: ");
-            node.getElseCondition().accept(this);
+            visit(node.getElseCondition());
         }
         subIndent();
         return null;
@@ -135,17 +143,17 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<LoopNode>");
         if (node.getVarDecl() != null) {
             println("varDecl: ");
-            node.getVarDecl().accept(this);
+            visit(node.getVarDecl());
         }
         if (node.getCondition() != null) {
             println("cond: ");
-            node.getCondition().accept(this);
+            visit(node.getCondition());
         }
         if (node.getStep() != null) {
             println("step: ");
-            node.getStep().accept(this);
+            visit(node.getStep());
         }
-        node.getBody().accept(this);
+        visit(node.getBody());
         subIndent();
         return null;
     }
@@ -164,7 +172,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<ReturnNode>");
         if (node.getReturnVal() != null) {
             println("returnVal: ");
-            node.getReturnVal().accept(this);
+            visit(node.getReturnVal());
         }
         subIndent();
         return null;
@@ -186,7 +194,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         if (!node.getArgs().isEmpty()) {
             println("args: ");
             for (ExprNode arg : node.getArgs()) {
-                arg.accept(this);
+                visit(arg);
             }
         }
         subIndent();
@@ -202,7 +210,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("var: <" + node.getVarSymbol() + ", " + node.getVarSymbol().getName() + ">");
         if (node.getInit() != null) {
             println("init:");
-            node.getInit().accept(this);
+            visit(node.getInit());
         }
         subIndent();
         return null;
@@ -217,10 +225,10 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("name: <" + node.getInstanceSymbol() + ", " + node.getInstanceSymbol().getName() + ">");
         println("params:");
         for (Node param : node.getParamList()) {
-            param.accept(this);
+            visit(param);
         }
         println("body:");
-        node.getBody().accept(this);
+        visit(node.getBody());
         subIndent();
         return null;
     }
@@ -269,7 +277,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<<BlockNode>>");
         subIndent();
         for (Node statement : node.getStatements()) {
-            statement.accept(this);
+            visit(statement);
         }
         return null;
     }
@@ -281,9 +289,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<BinaryExprNode>");
         println("op: " + node.getOp().toString());
         println("left: ");
-        node.getLeft().accept(this);
+        visit(node.getLeft());
         println("right: ");
-        node.getRight().accept(this);
+        visit(node.getRight());
         subIndent();
         return null;
     }
@@ -294,7 +302,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<UnaryExprNode>");
         println("op: " + node.getOp().toString());
         println("expr: ");
-        node.getExpr().accept(this);
+        visit(node.getExpr());
         subIndent();
         return null;
     }
@@ -308,7 +316,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         if (node.getDimArgs().size() != 0) {
             println("dimArgs: ");
             for (Node expr : node.getDimArgs()) {
-                expr.accept(this);
+                visit(expr);
             }
         }
         subIndent();
