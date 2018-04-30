@@ -46,7 +46,7 @@ public class FunctionTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
         throw new RuntimeException("(Type Checking) Function does not have a member ");
     }
 }

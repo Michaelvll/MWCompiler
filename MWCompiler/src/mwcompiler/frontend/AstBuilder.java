@@ -7,8 +7,6 @@ import mwcompiler.utility.StringProcess;
 import mwcompiler.utility.CompileError;
 import mx_gram.tools.*;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.*;
 
 import java.util.ArrayList;
@@ -106,7 +104,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         // Creator Function
         TypeSymbol search = TypeSymbol.searchSymbol(name);
         if (search instanceof NonArrayTypeSymbol) {
-            return new FunctionDeclNode(search, InstanceSymbol.constructorSymbol, params, body, null,
+            return new FunctionDeclNode(search, InstanceSymbol.CONSTRUCTOR_IS, params, body, null,
                     identifierLocation, paramLocation, functionBodyLocation);
         }
 
@@ -185,7 +183,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             } else if (statement instanceof FunctionDeclNode) {
                 FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.constructorSymbol
+                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR_IS
                         && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
                             , new Location(declarator));

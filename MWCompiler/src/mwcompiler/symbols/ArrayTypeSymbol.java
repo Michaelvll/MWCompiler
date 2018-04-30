@@ -9,8 +9,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
     private Integer dim;
 
     private static String combineName(String name, Integer dim) {
-        String combine = name + "~" + String.valueOf(dim);
-        return combine.intern();
+        return name + "~" + String.valueOf(dim);
     }
 
     public static ArrayTypeSymbol builder(String name, Integer dim) {
@@ -37,10 +36,10 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
-        if (instanceSymbol == InstanceSymbol.sizeFunctionIS) {
+    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
+        if (instanceSymbol == InstanceSymbol.SIZE_FUNCTION_IS) {
             List<TypeSymbol> params = new ArrayList<>();
-            return FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params);
+            return new SymbolInfo(FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params));
         }
         throw new RuntimeException("(Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
     }

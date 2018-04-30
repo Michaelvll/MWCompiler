@@ -1,10 +1,8 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
 import mwcompiler.frontend.TypeCheckAstVisitor;
-import mwcompiler.symbols.tools.ExprReturnType;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.CompileWarining;
 import org.junit.Test;
@@ -27,7 +25,7 @@ public class TestErrorPrintTest {
     @Parameterized.Parameters
     public static Collection<Object[]> testFiles() {
         Collection<Object[]> params = new ArrayList<>();
-        for (File file : new File("../testcases/error_test/").listFiles()) {
+        for (File file : new File("../testcases/type/").listFiles()) {
             if (file.isFile()) {
                 params.add(new Object[]{file.getAbsolutePath()});
             }
@@ -45,16 +43,15 @@ public class TestErrorPrintTest {
     }
 
 
-
     @Test
     public void test() throws Exception {
         PreBuild.build(filename);
         program = PreBuild.program;
         try {
-            AstVisitor<Void> constructSymbolTableAstVisitor = new ForwardRefPreprocessAstVisitor();
-            program.accept(constructSymbolTableAstVisitor);
-            AstVisitor<ExprReturnType> typeNotPresentException = new TypeCheckAstVisitor();
-            program.accept(typeNotPresentException);
+            ForwardRefPreprocessAstVisitor forwardRefPreprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
+            program.accept(forwardRefPreprocessAstVisitor);
+            TypeCheckAstVisitor typeCheckAstVisitor = new TypeCheckAstVisitor();
+            program.accept(typeCheckAstVisitor);
         } catch (CompileError e) {
             CompileWarining.printWarings();
             System.err.println(e.getMessage());

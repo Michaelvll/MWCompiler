@@ -1,24 +1,24 @@
 package mwcompiler.symbols;
 
 public class NonArrayTypeSymbol extends TypeSymbol {
-    public final static NonArrayTypeSymbol intTypeSymbol = new NonArrayTypeSymbol("int");
-    public final static NonArrayTypeSymbol stringTypeSymbol = new NonArrayTypeSymbol("string");
-    public final static NonArrayTypeSymbol boolTypeSymbol = new NonArrayTypeSymbol("bool");
-    public final static NonArrayTypeSymbol voidTypeSymbol = new NonArrayTypeSymbol("void");
-    public final static NonArrayTypeSymbol nullTypeSymbol = new NonArrayTypeSymbol("null");
+    public final static NonArrayTypeSymbol INT_TYPE_SYMBOL = new NonArrayTypeSymbol("int");
+    public final static NonArrayTypeSymbol STRING_TYPE_SYMBOL = new NonArrayTypeSymbol("string");
+    public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool");
+    public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void");
+    public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null");
 
     static {
-        typeSymbolMap.put("int", intTypeSymbol);
-        typeSymbolMap.put("string", stringTypeSymbol);
-        typeSymbolMap.put("bool", boolTypeSymbol);
-        typeSymbolMap.put("void", voidTypeSymbol);
-        typeSymbolMap.put("null", nullTypeSymbol);
+        typeSymbolMap.put("int", INT_TYPE_SYMBOL);
+        typeSymbolMap.put("string", STRING_TYPE_SYMBOL);
+        typeSymbolMap.put("bool", BOOL_TYPE_SYMBOL);
+        typeSymbolMap.put("void", VOID_TYPE_SYMBOL);
+        typeSymbolMap.put("null", NULL_TYPE_SYMBOL);
     }
 
     private String typename;
 
     private NonArrayTypeSymbol(String typename) {
-        this.typename = typename;
+        this.typename = typename.intern();
     }
 
 
@@ -30,11 +30,10 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         if (typename == null) {
             throw new RuntimeException("Get null typename when building NonArrayTypeSymbol");
         }
-        String intern = typename.intern();
-        TypeSymbol search = typeSymbolMap.get(intern);
+        TypeSymbol search = typeSymbolMap.get(typename);
         if (search == null) {
             search = new NonArrayTypeSymbol(typename);
-            typeSymbolMap.put(typename.intern(), search);
+            typeSymbolMap.put(typename, search);
         }
 
         return (NonArrayTypeSymbol) search;
@@ -49,7 +48,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
         SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException("No declared class named " + this.typename);
