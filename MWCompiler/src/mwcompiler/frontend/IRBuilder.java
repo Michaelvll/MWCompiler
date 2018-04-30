@@ -3,130 +3,140 @@ package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ir.nodes.IRNode;
+import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.tools.SSAValue;
 
-public class IRBuilder implements AstVisitor<IRNode> {
+public class IRBuilder implements AstVisitor<SSAValue> {
+    private BasicBlock startBB;
+    private BasicBlock currentBB;
 
-    public IRNode build(Node node) {
-        return visit(node);
+    public BasicBlock build(Node node) {
+        visit(node);
+        return startBB;
     }
 
-    private IRNode visit(Node node) {
+    private SSAValue visit(Node node) {
         return node.accept(this);
     }
 
     @Override
-    public IRNode visit(ProgramNode node) {
+    public SSAValue visit(ProgramNode node) {
+        currentBB = new BasicBlock();
+        startBB = currentBB;
+        visit(node.getBlock());
         return null;
     }
 
     @Override
-    public IRNode visit(BlockNode node) {
+    public SSAValue visit(BlockNode node) {
+        for (Node statement : node.getStatements()) {
+            visit(statement);
+        }
         return null;
     }
 
     @Override
-    public IRNode visit(VariableDeclNode node) {
+    public SSAValue visit(VariableDeclNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(FunctionDeclNode node) {
+    public SSAValue visit(FunctionDeclNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(ClassDeclNode node) {
+    public SSAValue visit(ClassDeclNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(BinaryExprNode node) {
+    public SSAValue visit(BinaryExprNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(UnaryExprNode node) {
+    public SSAValue visit(UnaryExprNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(IdentifierExprNode node) {
+    public SSAValue visit(IdentifierExprNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(NewExprNode node) {
+    public SSAValue visit(NewExprNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(NullLiteralNode node) {
+    public SSAValue visit(NullLiteralNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(StringLiteralNode node) {
+    public SSAValue visit(StringLiteralNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(BoolLiteralNode node) {
+    public SSAValue visit(BoolLiteralNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(IntLiteralNode node) {
+    public SSAValue visit(IntLiteralNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(EmptyExprNode node) {
+    public SSAValue visit(EmptyExprNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(FunctionCallNode node) {
+    public SSAValue visit(FunctionCallNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(DotMemberNode node) {
+    public SSAValue visit(DotMemberNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(BrackMemberNode node) {
+    public SSAValue visit(BrackMemberNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(IfNode node) {
+    public SSAValue visit(IfNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(LoopNode node) {
+    public SSAValue visit(LoopNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(BreakNode node) {
+    public SSAValue visit(BreakNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(ReturnNode node) {
+    public SSAValue visit(ReturnNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(ContinueNode node) {
+    public SSAValue visit(ContinueNode node) {
         return null;
     }
 
     @Override
-    public IRNode visit(ConstructorCallNode node) {
+    public SSAValue visit(ConstructorCallNode node) {
         return null;
     }
 }
