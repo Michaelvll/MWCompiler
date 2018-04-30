@@ -57,13 +57,16 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private Location mainLocation;
 
     private void checkMain() {
-        FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) currentSymbolTable
+        SymbolInfo mainSymbolIfo = currentSymbolTable
                 .findIn(InstanceSymbol.builder("main"));
-        if (mainTypeSymbol == null) {
+        if (mainSymbolIfo == null) {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
-        } else if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.intTypeSymbol
-                || mainTypeSymbol.getParams().size() != 0) {
-            throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
+        } else {
+            FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) mainSymbolIfo.getTypeSymbol();
+            if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
+                    || mainTypeSymbol.getParams().size() != 0) {
+                throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
+            }
         }
     }
 
@@ -111,7 +114,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     @Override
     public Void visit(VariableDeclNode node) {
         if (inClass) {
-            TypeSymbol search = currentSymbolTable.findIn(node.getVarSymbol());
+            SymbolInfo search = currentSymbolTable.findIn(node.getVarSymbol());
             if (search != null) {
                 throw new CompileError(stage, "Redeclare a variable "
                         + StringProcess.getRefString(node.getVarSymbol().getName()) + "in the same scope",

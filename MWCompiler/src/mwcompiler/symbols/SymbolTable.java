@@ -1,11 +1,11 @@
 package mwcompiler.symbols;
 
 
-import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 public class SymbolTable {
-    private static Dictionary<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new Hashtable<>();
+    private static Map<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new Hashtable<>();
 
     static {
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("int"), new SymbolTable(null));
@@ -14,7 +14,7 @@ public class SymbolTable {
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("void"), new SymbolTable(null));
     }
 
-    private Dictionary<InstanceSymbol, TypeSymbol> currentMap = new Hashtable<>();
+    private Map<InstanceSymbol, SymbolInfo> currentMap = new Hashtable<>();
     private SymbolTable outerSymbolTable;
 
     public SymbolTable(SymbolTable outerSymbolTable) {
@@ -28,13 +28,12 @@ public class SymbolTable {
      * @param typeSymbol
      */
     public void put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
-        TypeSymbol search = currentMap.get(instanceSymbol);
+        SymbolInfo search = currentMap.get(instanceSymbol);
         if (search != null) {
-            if (!search.getClass().equals(typeSymbol.getClass())) {
-                throw new RuntimeException("(Type Checking) Variable and function can not use the same name ");
-            }
-        }
-        currentMap.put(instanceSymbol, typeSymbol);
+            if (!search.getTypeSymbol().equals(typeSymbol))
+                throw new RuntimeException("Variable and function can not use the same name ");
+        } else
+            currentMap.put(instanceSymbol, new SymbolInfo(typeSymbol));
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
@@ -45,15 +44,15 @@ public class SymbolTable {
         return namedSymbolTableMap.get(nonArrayTypeSymbol);
     }
 
-    public TypeSymbol findAll(InstanceSymbol instanceSymbol) {
-        TypeSymbol search = currentMap.get(instanceSymbol);
+    public SymbolInfo findAll(InstanceSymbol instanceSymbol) {
+        SymbolInfo search = currentMap.get(instanceSymbol);
         if (search == null && outerSymbolTable != null) {
             search = outerSymbolTable.findAll(instanceSymbol);
         }
         return search;
     }
 
-    public TypeSymbol findIn(InstanceSymbol instanceSymbol) {
+    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
         return currentMap.get(instanceSymbol);
     }
 
