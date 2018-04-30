@@ -5,7 +5,7 @@ import mwcompiler.utility.Location;
 
 /**
  * BinaryExprNode.java
- * BinaryExpr extends from ExprNode
+ * BinaryExpInst extends from ExprNode
  *
  * @author Michael Wu
  * @since 2018-04-06

@@ -2,13 +2,12 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public class BinaryExpr extends Instruction {
+public class MoveInst extends Instruction {
 
-    public BinaryExpr(Register target, Register left, Register right) {
+    public MoveInst(RegisterSSA target, SSA value) {
         super();
         super.setTarget(target);
-        super.setLeft(left);
-        super.setRight(right);
+        super.setLeft(value);
     }
 
     @Override

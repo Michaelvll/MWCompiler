@@ -3,33 +3,46 @@ package mwcompiler.ir.nodes;
 import mwcompiler.ir.tools.IRVisitor;
 
 public abstract class Instruction {
-    private Register target;
-    private Register left;
-    private Register right;
+    public Instruction pre;
+    public Instruction next;
+
+    private RegisterSSA target;
+    private SSA left;
+    private SSA right;
 
     public abstract <T> T accept(IRVisitor<T> visitor);
 
-    public Register getTarget() {
+    public Instruction add_front(Instruction pre) {
+        this.pre = pre;
+        return pre;
+    }
+
+    public Instruction add_back(Instruction next) {
+        this.next = next;
+        return next;
+    }
+
+    public RegisterSSA getTarget() {
         return target;
     }
 
-    public void setTarget(Register target) {
+    public void setTarget(RegisterSSA target) {
         this.target = target;
     }
 
-    public Register getLeft() {
+    public SSA getLeft() {
         return left;
     }
 
-    public void setLeft(Register left) {
+    public void setLeft(SSA left) {
         this.left = left;
     }
 
-    public Register getRight() {
+    public SSA getRight() {
         return right;
     }
 
-    public void setRight(Register right) {
+    public void setRight(SSA right) {
         this.right = right;
     }
 }

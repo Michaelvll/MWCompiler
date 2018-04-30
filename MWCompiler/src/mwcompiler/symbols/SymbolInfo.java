@@ -1,10 +1,10 @@
 package mwcompiler.symbols;
 
-import mwcompiler.ir.nodes.Register;
+import mwcompiler.ir.nodes.RegisterSSA;
 
 public class SymbolInfo {
     private TypeSymbol typeSymbol;
-    private Register reg;
+    private RegisterSSA reg;
 
     public SymbolInfo(TypeSymbol typeSymbol) {
         this.typeSymbol = typeSymbol;
@@ -14,11 +14,11 @@ public class SymbolInfo {
         return typeSymbol;
     }
 
-    public Register getReg() {
+    public RegisterSSA getReg() {
         return reg;
     }
 
-    public void setReg(Register reg) {
+    public void setReg(RegisterSSA reg) {
         this.reg = reg;
     }
 }

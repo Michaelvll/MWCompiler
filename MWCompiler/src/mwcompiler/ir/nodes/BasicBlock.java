@@ -1,13 +1,22 @@
 package mwcompiler.ir.nodes;
 
 
-import java.util.LinkedList;
+import mwcompiler.ir.tools.IRVisitor;
 
 public class BasicBlock {
-    private LinkedList<Instruction> instructions = new LinkedList<>();
+    private Instruction head;
+    private Instruction end;
 
-    public void insert(Instruction instruction) {
-        instructions.add(instruction);
+    public void push_front(Instruction instruction) {
+        head = head.add_front(instruction);
+    }
+
+    public void push_back(Instruction instruction) {
+        end = end.add_back(instruction);
+    }
+
+    public Instruction getLast() {
+        return end;
     }
 
 }
