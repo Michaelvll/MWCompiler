@@ -38,7 +38,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     // For Error produce
     private void throwTypeMismatchErr(TypeSymbol lhsType, TypeSymbol rhsType, Location location) {
         throw new CompileError(stage,
-                "Type Mismatch. In binary expression,  " + StringProcess.getRefString(lhsType.getName()) + "mismatches "
+                "Type Mismatch. In binary expression, " + StringProcess.getRefString(lhsType.getName()) + "mismatches "
                         + StringProcess.getRefString(rhsType.getName()),
                 location);
     }
@@ -155,7 +155,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
     public ExprReturnType visit(FunctionDeclNode node) {
         FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
         expectedReturnType = (node.getInstanceSymbol() == InstanceSymbol.constructorSymbol) ?
-                null : functionTypeSymbol.getReturnType();
+                voidTypeSymbol : functionTypeSymbol.getReturnType();
         try {
             functionTypeSymbol.checkLegal();
         } catch (RuntimeException e) {
@@ -443,7 +443,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprReturnType> {
         }
         if (node.getReturnVal() != null) {
             TypeSymbol returnType = visit(node.getReturnVal()).typeSymbol;
-            if (expectedReturnType != returnType) {
+            if (returnType != nullTypeSymbol && expectedReturnType != returnType) {
                 throw new CompileError(stage, "Return type " + StringProcess.getRefString(expectedReturnType.getName())
                         + "expected, but " + StringProcess.getRefString(returnType.getName())
                         + "returned.", node.getStartLocation());
