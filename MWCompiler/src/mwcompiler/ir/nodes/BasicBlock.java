@@ -1,13 +1,38 @@
 package mwcompiler.ir.nodes;
 
 
-import java.util.LinkedList;
+import mwcompiler.ir.tools.NameBuilder;
 
 public class BasicBlock {
-    private LinkedList<Instruction> instructions = new LinkedList<>();
+    private Instruction head;
+    private Instruction end;
+    private String name;
 
-    public void insert(Instruction instruction) {
-        instructions.add(instruction);
+    public BasicBlock() {
+        this.name = NameBuilder.builder(this);
     }
 
+    public BasicBlock(String name) {
+        this.name = NameBuilder.builder(name);
+    }
+
+    public void push_front(Instruction instruction) {
+        head = head.add_front(instruction);
+    }
+
+    public void push_back(Instruction instruction) {
+        end = end.add_back(instruction);
+    }
+
+    public Instruction getHead() {
+        return head;
+    }
+
+    public Instruction getEnd() {
+        return end;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

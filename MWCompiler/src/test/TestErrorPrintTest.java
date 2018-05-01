@@ -49,9 +49,9 @@ public class TestErrorPrintTest {
         program = PreBuild.program;
         try {
             ForwardRefPreprocessAstVisitor forwardRefPreprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
-            program.accept(forwardRefPreprocessAstVisitor);
+            forwardRefPreprocessAstVisitor.apply(program);
             TypeCheckAstVisitor typeCheckAstVisitor = new TypeCheckAstVisitor();
-            program.accept(typeCheckAstVisitor);
+            typeCheckAstVisitor.apply(program);
         } catch (CompileError e) {
             CompileWarining.printWarings();
             System.err.println(e.getMessage());

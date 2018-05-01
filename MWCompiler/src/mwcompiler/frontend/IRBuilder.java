@@ -3,13 +3,11 @@ package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ir.nodes.BasicBlock;
-import mwcompiler.ir.nodes.Instruction;
-import mwcompiler.ir.nodes.VirtualRegister;
+import mwcompiler.ir.nodes.*;
 import mwcompiler.symbols.SymbolInfo;
 import mwcompiler.symbols.SymbolTable;
 
-public class IRBuilder implements AstVisitor<Instruction> {
+public class IRBuilder implements AstVisitor<SSA> {
     private BasicBlock startBasicBlock;
     private BasicBlock currentBasicBlock;
     private SymbolTable currentSymbolTable;
@@ -19,12 +17,16 @@ public class IRBuilder implements AstVisitor<Instruction> {
         return startBasicBlock;
     }
 
-    private Instruction visit(Node node) {
+    public BasicBlock getStartBasicBlock() {
+        return startBasicBlock;
+    }
+
+    private SSA visit(Node node) {
         return node.accept(this);
     }
 
     @Override
-    public Instruction visit(ProgramNode node) {
+    public SSA visit(ProgramNode node) {
         currentBasicBlock = new BasicBlock();
         startBasicBlock = currentBasicBlock;
         visit(node.getBlock());
@@ -32,7 +34,7 @@ public class IRBuilder implements AstVisitor<Instruction> {
     }
 
     @Override
-    public Instruction visit(BlockNode node) {
+    public SSA visit(BlockNode node) {
         currentSymbolTable = node.getCurrentSymbolTable();
         for (Node statement : node.getStatements()) {
             visit(statement);
@@ -42,117 +44,122 @@ public class IRBuilder implements AstVisitor<Instruction> {
     }
 
     @Override
-    public Instruction visit(VariableDeclNode node) {
+    public SSA visit(VariableDeclNode node) {
         SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getVarSymbol());
-        VirtualRegister reg = VirtualRegister.builder(node.getVarSymbol());
+        VirtualRegisterSSA reg = VirtualRegisterSSA.builder(node.getVarSymbol());
         symbolInfo.setReg(reg);
-        Instruction init = null;
+        Instruction init;
         if (node.getInit() != null) {
-            init = visit(node.getInit());
-            init.setTarget(reg);
+            SSA value = visit(node.getInit());
+            if (value instanceof IntLiteralSSA) {
+                init = new MoveInst(reg, value);
+                currentBasicBlock.push_back(init);
+            } else {
+                init = currentBasicBlock.getEnd();
+                init.setTarget(reg);
+            }
         }
-        return init;
-    }
-
-    @Override
-    public Instruction visit(FunctionDeclNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(ClassDeclNode node) {
+    public SSA visit(FunctionDeclNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(BinaryExprNode node) {
+    public SSA visit(ClassDeclNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(UnaryExprNode node) {
+    public SSA visit(BinaryExprNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(IdentifierExprNode node) {
+    public SSA visit(UnaryExprNode node) {
+        return null;
+    }
+
+    @Override
+    public SSA visit(IdentifierExprNode node) {
 
         return null;
     }
 
     @Override
-    public Instruction visit(NewExprNode node) {
+    public SSA visit(NewExprNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(NullLiteralNode node) {
+    public SSA visit(NullLiteralNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(StringLiteralNode node) {
+    public SSA visit(StringLiteralNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(BoolLiteralNode node) {
+    public SSA visit(BoolLiteralNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(IntLiteralNode node) {
-         node.getVal();
+    public SSA visit(IntLiteralNode node) {
+        return new IntLiteralSSA(node.getVal());
+    }
+
+    @Override
+    public SSA visit(EmptyExprNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(EmptyExprNode node) {
+    public SSA visit(FunctionCallNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(FunctionCallNode node) {
+    public SSA visit(DotMemberNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(DotMemberNode node) {
+    public SSA visit(BrackMemberNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(BrackMemberNode node) {
+    public SSA visit(IfNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(IfNode node) {
+    public SSA visit(LoopNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(LoopNode node) {
+    public SSA visit(BreakNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(BreakNode node) {
+    public SSA visit(ReturnNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(ReturnNode node) {
+    public SSA visit(ContinueNode node) {
         return null;
     }
 
     @Override
-    public Instruction visit(ContinueNode node) {
-        return null;
-    }
-
-    @Override
-    public Instruction visit(ConstructorCallNode node) {
+    public SSA visit(ConstructorCallNode node) {
         return null;
     }
 }
