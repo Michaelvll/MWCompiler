@@ -1,14 +1,10 @@
 package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.tools.IRVisitor;
+import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.InstanceSymbol;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class VirtualRegisterSSA extends RegisterSSA {
-    private static Map<String, Integer> preTextMap = new HashMap<>();
-
     private String name;
 
     private VirtualRegisterSSA(String name) {
@@ -16,8 +12,7 @@ public class VirtualRegisterSSA extends RegisterSSA {
     }
 
     public static VirtualRegisterSSA builder(String preName) {
-        Integer suf = preTextMap.put(preName, preTextMap.getOrDefault(preName, -1) + 1);
-        return new VirtualRegisterSSA(preName + "_" + String.valueOf(suf));
+        return new VirtualRegisterSSA(NameBuilder.builder(preName));
     }
 
     public static VirtualRegisterSSA builder(InstanceSymbol symbol) {

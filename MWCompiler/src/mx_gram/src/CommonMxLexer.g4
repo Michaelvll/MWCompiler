@@ -13,6 +13,7 @@ lexer grammar CommonMxLexer;
 // 	WHITESPACE
 // }
 
+
 // Keywords
 BOOL		: 'bool';
 INT			: 'int';
@@ -81,7 +82,7 @@ BoolLiteral : TRUE | FALSE;
 IntLiteral : DecimalInt | HexInt | OctInt | BinInt;
 
 // Name of variables(including classSymbol of classes and functions)
-StringLiteral : '"' StringCharactors? '"';
+StringLiteral : '"' StringCharactors? '"' | '\'' StringCharactors? '\'';
 
 Identifier : [a-zA-Z][0-9a-zA-Z_]*;
 

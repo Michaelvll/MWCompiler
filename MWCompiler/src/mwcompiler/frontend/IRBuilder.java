@@ -17,6 +17,10 @@ public class IRBuilder implements AstVisitor<SSA> {
         return startBasicBlock;
     }
 
+    public BasicBlock getStartBasicBlock() {
+        return startBasicBlock;
+    }
+
     private SSA visit(Node node) {
         return node.accept(this);
     }
@@ -47,11 +51,11 @@ public class IRBuilder implements AstVisitor<SSA> {
         Instruction init;
         if (node.getInit() != null) {
             SSA value = visit(node.getInit());
-            if (value instanceof IntLiteral) {
+            if (value instanceof IntLiteralSSA) {
                 init = new MoveInst(reg, value);
                 currentBasicBlock.push_back(init);
             } else {
-                init = currentBasicBlock.getLast();
+                init = currentBasicBlock.getEnd();
                 init.setTarget(reg);
             }
         }
@@ -106,7 +110,7 @@ public class IRBuilder implements AstVisitor<SSA> {
 
     @Override
     public SSA visit(IntLiteralNode node) {
-        return new IntLiteral(node.getVal());
+        return new IntLiteralSSA(node.getVal());
     }
 
     @Override

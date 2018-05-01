@@ -18,6 +18,7 @@ public class PreBuild {
 
     public static void build() throws Exception {
         CharStream input = CharStreams.fromFileName("../testcases" + typeCheck[0]);
+//        CharStream input = CharStreams.fromStream(System.in);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         StringProcess.setTokens(tokens);

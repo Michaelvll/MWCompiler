@@ -13,7 +13,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since 2018-03-30
  */
 @RunWith(Suite.class)
-@SuiteClasses({  TestPrint.class, TestParser.class
+@SuiteClasses({  TestPrint.class
         /*Add test class name here, e.g. testA.class*/
 })
 

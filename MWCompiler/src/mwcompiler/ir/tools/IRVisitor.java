@@ -9,7 +9,7 @@ public interface IRVisitor<T> {
 
     T visit(MoveInst moveInst);
 
-    T visit(IntLiteral intLiteral);
+    T visit(IntLiteralSSA intLiteralSSA);
 
     T visit(BasicBlock block);
 }

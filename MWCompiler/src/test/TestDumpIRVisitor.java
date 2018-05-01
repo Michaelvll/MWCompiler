@@ -1,11 +1,10 @@
 package test;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.ast.tools.DumpAstVisitor;
-import mwcompiler.frontend.AstBuilder;
 import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
+import mwcompiler.frontend.IRBuilder;
 import mwcompiler.frontend.TypeCheckAstVisitor;
+import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.tools.DumpIRVisitor;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,11 @@ public class TestDumpIRVisitor {
 
     @Test
     public void testDumpIRVisitor() {
+        IRBuilder irBuilder = new IRBuilder();
+        irBuilder.build(program);
+        BasicBlock startBasicBlock = irBuilder.getStartBasicBlock();
         DumpIRVisitor dumpIRVisitor = new DumpIRVisitor();
+        dumpIRVisitor.apply(startBasicBlock);
+
     }
 }

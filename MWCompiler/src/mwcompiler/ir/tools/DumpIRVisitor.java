@@ -37,7 +37,15 @@ public class DumpIRVisitor implements IRVisitor<String> {
         return ssa.accept(this);
     }
 
+    private String visit(Instruction instruction) {
+        return instruction.accept(this);
+    }
+
     public String visit(BasicBlock block) {
+        println(block.getName() + " .entry:");
+        for (Instruction instruction = block.getHead(); instruction != null; instruction = instruction.next) {
+            println(visit(instruction));
+        }
         return null;
     }
 
@@ -54,12 +62,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(MoveInst moveInst) {
-        println(indent + visit(moveInst.getTarget()) + " = " + visit(moveInst.getLeft()));
-        return null;
+        return indent + visit(moveInst.getTarget()) + " = " + visit(moveInst.getLeft());
     }
 
     @Override
-    public String visit(IntLiteral intLiteral) {
-        return String.valueOf(intLiteral.getVal());
+    public String visit(IntLiteralSSA intLiteralSSA) {
+        return String.valueOf(intLiteralSSA.getVal());
     }
 }

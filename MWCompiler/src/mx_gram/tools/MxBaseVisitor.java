@@ -1,4 +1,4 @@
-// Generated from Mx.g4 by ANTLR 4.7
+// Generated from C:/AResource/Compiler/MWCompiler/MWCompiler/src/mx_gram/src\Mx.g4 by ANTLR 4.7
 package mx_gram.tools;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

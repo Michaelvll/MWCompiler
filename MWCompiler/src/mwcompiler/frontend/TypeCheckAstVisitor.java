@@ -448,6 +448,10 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                         + "expected, but " + StringProcess.getRefString(returnType.getName())
                         + "returned.", node.getStartLocation());
             }
+            if (returnType == VOID_TYPE_SYMBOL) {
+                throw new CompileError(stage, "Cannot return type " + StringProcess.getRefString("void"),
+                        node.getStartLocation());
+            }
             return new ExprType(visit(node.getReturnVal()).typeSymbol, RVAL);
         }
         if (expectedReturnType != VOID_TYPE_SYMBOL) {
