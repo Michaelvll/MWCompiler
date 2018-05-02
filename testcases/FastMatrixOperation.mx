@@ -1,3 +1,4 @@
+// A changed solution for 1630 on SJTU Online Judge 
 int maxr = 25;
 int maxc = 20005;
 int INF = -1 >> 1;
@@ -142,8 +143,9 @@ int main() {
     int  y1; 
     int  x2; 
     int  y2; 
-    int  v; 
-    for (int i = 1; i <= m; ++i) {
+    int  v;
+    int i; 
+    for (i = 1; i <= m; ++i) {
         op = getInt();
         x1 = getInt();
         y1 = getInt();

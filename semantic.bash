@@ -1,3 +1,4 @@
+#!/bin/bash
 # this script is called when the judge wants our compiler to compile a source file.
 # print the compiled source, i.e. asm code, directly to stdout.
 # don't print anything other to stdout.
@@ -7,5 +8,4 @@
 
 set -e
 cd "$(dirname "$0")"
-cat > program.txt   # save everything in stdin to program.txt
-java -cp ./lib/*:./bin mwcompiler.Mwcc -i program.txt -o program.out
+java -cp ./lib/*:./bin mwcompiler.Mwcc -o program.out

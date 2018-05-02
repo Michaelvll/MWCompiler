@@ -1,3 +1,4 @@
+#!/bin/bash
 # this script is called when the judge is building your compiler.
 # no argument will be passed in.
 

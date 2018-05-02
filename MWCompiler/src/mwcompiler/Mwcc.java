@@ -1,7 +1,6 @@
 package mwcompiler;
 
 import mwcompiler.ast.nodes.Node;
-import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.frontend.AstBuilder;
 import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
@@ -49,11 +48,6 @@ public class Mwcc {
             MxParser.ProgramContext programContext = parser.program();
             AstBuilder astBuilder = new AstBuilder();
             programAstRoot = astBuilder.build(programContext);
-            if (CompilerOptions.ast) {
-                DumpAstVisitor astDumper = new DumpAstVisitor();
-                astDumper.apply(programAstRoot);
-                System.exit(0);
-            }
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
@@ -61,6 +55,15 @@ public class Mwcc {
             System.err.println(e.getMessage());
             System.exit(1);
         }
+//        if (!ErrorSet.empty()) {
+//            ErrorSet.print(System.err);
+//        }
+        if (CompilerOptions.ast) {
+            DumpAstVisitor astDumper = new DumpAstVisitor();
+            astDumper.apply(programAstRoot);
+            System.exit(0);
+        }
+
     }
 
 

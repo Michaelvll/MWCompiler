@@ -141,9 +141,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(LoopNode node) {
         addIndent();
         println("<LoopNode>");
-        if (node.getVarDecl() != null) {
+        if (node.getVarInit() != null) {
             println("varDecl: ");
-            visit(node.getVarDecl());
+            visit(node.getVarInit());
         }
         if (node.getCondition() != null) {
             println("cond: ");
