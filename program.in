@@ -1,0 +1,13 @@
+int main()
+{
+
+if(true)
+//return "heiheihei";
+int i = 0;
+i = 1;
+return null;
+}
+//TimerChen
+//Failure Compile
+
+
