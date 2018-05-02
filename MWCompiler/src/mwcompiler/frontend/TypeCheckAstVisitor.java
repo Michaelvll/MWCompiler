@@ -143,7 +143,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
 
         }
         if (currentSymbolTable.findIn(node.getVarSymbol()) != null && !inClass) {
-            throw new CompileError(stage, "Redeclare a variable " + node.getVarSymbol().getName() + "in the same scope",
+            throw new CompileError(stage, "Redeclare a variable " + StringProcess.getRefString(node.getVarSymbol().getName()) + "in the same scope",
                     node.getStartLocation());
         }
         currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
@@ -408,9 +408,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     @Override
     public ExprType visit(LoopNode node) {
         ++inLoop;
-        getCurrentSymbolTable(node.getBody());
-        if (node.getVarDecl() != null) {
-            visit(node.getVarDecl());
+        if (node.getVarInit() != null) {
+            visit(node.getVarInit());
         }
         if (node.getCondition() != null) {
             if (visit(node.getCondition()).typeSymbol != BOOL_TYPE_SYMBOL) {

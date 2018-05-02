@@ -11,23 +11,23 @@ import mwcompiler.utility.Location;
  * @since 2018-04-13
  */
 public class LoopNode extends Node {
-    private Node varDecl;
+    private BinaryExprNode varInit;
     private ExprNode condition;
     private ExprNode step;
     private BlockNode body;
     private Location forPos;
-    private Location varDeclPos;
+    private Location varInitPos;
     private Location conditionPos;
     private Location stepPos;
 
-    public LoopNode(Node varDecl, ExprNode condition, ExprNode step, BlockNode body, Location forPos,
-                    Location varDeclPos, Location conditionPos, Location stepPos) {
-        this.varDecl = varDecl;
+    public LoopNode(BinaryExprNode varInit, ExprNode condition, ExprNode step, BlockNode body, Location forPos,
+                    Location varInitPos, Location conditionPos, Location stepPos) {
+        this.varInit = varInit;
         this.condition = condition;
         this.step = step;
         this.body = body;
         this.forPos = forPos;
-        this.varDeclPos = varDeclPos;
+        this.varInitPos = varInitPos;
         this.conditionPos = conditionPos;
         this.stepPos = stepPos;
     }
@@ -38,8 +38,8 @@ public class LoopNode extends Node {
         return visitor.visit(this);
     }
 
-    public Node getVarDecl() {
-        return varDecl;
+    public Node getVarInit() {
+        return varInit;
     }
 
     public ExprNode getCondition() {
@@ -54,8 +54,8 @@ public class LoopNode extends Node {
         return body;
     }
 
-    public Location getVarDeclPos() {
-        return varDeclPos;
+    public Location getVarInitPos() {
+        return varInitPos;
     }
 
     public Location getConditionPos() {

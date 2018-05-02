@@ -64,6 +64,7 @@ public class IRBuilder implements AstVisitor<SSA> {
 
     @Override
     public SSA visit(FunctionDeclNode node) {
+
         return null;
     }
 
@@ -84,7 +85,6 @@ public class IRBuilder implements AstVisitor<SSA> {
 
     @Override
     public SSA visit(IdentifierExprNode node) {
-
         return null;
     }
 

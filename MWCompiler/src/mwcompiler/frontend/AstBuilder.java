@@ -1,13 +1,16 @@
 package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.*;
+import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.utility.CompileError;
 import mwcompiler.utility.Location;
 import mwcompiler.utility.StringProcess;
-import mwcompiler.utility.CompileError;
-import mx_gram.tools.*;
-
-import org.antlr.v4.runtime.tree.*;
+import mx_gram.tools.MxBaseVisitor;
+import mx_gram.tools.MxParser;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -465,30 +468,19 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     // Loop statement
     @Override
     public Node visitForField(MxParser.ForFieldContext ctx) {
-        Node vardecl = null;
+        BinaryExprNode vardecl = null;
         ExprNode condition = null;
         ExprNode step = null;
         BlockNode body = (BlockNode) visit(ctx.body());
         Location vardeclPos = null;
         Location conditionPos = null;
         Location stepPos = null;
-        if (ctx.type() != null) {
-            vardeclPos = new Location(ctx);
-            if (ctx.variableField() == null) {
-                throw new CompileError(stage, "Syntax Error. Condition field in for should contain "
-                        + "complete variable declaration or initialization", new Location(ctx));
-            }
-            VariableDeclNode node = (VariableDeclNode) visit(ctx.variableField());
-            TypeNode typeNode = (TypeNode) visit(ctx.type());
-            node.setType(typeNode.getTypeSymbol(), vardeclPos);
-            vardecl = node;
-        } else {
-            if (ctx.variableField() != null) {
-                VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
-                vardecl = new BinaryExprNode(
-                        new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx)),
-                        ExprNode.OPs.ASSIGN, variableDeclNode.getInit(), new Location(ctx));
-            }
+
+        if (ctx.variableField() != null) {
+            VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
+            vardecl = new BinaryExprNode(
+                    new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx)),
+                    ExprNode.OPs.ASSIGN, variableDeclNode.getInit(), new Location(ctx));
         }
 
         if (ctx.cond != null) {
