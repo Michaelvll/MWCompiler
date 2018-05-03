@@ -1,4 +1,4 @@
-// Generated from C:/AResource/Compiler/MWCompiler/MWCompiler/src/mx_gram/src\Mx.g4 by ANTLR 4.7
+// Generated from Mx.g4 by ANTLR 4.7
 package mx_gram.tools;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1432,6 +1432,7 @@ public class MxParser extends Parser {
 	}
 
 	public static class ForFieldContext extends ParserRuleContext {
+		public VariableFieldContext init;
 		public ExprContext cond;
 		public ExprContext step;
 		public TerminalNode FOR() { return getToken(MxParser.FOR, 0); }
@@ -1481,7 +1482,7 @@ public class MxParser extends Parser {
 			if (_la==Identifier) {
 				{
 				setState(208);
-				variableField();
+				((ForFieldContext)_localctx).init = variableField();
 				}
 			}
 

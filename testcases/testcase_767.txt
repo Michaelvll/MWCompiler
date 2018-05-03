@@ -1,0 +1,30 @@
+int main()
+{
+int [][][]a = (new int[3][2][][])[1];
+
+}
+
+//TimerChen
+//new multi-dim Array
+//success compile
+
+/*!! metadata:
+=== comment ===
+陈竞潇 [success]new multi-dim Array
+=== is_public ===
+True
+=== assert ===
+success_compile
+=== timeout ===
+0
+=== input ===
+
+=== phase ===
+semantic extended
+=== output ===
+
+=== exitcode ===
+0
+
+!!*/
+

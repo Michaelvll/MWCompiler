@@ -55,9 +55,7 @@ public class Mwcc {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-//        if (!ErrorSet.empty()) {
-//            ErrorSet.print(System.err);
-//        }
+
         if (CompilerOptions.ast) {
             DumpAstVisitor astDumper = new DumpAstVisitor();
             astDumper.apply(programAstRoot);
