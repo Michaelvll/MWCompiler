@@ -1,13 +1,7 @@
 int main()
 {
+int [][][]a = (new int[3][2][][])[1];
 
-if(true)
-//return "heiheihei";
-int i = 0;
-i = 1;
-return null;
 }
-//TimerChen
-//Failure Compile
 
 

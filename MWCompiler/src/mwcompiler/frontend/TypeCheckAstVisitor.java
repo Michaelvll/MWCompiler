@@ -27,6 +27,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     private String stage = "Type Checking";
     private TypeSymbol expectedReturnType;
 
+    private Boolean inNew = false;
+
     public void apply(Node node) {
         visit(node);
     }
@@ -341,6 +343,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                     node.getStartLocation());
         }
         FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) callerType.typeSymbol;
+
         List<ExprNode> args = node.getArgs();
         List<TypeSymbol> params = functionTypeSymbol.getParams();
         checkArgs(args, params, node.getStartLocation());

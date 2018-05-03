@@ -133,7 +133,7 @@ literal:
 
 arguments	: LPAREN exprList? RPAREN;
 exprList	: expr (COMMA expr)*;
-creator		: createdName arrayCreatorRest?;
+creator		: createdName (LPAREN RPAREN)? arrayCreatorRest?;
 createdName	: Identifier | primitiveType;
 arrayCreatorRest:
     creatorInner+
