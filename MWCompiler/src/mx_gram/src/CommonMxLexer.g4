@@ -8,11 +8,6 @@
  */
 
 lexer grammar CommonMxLexer;
-// channels {
-// 	COMMENTS,
-// 	WHITESPACE
-// }
-
 
 // Keywords
 BOOL		: 'bool';
