@@ -29,7 +29,7 @@ THIS		: 'this';
 fragment TRUE	: 'true';
 fragment FALSE	: 'false';
 
-// Seperator
+// Separator
 LPAREN	: '(';
 RPAREN	: ')';
 LBRACE	: '{';
@@ -40,7 +40,7 @@ SEMI	: ';';
 COMMA	: ',';
 
 // Operators
-// Arithmatic
+// Arithmetic
 ADD	: '+';
 SUB	: '-';
 MUL	: '*';
@@ -77,7 +77,7 @@ BoolLiteral : TRUE | FALSE;
 IntLiteral : DecimalInt | HexInt | OctInt | BinInt;
 
 // Name of variables(including classSymbol of classes and functions)
-StringLiteral : '"' StringCharactors? '"' | '\'' StringCharactors? '\'';
+StringLiteral : '"' StringCharacters? '"' | '\'' StringCharacters? '\'';
 
 Identifier : [a-zA-Z][0-9a-zA-Z_]*;
 
@@ -92,8 +92,8 @@ fragment HexDigit			: [0-9a-fA-F];
 fragment OctDigit			: [0-7];
 fragment BinDigit			: [01];
 fragment Zero				: '0';
-fragment StringCharactors	: StringCharactor+;
-fragment StringCharactor	: ~["\\] | EscapeSequence;
+fragment StringCharacters	: StringCharacter+;
+fragment StringCharacter	: ~["\\] | EscapeSequence;
 fragment EscapeSequence		: '\\' [btnfr"'\\];
 
 LINE_COMMENT		: '//' .*? '\n' -> skip;
