@@ -218,7 +218,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 if (lhsType.typeSymbol != INT_TYPE_SYMBOL && lhsType.typeSymbol != STRING_TYPE_SYMBOL)
                     throwNotSupport(node.getOp(), lhsType.typeSymbol, node.getStartLocation());
                 return new ExprType(lhsType.typeSymbol, RVAL);
-            case SUB: case DIV: case MOD: case MUL: case LSFT: case RSFT: case BITOR: case BITAND: case BITNOT:
+            case SUB: case DIV: case MOD: case MUL: case LSFT: case RSFT: case BITOR: case BITAND:
             case BITXOR:
                 if (lhsType.typeSymbol != INT_TYPE_SYMBOL)
                     throwNotSupport(node.getOp(), lhsType.typeSymbol, node.getStartLocation());
@@ -248,7 +248,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(UnaryExprNode node) {
         ExprType exprType = visit(node.getExpr());
         switch (node.getOp()) {
-            case INC: case DEC: case INC_SUFF: case DEC_SUFF: case BITNOT:
+            case INC: case DEC: case INC_SUFF: case DEC_SUFF:
                 if (exprType.typeSymbol != INT_TYPE_SYMBOL) {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
@@ -263,8 +263,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
                 return new ExprType(BOOL_TYPE_SYMBOL, RVAL);
-            case ADD:
-            case SUB:
+            case ADD: case SUB:case BITNOT:
                 if (exprType.typeSymbol != INT_TYPE_SYMBOL)
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 return new ExprType(INT_TYPE_SYMBOL, RVAL);
