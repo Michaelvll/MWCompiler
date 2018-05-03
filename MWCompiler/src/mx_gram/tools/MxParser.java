@@ -1,4 +1,4 @@
-// Generated from C:/AResource/Compiler/MWCompiler/MWCompiler/src/mx_gram/src\Mx.g4 by ANTLR 4.7
+// Generated from Mx.g4 by ANTLR 4.7
 package mx_gram.tools;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1432,6 +1432,7 @@ public class MxParser extends Parser {
 	}
 
 	public static class ForFieldContext extends ParserRuleContext {
+		public VariableFieldContext init;
 		public ExprContext cond;
 		public ExprContext step;
 		public TerminalNode FOR() { return getToken(MxParser.FOR, 0); }
@@ -1481,7 +1482,7 @@ public class MxParser extends Parser {
 			if (_la==Identifier) {
 				{
 				setState(208);
-				variableField();
+				((ForFieldContext)_localctx).init = variableField();
 				}
 			}
 
@@ -2573,6 +2574,8 @@ public class MxParser extends Parser {
 		public ArrayCreatorRestContext arrayCreatorRest() {
 			return getRuleContext(ArrayCreatorRestContext.class,0);
 		}
+		public TerminalNode LPAREN() { return getToken(MxParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(MxParser.RPAREN, 0); }
 		public CreatorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2592,12 +2595,22 @@ public class MxParser extends Parser {
 			{
 			setState(342);
 			createdName();
-			setState(344);
+			setState(346);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 			case 1:
 				{
+				{
 				setState(343);
+				match(LPAREN);
+				setState(344);
+				match(RPAREN);
+				}
+				}
+				break;
+			case 2:
+				{
+				setState(345);
 				arrayCreatorRest();
 				}
 				break;
@@ -2635,13 +2648,13 @@ public class MxParser extends Parser {
 		CreatedNameContext _localctx = new CreatedNameContext(_ctx, getState());
 		enterRule(_localctx, 70, RULE_createdName);
 		try {
-			setState(348);
+			setState(350);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Identifier:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(346);
+				setState(348);
 				match(Identifier);
 				}
 				break;
@@ -2650,7 +2663,7 @@ public class MxParser extends Parser {
 			case STRING:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(347);
+				setState(349);
 				primitiveType();
 				}
 				break;
@@ -2694,7 +2707,7 @@ public class MxParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(351); 
+			setState(353); 
 			_errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -2702,7 +2715,7 @@ public class MxParser extends Parser {
 				case 1:
 					{
 					{
-					setState(350);
+					setState(352);
 					creatorInner();
 					}
 					}
@@ -2710,7 +2723,7 @@ public class MxParser extends Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(353); 
+				setState(355); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,29,_ctx);
 			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
@@ -2751,19 +2764,19 @@ public class MxParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(355);
-			match(LBRACK);
 			setState(357);
+			match(LBRACK);
+			setState(359);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NULL) | (1L << NEW) | (1L << THIS) | (1L << LPAREN) | (1L << ADD) | (1L << SUB) | (1L << NOT) | (1L << BITNOT) | (1L << INC) | (1L << DEC) | (1L << BoolLiteral) | (1L << IntLiteral) | (1L << StringLiteral) | (1L << Identifier))) != 0)) {
 				{
-				setState(356);
+				setState(358);
 				expr(0);
 				}
 			}
 
-			setState(359);
+			setState(361);
 			match(RBRACK);
 			}
 		}
@@ -2822,7 +2835,7 @@ public class MxParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\38\u016c\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\38\u016e\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -2846,18 +2859,18 @@ public class MxParser extends Parser {
 		" \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3"+
 		" \3 \3 \3 \3 \3 \3 \3 \3 \7 \u0140\n \f \16 \u0143\13 \3!\3!\3!\3!\5!"+
 		"\u0149\n!\3\"\3\"\5\"\u014d\n\"\3\"\3\"\3#\3#\3#\7#\u0154\n#\f#\16#\u0157"+
-		"\13#\3$\3$\5$\u015b\n$\3%\3%\5%\u015f\n%\3&\6&\u0162\n&\r&\16&\u0163\3"+
-		"\'\3\'\5\'\u0168\n\'\3\'\3\'\3\'\2\3>(\2\4\6\b\n\f\16\20\22\24\26\30\32"+
-		"\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJL\2\t\3\2\3\5\3\2/\60\3\2\32\33\3"+
-		"\2\34\36\3\2()\4\2\37 #$\3\2!\"\2\u0181\2Q\3\2\2\2\4Y\3\2\2\2\6[\3\2\2"+
-		"\2\bd\3\2\2\2\nf\3\2\2\2\fi\3\2\2\2\16s\3\2\2\2\20u\3\2\2\2\22w\3\2\2"+
-		"\2\24y\3\2\2\2\26~\3\2\2\2\30\u0082\3\2\2\2\32\u0084\3\2\2\2\34\u0091"+
+		"\13#\3$\3$\3$\3$\5$\u015d\n$\3%\3%\5%\u0161\n%\3&\6&\u0164\n&\r&\16&\u0165"+
+		"\3\'\3\'\5\'\u016a\n\'\3\'\3\'\3\'\2\3>(\2\4\6\b\n\f\16\20\22\24\26\30"+
+		"\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJL\2\t\3\2\3\5\3\2/\60\3\2\32\33"+
+		"\3\2\34\36\3\2()\4\2\37 #$\3\2!\"\2\u0184\2Q\3\2\2\2\4Y\3\2\2\2\6[\3\2"+
+		"\2\2\bd\3\2\2\2\nf\3\2\2\2\fi\3\2\2\2\16s\3\2\2\2\20u\3\2\2\2\22w\3\2"+
+		"\2\2\24y\3\2\2\2\26~\3\2\2\2\30\u0082\3\2\2\2\32\u0084\3\2\2\2\34\u0091"+
 		"\3\2\2\2\36\u0094\3\2\2\2 \u0096\3\2\2\2\"\u00a5\3\2\2\2$\u00a7\3\2\2"+
 		"\2&\u00a9\3\2\2\2(\u00b7\3\2\2\2*\u00be\3\2\2\2,\u00c3\3\2\2\2.\u00c5"+
 		"\3\2\2\2\60\u00ce\3\2\2\2\62\u00d0\3\2\2\2\64\u00e0\3\2\2\2\66\u00e7\3"+
 		"\2\2\28\u00eb\3\2\2\2:\u00f8\3\2\2\2<\u00fa\3\2\2\2>\u0110\3\2\2\2@\u0148"+
-		"\3\2\2\2B\u014a\3\2\2\2D\u0150\3\2\2\2F\u0158\3\2\2\2H\u015e\3\2\2\2J"+
-		"\u0161\3\2\2\2L\u0165\3\2\2\2NP\5\4\3\2ON\3\2\2\2PS\3\2\2\2QO\3\2\2\2"+
+		"\3\2\2\2B\u014a\3\2\2\2D\u0150\3\2\2\2F\u0158\3\2\2\2H\u0160\3\2\2\2J"+
+		"\u0163\3\2\2\2L\u0167\3\2\2\2NP\5\4\3\2ON\3\2\2\2PS\3\2\2\2QO\3\2\2\2"+
 		"QR\3\2\2\2RT\3\2\2\2SQ\3\2\2\2TU\7\2\2\3U\3\3\2\2\2VZ\5\6\4\2WZ\5\b\5"+
 		"\2XZ\5\n\6\2YV\3\2\2\2YW\3\2\2\2YX\3\2\2\2Z\5\3\2\2\2[\\\5\f\7\2\\]\5"+
 		"\24\13\2]^\7\30\2\2^\7\3\2\2\2_`\5\f\7\2`a\5\26\f\2ae\3\2\2\2bc\7\6\2"+
@@ -2940,15 +2953,16 @@ public class MxParser extends Parser {
 		"\u014f\7\23\2\2\u014fC\3\2\2\2\u0150\u0155\5> \2\u0151\u0152\7\31\2\2"+
 		"\u0152\u0154\5> \2\u0153\u0151\3\2\2\2\u0154\u0157\3\2\2\2\u0155\u0153"+
 		"\3\2\2\2\u0155\u0156\3\2\2\2\u0156E\3\2\2\2\u0157\u0155\3\2\2\2\u0158"+
-		"\u015a\5H%\2\u0159\u015b\5J&\2\u015a\u0159\3\2\2\2\u015a\u015b\3\2\2\2"+
-		"\u015bG\3\2\2\2\u015c\u015f\7\65\2\2\u015d\u015f\5\20\t\2\u015e\u015c"+
-		"\3\2\2\2\u015e\u015d\3\2\2\2\u015fI\3\2\2\2\u0160\u0162\5L\'\2\u0161\u0160"+
-		"\3\2\2\2\u0162\u0163\3\2\2\2\u0163\u0161\3\2\2\2\u0163\u0164\3\2\2\2\u0164"+
-		"K\3\2\2\2\u0165\u0167\7\26\2\2\u0166\u0168\5> \2\u0167\u0166\3\2\2\2\u0167"+
-		"\u0168\3\2\2\2\u0168\u0169\3\2\2\2\u0169\u016a\7\27\2\2\u016aM\3\2\2\2"+
+		"\u015c\5H%\2\u0159\u015a\7\22\2\2\u015a\u015d\7\23\2\2\u015b\u015d\5J"+
+		"&\2\u015c\u0159\3\2\2\2\u015c\u015b\3\2\2\2\u015c\u015d\3\2\2\2\u015d"+
+		"G\3\2\2\2\u015e\u0161\7\65\2\2\u015f\u0161\5\20\t\2\u0160\u015e\3\2\2"+
+		"\2\u0160\u015f\3\2\2\2\u0161I\3\2\2\2\u0162\u0164\5L\'\2\u0163\u0162\3"+
+		"\2\2\2\u0164\u0165\3\2\2\2\u0165\u0163\3\2\2\2\u0165\u0166\3\2\2\2\u0166"+
+		"K\3\2\2\2\u0167\u0169\7\26\2\2\u0168\u016a\5> \2\u0169\u0168\3\2\2\2\u0169"+
+		"\u016a\3\2\2\2\u016a\u016b\3\2\2\2\u016b\u016c\7\27\2\2\u016cM\3\2\2\2"+
 		"!QYdns|\u008a\u008d\u009a\u00a5\u00b1\u00b5\u00c3\u00ca\u00ce\u00d3\u00d7"+
-		"\u00db\u00e7\u00f0\u00f8\u0110\u013f\u0141\u0148\u014c\u0155\u015a\u015e"+
-		"\u0163\u0167";
+		"\u00db\u00e7\u00f0\u00f8\u0110\u013f\u0141\u0148\u014c\u0155\u015c\u0160"+
+		"\u0165\u0169";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

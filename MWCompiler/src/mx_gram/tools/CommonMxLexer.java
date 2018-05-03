@@ -41,8 +41,8 @@ public class CommonMxLexer extends Lexer {
 		"NOT", "AND", "OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR", 
 		"ASSIGN", "INC", "DEC", "DOT", "BoolLiteral", "IntLiteral", "StringLiteral", 
 		"Identifier", "DecimalInt", "HexInt", "OctInt", "BinInt", "Digit", "Alpha", 
-		"NonZeroDigit", "HexDigit", "OctDigit", "BinDigit", "Zero", "StringCharactors", 
-		"StringCharactor", "EscapeSequence", "LINE_COMMENT", "MULTILINE_COMMENT", 
+		"NonZeroDigit", "HexDigit", "OctDigit", "BinDigit", "Zero", "StringCharacters", 
+		"StringCharacter", "EscapeSequence", "LINE_COMMENT", "MULTILINE_COMMENT", 
 		"WS"
 	};
 

@@ -8,4 +8,5 @@
 
 set -e
 cd "$(dirname "$0")"
-java -cp ./lib/*:./bin mwcompiler.Mwcc -o program.out
+cat > program.in
+java -cp ./lib/*:./bin mwcompiler.Mwcc -i program.in -o program.out -Wall

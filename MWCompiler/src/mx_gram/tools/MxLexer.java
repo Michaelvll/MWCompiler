@@ -1,4 +1,4 @@
-// Generated from C:/AResource/Compiler/MWCompiler/MWCompiler/src/mx_gram/src\Mx.g4 by ANTLR 4.7
+// Generated from Mx.g4 by ANTLR 4.7
 package mx_gram.tools;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -41,8 +41,8 @@ public class MxLexer extends Lexer {
 		"NOT", "AND", "OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR", 
 		"ASSIGN", "INC", "DEC", "DOT", "BoolLiteral", "IntLiteral", "StringLiteral", 
 		"Identifier", "DecimalInt", "HexInt", "OctInt", "BinInt", "Digit", "Alpha", 
-		"NonZeroDigit", "HexDigit", "OctDigit", "BinDigit", "Zero", "StringCharactors", 
-		"StringCharactor", "EscapeSequence", "LINE_COMMENT", "MULTILINE_COMMENT", 
+		"NonZeroDigit", "HexDigit", "OctDigit", "BinDigit", "Zero", "StringCharacters", 
+		"StringCharacter", "EscapeSequence", "LINE_COMMENT", "MULTILINE_COMMENT", 
 		"WS"
 	};
 
