@@ -4,7 +4,7 @@ import mwcompiler.ir.tools.IRVisitor;
 
 public class MoveInst extends Instruction {
 
-    public MoveInst(RegisterSSA target, SSA value) {
+    public MoveInst(Register target, RegOrImm value) {
         super();
         super.setTarget(target);
         super.setLeft(value);

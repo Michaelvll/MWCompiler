@@ -4,7 +4,7 @@ import mwcompiler.ir.tools.IRVisitor;
 
 public class BinaryExpInst extends Instruction {
 
-    public BinaryExpInst(RegisterSSA target, RegisterSSA left, RegisterSSA right) {
+    public BinaryExpInst(Register target, Register left, Register right) {
         super();
         super.setTarget(target);
         super.setLeft(left);

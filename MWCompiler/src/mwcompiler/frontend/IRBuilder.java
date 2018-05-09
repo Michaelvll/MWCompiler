@@ -4,10 +4,12 @@ package mwcompiler.frontend;
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ir.nodes.*;
+import mwcompiler.symbols.FunctionTypeSymbol;
+import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.SymbolInfo;
 import mwcompiler.symbols.SymbolTable;
 
-public class IRBuilder implements AstVisitor<SSA> {
+public class IRBuilder implements AstVisitor<RegOrImm> {
     private BasicBlock startBasicBlock;
     private BasicBlock currentBasicBlock;
     private SymbolTable currentSymbolTable;
@@ -21,20 +23,18 @@ public class IRBuilder implements AstVisitor<SSA> {
         return startBasicBlock;
     }
 
-    private SSA visit(Node node) {
+    private RegOrImm visit(Node node) {
         return node.accept(this);
     }
 
     @Override
-    public SSA visit(ProgramNode node) {
-        currentBasicBlock = new BasicBlock();
-        startBasicBlock = currentBasicBlock;
+    public RegOrImm visit(ProgramNode node) {
         visit(node.getBlock());
         return null;
     }
 
     @Override
-    public SSA visit(BlockNode node) {
+    public RegOrImm visit(BlockNode node) {
         currentSymbolTable = node.getCurrentSymbolTable();
         for (Node statement : node.getStatements()) {
             visit(statement);
@@ -44,14 +44,14 @@ public class IRBuilder implements AstVisitor<SSA> {
     }
 
     @Override
-    public SSA visit(VariableDeclNode node) {
+    public RegOrImm visit(VariableDeclNode node) {
         SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getVarSymbol());
-        VirtualRegisterSSA reg = VirtualRegisterSSA.builder(node.getVarSymbol());
+        VirtualRegister reg = VirtualRegister.builder(node.getVarSymbol());
         symbolInfo.setReg(reg);
         Instruction init;
         if (node.getInit() != null) {
-            SSA value = visit(node.getInit());
-            if (value instanceof IntLiteralSSA) {
+            RegOrImm value = visit(node.getInit());
+            if (value instanceof IntLiteral) {
                 init = new MoveInst(reg, value);
                 currentBasicBlock.push_back(init);
             } else {
@@ -63,103 +63,108 @@ public class IRBuilder implements AstVisitor<SSA> {
     }
 
     @Override
-    public SSA visit(FunctionDeclNode node) {
+    public RegOrImm visit(FunctionDeclNode node) {
+        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
+        InstanceSymbol instanceSymbol = node.getInstanceSymbol();
+        SymbolInfo symbolInfo = currentSymbolTable.findIn(instanceSymbol);
+        Function function = new Function(functionTypeSymbol, instanceSymbol);
 
+        //TODO: add function new
         return null;
     }
 
     @Override
-    public SSA visit(ClassDeclNode node) {
+    public RegOrImm visit(ClassDeclNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(BinaryExprNode node) {
+    public RegOrImm visit(BinaryExprNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(UnaryExprNode node) {
+    public RegOrImm visit(UnaryExprNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(IdentifierExprNode node) {
+    public RegOrImm visit(IdentifierExprNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(NewExprNode node) {
+    public RegOrImm visit(NewExprNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(NullLiteralNode node) {
+    public RegOrImm visit(NullLiteralNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(StringLiteralNode node) {
+    public RegOrImm visit(StringLiteralNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(BoolLiteralNode node) {
+    public RegOrImm visit(BoolLiteralNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(IntLiteralNode node) {
-        return new IntLiteralSSA(node.getVal());
+    public RegOrImm visit(IntLiteralNode node) {
+        return new IntLiteral(node.getVal());
     }
 
     @Override
-    public SSA visit(EmptyExprNode node) {
+    public RegOrImm visit(EmptyExprNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(FunctionCallNode node) {
+    public RegOrImm visit(FunctionCallNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(DotMemberNode node) {
+    public RegOrImm visit(DotMemberNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(BrackMemberNode node) {
+    public RegOrImm visit(BrackMemberNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(IfNode node) {
+    public RegOrImm visit(IfNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(LoopNode node) {
+    public RegOrImm visit(LoopNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(BreakNode node) {
+    public RegOrImm visit(BreakNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(ReturnNode node) {
+    public RegOrImm visit(ReturnNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(ContinueNode node) {
+    public RegOrImm visit(ContinueNode node) {
         return null;
     }
 
     @Override
-    public SSA visit(ConstructorCallNode node) {
+    public RegOrImm visit(ConstructorCallNode node) {
         return null;
     }
 }

@@ -209,6 +209,11 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 if (lhsType.lvalOrRval == RVAL || node.getLeft() instanceof FunctionCallNode) {
                     throw new CompileError(stage, "Can not assign to a Rvalue ", node.getStartLocation());
                 }
+                if (node.getLeft() instanceof IdentifierExprNode) {
+                    if (((IdentifierExprNode) node.getLeft()).getInstanceSymbol() == InstanceSymbol.THIS_IS)
+                        throw new CompileError(stage, "Can not assign to "
+                                + StringProcess.getRefString("this"), node.getStartLocation());
+                }
                 if (((lhsType.typeSymbol instanceof ArrayTypeSymbol || !lhsType.typeSymbol.isPrimitiveType())
                         && rhsType.typeSymbol == NULL_TYPE_SYMBOL) || lhsType.typeSymbol == rhsType.typeSymbol) {
                     return new ExprType(VOID_TYPE_SYMBOL, RVAL);
@@ -263,7 +268,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 }
                 return new ExprType(BOOL_TYPE_SYMBOL, RVAL);
-            case ADD: case SUB:case BITNOT:
+            case ADD: case SUB: case BITNOT:
                 if (exprType.typeSymbol != INT_TYPE_SYMBOL)
                     throwNotSupport(node.getOp(), exprType.typeSymbol, node.getStartLocation());
                 return new ExprType(INT_TYPE_SYMBOL, RVAL);

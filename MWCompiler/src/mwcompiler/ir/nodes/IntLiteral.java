@@ -2,10 +2,10 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public class IntLiteralSSA extends SSA {
+public class IntLiteral extends RegOrImm {
     private Integer val;
 
-    public IntLiteralSSA(Integer val) {
+    public IntLiteral(Integer val) {
         this.val = val;
     }
 

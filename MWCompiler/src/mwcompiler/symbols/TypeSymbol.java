@@ -1,10 +1,10 @@
 package mwcompiler.symbols;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class TypeSymbol extends Symbol {
-    static Map<String, TypeSymbol> typeSymbolMap = new Hashtable<>();
+    static Map<String, TypeSymbol> typeSymbolMap = new HashMap<>();
 
     public static TypeSymbol searchSymbol(String name) {
         return typeSymbolMap.get(name);

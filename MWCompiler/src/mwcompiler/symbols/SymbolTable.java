@@ -1,11 +1,11 @@
 package mwcompiler.symbols;
 
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
-    private static Map<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new Hashtable<>();
+    private static Map<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new HashMap<>();
 
     static {
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("int"), new SymbolTable(null));
@@ -14,7 +14,7 @@ public class SymbolTable {
         namedSymbolTableMap.put(NonArrayTypeSymbol.builder("void"), new SymbolTable(null));
     }
 
-    private Map<InstanceSymbol, SymbolInfo> currentMap = new Hashtable<>();
+    private Map<InstanceSymbol, SymbolInfo> currentMap = new HashMap<>();
     private SymbolTable outerSymbolTable;
 
     public SymbolTable(SymbolTable outerSymbolTable) {
@@ -37,6 +37,7 @@ public class SymbolTable {
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
+        symbolTable.put(InstanceSymbol.THIS_IS, nonArrayTypeSymbol);
         namedSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 
