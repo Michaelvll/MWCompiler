@@ -3,16 +3,24 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.tools.NameBuilder;
 
+import java.util.Set;
+
 public class BasicBlock {
     private Instruction head;
     private Instruction end;
     private String name;
+    private Function parentFunction;
 
-    public BasicBlock() {
+    private Set<BasicBlock> fromBasicBlock;
+    private Set<BasicBlock> toBasicBlock;
+
+    public BasicBlock(Function parentFunction) {
+        this.parentFunction = parentFunction;
         this.name = NameBuilder.builder(this);
     }
 
-    public BasicBlock(String name) {
+    public BasicBlock(Function parentFunction, String name) {
+        this.parentFunction = parentFunction;
         this.name = NameBuilder.builder(name);
     }
 

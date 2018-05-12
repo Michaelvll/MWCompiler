@@ -1,6 +1,6 @@
 package mwcompiler.symbols;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class InstanceSymbol extends Symbol {
@@ -9,7 +9,7 @@ public class InstanceSymbol extends Symbol {
     public static final InstanceSymbol CONSTRUCTOR_IS = new InstanceSymbol("~constructor");
 
 
-    private static Map<String, InstanceSymbol> instanceSymbolMap = new Hashtable<>();
+    private static Map<String, InstanceSymbol> instanceSymbolMap = new HashMap<>();
 
     static {
         instanceSymbolMap.put("this", THIS_IS);

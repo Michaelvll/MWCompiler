@@ -6,9 +6,9 @@ public abstract class Instruction {
     public Instruction pre;
     public Instruction next;
 
-    private RegisterSSA target;
-    private SSA left;
-    private SSA right;
+    private Register target;
+    private RegOrImm left;
+    private RegOrImm right;
 
     public abstract <T> T accept(IRVisitor<T> visitor);
 
@@ -22,27 +22,27 @@ public abstract class Instruction {
         return next;
     }
 
-    public RegisterSSA getTarget() {
+    public Register getTarget() {
         return target;
     }
 
-    public void setTarget(RegisterSSA target) {
+    public void setTarget(Register target) {
         this.target = target;
     }
 
-    public SSA getLeft() {
+    public RegOrImm getLeft() {
         return left;
     }
 
-    public void setLeft(SSA left) {
+    public void setLeft(RegOrImm left) {
         this.left = left;
     }
 
-    public SSA getRight() {
+    public RegOrImm getRight() {
         return right;
     }
 
-    public void setRight(SSA right) {
+    public void setRight(RegOrImm right) {
         this.right = right;
     }
 }

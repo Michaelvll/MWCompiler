@@ -33,8 +33,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
         this.out.print(indent + s);
     }
 
-    private String visit(SSA ssa) {
-        return ssa.accept(this);
+    private String visit(RegOrImm regOrImm) {
+        return regOrImm.accept(this);
     }
 
     private String visit(Instruction instruction) {
@@ -50,7 +50,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(VirtualRegisterSSA register) {
+    public String visit(VirtualRegister register) {
         return "%" + register.getName();
     }
 
@@ -66,7 +66,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(IntLiteralSSA intLiteralSSA) {
+    public String visit(IntLiteral intLiteralSSA) {
         return String.valueOf(intLiteralSSA.getVal());
     }
 }
