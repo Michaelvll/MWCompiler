@@ -1,6 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.utility.ExprOps;
 import mwcompiler.utility.Location;
 
 /**
@@ -12,10 +13,10 @@ import mwcompiler.utility.Location;
  */
 public class UnaryExprNode extends ExprNode {
 
-    private OPs op;
+    private ExprOps op;
     private ExprNode expr;
 
-    public UnaryExprNode(OPs op, ExprNode expr, Location pos) {
+    public UnaryExprNode(ExprOps op, ExprNode expr, Location pos) {
         super(pos);
         this.op = op;
         this.expr = expr;
@@ -27,7 +28,7 @@ public class UnaryExprNode extends ExprNode {
         return visitor.visit(this);
     }
 
-    public OPs getOp() {
+    public ExprOps getOp() {
         return op;
     }
 

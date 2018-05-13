@@ -1,8 +1,10 @@
 package mwcompiler.ir.tools;
 
 import mwcompiler.ir.nodes.*;
+import mwcompiler.utility.ExprOps;
 
 import java.io.PrintStream;
+import java.util.StringJoiner;
 
 public class DumpIRVisitor implements IRVisitor<String> {
     private String indent;
@@ -13,8 +15,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
         this.out = new PrintStream(System.out);
     }
 
-    public void apply(BasicBlock block) {
-        visit(block);
+    public void apply(ProgramIR programIR) {
+        programIR.getFunctionMap().values().forEach(this::visit);
+        //TODO
     }
 
     private void addIndent() {
@@ -41,11 +44,47 @@ public class DumpIRVisitor implements IRVisitor<String> {
         return instruction.accept(this);
     }
 
-    public String visit(BasicBlock block) {
-        println(block.getName() + " .entry:");
-        for (Instruction instruction = block.getHead(); instruction != null; instruction = instruction.next) {
-            println(visit(instruction));
+    private String visit(ExprOps op) {
+        switch (op) {
+            case ADD: return "add";
+            default: return null;
         }
+    }
+
+    public String visit(BasicBlock block) {
+        println(block.getName() + ".entry:");
+        for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
+            visit(instruction);
+        }
+        return null;
+    }
+
+    @Override
+    public String visit(Return ret) {
+        addIndent();
+        println("ret " + (ret.getRetVal() != null ? visit(ret.getRetVal()) : ""));
+        subIndent();
+        return null;
+    }
+
+    @Override
+    public String visit(Function function) {
+        print("define " + "@" + function.getInstanceSymbol().getName() + "(");
+        StringJoiner params = new StringJoiner(", ");
+        function.getParamVReg().forEach(param -> params.add(visit(param)));
+        print(params.toString());
+        println(") {");
+        visit(function.getStartBasicBlock());
+        println("}");
+        //TODO
+        return null;
+    }
+
+    @Override
+    public String visit(MoveInst moveInst) {
+        addIndent();
+        println(visit(moveInst.getDst()) + " = move " + visit(moveInst.getVal()));
+        subIndent();
         return null;
     }
 
@@ -55,18 +94,16 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(BinaryExpInst binaryExpInst) {
-//        println(indent + visit(binaryExpInst.getTarget()) + " = " + binaryExpInst.get)
+    public String visit(BinaryExprInst binaryExprInst) {
+        addIndent();
+        println(visit(binaryExprInst.getDst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
+                + " " + visit(binaryExprInst.getRight()));
+        subIndent();
         return null;
     }
 
     @Override
-    public String visit(MoveInst moveInst) {
-        return indent + visit(moveInst.getTarget()) + " = " + visit(moveInst.getLeft());
-    }
-
-    @Override
-    public String visit(IntLiteral intLiteralSSA) {
-        return String.valueOf(intLiteralSSA.getVal());
+    public String visit(IntLiteral intLiteral) {
+        return String.valueOf(intLiteral.getVal());
     }
 }

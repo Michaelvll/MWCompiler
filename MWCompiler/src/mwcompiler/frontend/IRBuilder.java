@@ -4,27 +4,31 @@ package mwcompiler.frontend;
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ir.nodes.*;
-import mwcompiler.symbols.FunctionTypeSymbol;
-import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.SymbolInfo;
-import mwcompiler.symbols.SymbolTable;
+import mwcompiler.symbols.*;
+import mwcompiler.utility.ExprOps;
 
 public class IRBuilder implements AstVisitor<RegOrImm> {
-    private BasicBlock startBasicBlock;
     private BasicBlock currentBasicBlock;
     private SymbolTable currentSymbolTable;
+    private ProgramIR programIR = new ProgramIR();
 
-    public BasicBlock build(Node node) {
+    private Boolean getReg = false;
+
+    public ProgramIR build(Node node) {
         visit(node);
-        return startBasicBlock;
-    }
-
-    public BasicBlock getStartBasicBlock() {
-        return startBasicBlock;
+        return programIR;
     }
 
     private RegOrImm visit(Node node) {
         return node.accept(this);
+    }
+
+    private void getCurrentSymbolTable(BlockNode block) {
+        currentSymbolTable = block.getCurrentSymbolTable();
+    }
+
+    private void getCurrentBasicBlock(Function function) {
+        currentBasicBlock = function.getStartBasicBlock();
     }
 
     @Override
@@ -36,9 +40,7 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
     @Override
     public RegOrImm visit(BlockNode node) {
         currentSymbolTable = node.getCurrentSymbolTable();
-        for (Node statement : node.getStatements()) {
-            visit(statement);
-        }
+        node.getStatements().forEach(this::visit);
         currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
         return null;
     }
@@ -48,28 +50,51 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
         SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getVarSymbol());
         VirtualRegister reg = VirtualRegister.builder(node.getVarSymbol());
         symbolInfo.setReg(reg);
-        Instruction init;
+        AssignInst init;
         if (node.getInit() != null) {
             RegOrImm value = visit(node.getInit());
             if (value instanceof IntLiteral) {
                 init = new MoveInst(reg, value);
-                currentBasicBlock.push_back(init);
+                currentBasicBlock.addKnownReg(reg, (IntLiteral) value);
+                currentBasicBlock.pushBack(init);
             } else {
-                init = currentBasicBlock.getEnd();
-                init.setTarget(reg);
+                assert currentBasicBlock.back() instanceof AssignInst;
+                init = (AssignInst) currentBasicBlock.back();
+                init.setDst(reg);
             }
+        } else {
+            IntLiteral val = new IntLiteral(0);
+            currentBasicBlock.addKnownReg(reg, val);
+            currentBasicBlock.pushBack(new MoveInst(reg, val));
         }
-        return null;
+        return reg;
+    }
+
+    private Function getFunction(InstanceSymbol functionSymbol, FunctionTypeSymbol functionTypeSymbol) {
+        Function function = programIR.getFunction(functionSymbol);
+        if (function == null) {
+            function = new Function(functionSymbol, functionTypeSymbol);
+            programIR.putFunction(functionSymbol, function);
+        }
+        return function;
     }
 
     @Override
     public RegOrImm visit(FunctionDeclNode node) {
+        InstanceSymbol functionSymbol = node.getInstanceSymbol();
         FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        InstanceSymbol instanceSymbol = node.getInstanceSymbol();
-        SymbolInfo symbolInfo = currentSymbolTable.findIn(instanceSymbol);
-        Function function = new Function(functionTypeSymbol, instanceSymbol);
-
-        //TODO: add function new
+        Function function = getFunction(functionSymbol, functionTypeSymbol);
+        getCurrentSymbolTable(node.getBody());
+        getCurrentBasicBlock(function);
+        node.getParamList().forEach(param -> function.AddParam((VirtualRegister) visit(param)));
+        visit(node.getBody());
+        if (!(currentBasicBlock.back() instanceof Return)) {
+            if (function.getFunctionTypeSymbol().getReturnType() == NonArrayTypeSymbol.VOID_TYPE_SYMBOL) {
+                currentBasicBlock.pushBack(new Return(null));
+            } else {
+                currentBasicBlock.pushBack(new Return(new IntLiteral(0)));
+            }
+        }
         return null;
     }
 
@@ -78,9 +103,47 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
         return null;
     }
 
+    private IntLiteral immCalc(IntLiteral x_, IntLiteral y_, ExprOps op) {
+        Integer x = x_.getVal();
+        Integer y = y_.getVal();
+        switch (op) {
+            case ADD: return new IntLiteral(x + y);
+            case SUB: return new IntLiteral(x - y);
+            case MUL: return new IntLiteral(x * y);
+            case DIV: return new IntLiteral(x / y);
+            case MOD: return new IntLiteral(x % y);
+            default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for IntLiteral");
+        }
+    }
+
+    private RegOrImm visitAssign(BinaryExprNode node) {
+        getReg = true;
+        RegOrImm left = visit(node.getLeft());
+        getReg = false;
+        RegOrImm right = visit(node.getRight());
+        if (right instanceof IntLiteral) {
+            currentBasicBlock.pushBack(new MoveInst((Register) left, right));
+            currentBasicBlock.addKnownReg((Register) left, (IntLiteral) right);
+        } else {
+            ((AssignInst) currentBasicBlock.back()).setDst((Register) left);
+        }
+        return left;
+    }
+
     @Override
     public RegOrImm visit(BinaryExprNode node) {
-        return null;
+        ExprOps op = node.getOp();
+        switch (op) {
+            case ASSIGN: return visitAssign(node);
+        }
+        RegOrImm left = visit(node.getLeft());
+        RegOrImm right = visit(node.getRight());
+        if (left instanceof IntLiteral && right instanceof IntLiteral) {
+            return immCalc((IntLiteral) left, (IntLiteral) right, op);
+        }
+        VirtualRegister dst = VirtualRegister.builder(op.toString() + "tmp");
+        currentBasicBlock.pushBack(new BinaryExprInst(dst, left, op, right));
+        return dst;
     }
 
     @Override
@@ -90,7 +153,10 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
 
     @Override
     public RegOrImm visit(IdentifierExprNode node) {
-        return null;
+        SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getInstanceSymbol());
+        Register reg = symbolInfo.getReg();
+        IntLiteral val = currentBasicBlock.getKnownReg(reg);
+        return (getReg || val == null) ? reg : val;
     }
 
     @Override
@@ -125,6 +191,17 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
 
     @Override
     public RegOrImm visit(FunctionCallNode node) {
+        ExprNode caller = node.getCaller();
+        Function function;
+        if (caller instanceof IdentifierExprNode) {
+            InstanceSymbol functionSymbol = ((IdentifierExprNode) caller).getInstanceSymbol();
+            SymbolInfo functionInfo = currentSymbolTable.findAll(functionSymbol);
+            FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) functionInfo.getTypeSymbol();
+            function = getFunction(functionSymbol, functionTypeSymbol);
+        } else {
+            //TODO
+        }
+        //TODO
         return null;
     }
 
@@ -155,6 +232,11 @@ public class IRBuilder implements AstVisitor<RegOrImm> {
 
     @Override
     public RegOrImm visit(ReturnNode node) {
+        RegOrImm retVal = null;
+        if (node.getReturnVal() != null) {
+            retVal = visit(node.getReturnVal());
+        }
+        currentBasicBlock.pushBack(new Return(retVal));
         return null;
     }
 

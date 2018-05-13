@@ -1,0 +1,14 @@
+int main() {
+    int a = 1;
+    int b;
+    b = 5;
+    a = b + 1;
+    return a;
+}
+
+void function() {
+    int a = 3;
+    int b = 2;
+    b = a + b;
+    return;
+}

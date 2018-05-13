@@ -38,7 +38,7 @@ public class MxLexer extends Lexer {
 		"BREAK", "CONTINUE", "RETURN", "NEW", "CLASS", "THIS", "TRUE", "FALSE", 
 		"LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", 
 		"ADD", "SUB", "MUL", "DIV", "MOD", "GT", "LT", "EQ", "NEQ", "LTE", "GTE", 
-		"NOT", "AND", "OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR", 
+		"NOT", "AND", "OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR",
 		"ASSIGN", "INC", "DEC", "DOT", "BoolLiteral", "IntLiteral", "StringLiteral", 
 		"Identifier", "DecimalInt", "HexInt", "OctInt", "BinInt", "Digit", "Alpha", 
 		"NonZeroDigit", "HexDigit", "OctDigit", "BinDigit", "Zero", "StringCharacters", 
@@ -59,7 +59,7 @@ public class MxLexer extends Lexer {
 		"BREAK", "CONTINUE", "RETURN", "NEW", "CLASS", "THIS", "LPAREN", "RPAREN", 
 		"LBRACE", "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", "ADD", "SUB", 
 		"MUL", "DIV", "MOD", "GT", "LT", "EQ", "NEQ", "LTE", "GTE", "NOT", "AND", 
-		"OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR", "ASSIGN", 
+		"OR", "LSFT", "RSFT", "BITNOT", "BITAND", "BITOR", "BITXOR", "ASSIGN",
 		"INC", "DEC", "DOT", "BoolLiteral", "IntLiteral", "StringLiteral", "Identifier", 
 		"LINE_COMMENT", "MULTILINE_COMMENT", "WS"
 	};

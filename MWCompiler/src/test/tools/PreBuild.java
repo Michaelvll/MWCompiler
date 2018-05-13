@@ -10,6 +10,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.InputStream;
+
 public class PreBuild {
     private static String[] astBuild = {"/ast/VariableDecl.mx", "/ast/FunctionDecl.mx", "/ast/ClassDecl.mx", "./ast/Whole.mx", "./ast/Whole2.mx", "/ast/611.mx"};
     private static String[] typeCheck = {"/type/1.mx", "/type/newfail.mx", "/type/constructor.mx"};
@@ -30,6 +32,17 @@ public class PreBuild {
 
     public static void build(String filename) throws Exception {
         CharStream input = CharStreams.fromFileName(filename);
+        MxLexer lexer = new MxLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        StringProcess.setTokens(tokens);
+        MxParser parser = new MxParser(tokens);
+        ParseTree tree = parser.program();
+        astBuilder = new AstBuilder();
+        program = astBuilder.visit(tree);
+    }
+
+    public static void build(InputStream in) throws Exception {
+        CharStream input = CharStreams.fromStream(in);
         MxLexer lexer = new MxLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         StringProcess.setTokens(tokens);

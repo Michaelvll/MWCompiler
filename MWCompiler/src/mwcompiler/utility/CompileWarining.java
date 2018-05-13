@@ -12,8 +12,6 @@ public class CompileWarining {
     }
 
     public static void printWarings() {
-        for (String warning : messages) {
-            System.err.println(warning);
-        }
+        messages.forEach(System.err::println);
     }
 }

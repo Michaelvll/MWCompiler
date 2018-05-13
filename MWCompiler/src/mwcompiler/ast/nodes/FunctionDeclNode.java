@@ -37,9 +37,7 @@ public class FunctionDeclNode extends DeclaratorNode {
         this.paramListPos = paramListPos;
         this.bodyPos = bodyPos;
         List<TypeSymbol> typeParams = new ArrayList<>();
-        for (VariableDeclNode node : paramList) {
-            typeParams.add(node.getTypeSymbol());
-        }
+        paramList.forEach(x->typeParams.add(x.getTypeSymbol()));
         this.functionTypeSymbol = FunctionTypeSymbol.builder(returnTypeSymbol, typeParams);
     }
 

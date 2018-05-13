@@ -31,18 +31,14 @@ public class FunctionTypeSymbol extends TypeSymbol {
     @Override
     public String getName() {
         StringBuilder name = new StringBuilder("returnType: " + returnType.getName() + "\nParams:\n");
-        for (TypeSymbol param : params) {
-            name.append("\t").append(param.getName()).append("\n");
-        }
+        params.forEach(param->name.append("\t").append(param.getName()).append("\n"));
         return String.valueOf(name);
     }
 
     @Override
     public void checkLegal() {
         returnType.checkLegal();
-        for (TypeSymbol param:params) {
-            param.checkLegal();
-        }
+        params.forEach(TypeSymbol::checkLegal);
     }
 
     @Override

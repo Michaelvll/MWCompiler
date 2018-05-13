@@ -23,7 +23,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         visit(node);
     }
 
-    private void visit(Node node){
+    private void visit(Node node) {
         node.accept(this);
     }
 
@@ -104,9 +104,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             currentSymbolTable = new SymbolTable(currentSymbolTable);
             node.setCurrentSymbolTable(currentSymbolTable);
         }
-        for (Node statement : node.getStatements()) {
-            visit(statement);
-        }
+        node.getStatements().forEach(this::visit);
         currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
         return null;
     }

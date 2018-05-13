@@ -4,17 +4,14 @@ import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.symbols.*;
 import mwcompiler.symbols.tools.ExprType;
-import mwcompiler.utility.CompileError;
-import mwcompiler.utility.CompileWarining;
-import mwcompiler.utility.Location;
-import mwcompiler.utility.StringProcess;
+import mwcompiler.utility.*;
 
 import java.util.List;
 
-import static mwcompiler.ast.nodes.ExprNode.OPs.*;
 import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 import static mwcompiler.symbols.tools.ExprType.LvalOrRval.LVAL;
 import static mwcompiler.symbols.tools.ExprType.LvalOrRval.RVAL;
+import static mwcompiler.utility.ExprOps.*;
 
 /**
  * @author Michael Wu
@@ -49,7 +46,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         throw new CompileError(stage, "Get an unknown type " + StringProcess.getRefString(typename), location);
     }
 
-    private void throwNotSupport(ExprNode.OPs op, TypeSymbol typename, Location location) {
+    private void throwNotSupport(ExprOps op, TypeSymbol typename, Location location) {
         throw new CompileError(stage, "Operator " + StringProcess.getRefString(op.toString())
                 + "not support for the type " + StringProcess.getRefString(typename.getName()), location);
     }
@@ -164,9 +161,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             throwNoSuchType(e.getMessage(), node.getStartLocation());
         }
         getCurrentSymbolTable(node.getBody());
-        for (VariableDeclNode param : node.getParamList()) {
-            visit(param);
-        }
+        node.getParamList().forEach(this::visit);
         ExprType blockReturn = visit(node.getBody());
         if (blockReturn == null) {
             if (node.getFunctionTypeSymbol().getReturnType() != VOID_TYPE_SYMBOL

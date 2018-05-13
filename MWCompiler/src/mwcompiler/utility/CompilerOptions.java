@@ -9,6 +9,7 @@ import java.io.PrintStream;
 
 public class CompilerOptions {
     public static Boolean ast = false;
+    public static Boolean ir = false;
     public static InputStream in = System.in;
     public static PrintStream out = System.out;
     public static Integer warningLevel = 0;
@@ -30,8 +31,11 @@ public class CompilerOptions {
         Option help = Option.builder("h").longOpt("help").hasArg(false).desc("Print help message (this message)").build();
         options.addOption(help);
 
-        Option dumpAst = Option.builder("ast").desc("Build and dump ast for source code").hasArg(false).build();
+        Option dumpAst = Option.builder().longOpt("dump_ast").desc("Dump ast for source code").hasArg(false).build();
         options.addOption(dumpAst);
+
+        Option dumpIR = Option.builder().longOpt("dump_ir").desc("Dump ir for source code").hasArg(false).build();
+        options.addOption(dumpIR);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -74,8 +78,12 @@ public class CompilerOptions {
                 warningLevel = 1;
             }
 
-            if (cmd.hasOption("ast")) {
+            if (cmd.hasOption("dump_ast")) {
                 ast = true;
+            }
+
+            if (cmd.hasOption("dump_ir")) {
+                ir = true;
             }
 
         } catch (ParseException e) {
