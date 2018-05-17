@@ -1,15 +1,16 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.tools.IRVisitor;
 
-public class Return extends Jump{
-    private RegOrImm retVal;
+public class ReturnInst extends JumpInst {
+    private Operand retVal;
 
-    public Return(RegOrImm retVal) {
+    public ReturnInst(Operand retVal) {
         this.retVal = retVal;
     }
 
-    public RegOrImm getRetVal() {
+    public Operand getRetVal() {
         return retVal;
     }
 

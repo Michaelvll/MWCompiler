@@ -402,8 +402,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             }
         }
         visit(node.getBody());
-        if (node.getElseCondition() != null)
-            visit(node.getElseCondition());
+        if (node.getElseNode() != null)
+            visit(node.getElseNode());
         return null;
     }
 
@@ -440,12 +440,12 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     @Override
     public ExprType visit(ReturnNode node) {
         if (expectedReturnType == null) {
-            throw new CompileError(stage, "Return statement is unexpected in this scope", node.getStartLocation());
+            throw new CompileError(stage, "ReturnInst statement is unexpected in this scope", node.getStartLocation());
         }
         if (node.getReturnVal() != null) {
             TypeSymbol returnType = visit(node.getReturnVal()).typeSymbol;
             if (returnType != NULL_TYPE_SYMBOL && expectedReturnType != returnType) {
-                throw new CompileError(stage, "Return type " + StringProcess.getRefString(expectedReturnType.getName())
+                throw new CompileError(stage, "ReturnInst type " + StringProcess.getRefString(expectedReturnType.getName())
                         + "expected, but " + StringProcess.getRefString(returnType.getName())
                         + "returned.", node.getStartLocation());
             }
@@ -456,7 +456,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             return new ExprType(visit(node.getReturnVal()).typeSymbol, RVAL);
         }
         if (expectedReturnType != VOID_TYPE_SYMBOL) {
-            throw new CompileError(stage, "Return type " + StringProcess.getRefString(expectedReturnType.getName())
+            throw new CompileError(stage, "ReturnInst type " + StringProcess.getRefString(expectedReturnType.getName())
                     + "expected, but " + StringProcess.getRefString("void")
                     + "returned.", node.getStartLocation());
         }

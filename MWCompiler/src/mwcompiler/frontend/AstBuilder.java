@@ -441,12 +441,12 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         if (ctx.elseifConditionField().size() != 0) {
             for (MxParser.ElseifConditionFieldContext field : ctx.elseifConditionField()) {
                 IfNode nextCond = (IfNode) visit(field);
-                prevCond.setElseCondition(nextCond);
+                prevCond.setElseNode(nextCond);
                 prevCond = nextCond;
             }
         }
         if (ctx.elseConditionField() != null) {
-            prevCond.setElseCondition((IfNode) visit(ctx.elseConditionField()));
+            prevCond.setElseNode((IfNode) visit(ctx.elseConditionField()));
         }
         return ifNode;
     }

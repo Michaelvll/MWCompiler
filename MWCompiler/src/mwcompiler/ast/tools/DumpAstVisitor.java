@@ -123,9 +123,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         }
         println("body: ");
         visit(node.getBody());
-        if (node.getElseCondition() != null) {
+        if (node.getElseNode() != null) {
             println("else: ");
-            visit(node.getElseCondition());
+            visit(node.getElseNode());
         }
         subIndent();
         return null;

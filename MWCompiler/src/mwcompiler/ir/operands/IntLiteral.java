@@ -1,8 +1,8 @@
-package mwcompiler.ir.nodes;
+package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public class IntLiteral extends RegOrImm {
+public class IntLiteral extends Operand {
     private Integer val;
 
     public IntLiteral(Integer val) {

@@ -5,7 +5,7 @@ import mwcompiler.utility.Location;
 
 /**
  * JumpNode.java
- * Jump node extends from ExprNode
+ * JumpInst node extends from ExprNode
  *
  * @author Michael Wu
  * @since 2018-04-13

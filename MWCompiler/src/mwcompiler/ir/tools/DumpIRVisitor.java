@@ -1,6 +1,9 @@
 package mwcompiler.ir.tools;
 
 import mwcompiler.ir.nodes.*;
+import mwcompiler.ir.operands.IntLiteral;
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.utility.ExprOps;
 
 import java.io.PrintStream;
@@ -36,8 +39,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
         this.out.print(indent + s);
     }
 
-    private String visit(RegOrImm regOrImm) {
-        return regOrImm.accept(this);
+    private String visit(Operand operand) {
+        return operand.accept(this);
     }
 
     private String visit(Instruction instruction) {
@@ -52,7 +55,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     public String visit(BasicBlock block) {
-        println(block.getName() + ".entry:");
+        println("\n" + block.getName() + ":");
         for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
             visit(instruction);
         }
@@ -60,7 +63,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(Return ret) {
+    public String visit(ReturnInst ret) {
         addIndent();
         println("ret " + (ret.getRetVal() != null ? visit(ret.getRetVal()) : ""));
         subIndent();
@@ -68,22 +71,38 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(Function function) {
-        print("define " + "@" + function.getInstanceSymbol().getName() + "(");
+    public String visit(Function inst) {
+        print("define " + "@" + inst.getInstanceSymbol().getName() + "(");
         StringJoiner params = new StringJoiner(", ");
-        function.getParamVReg().forEach(param -> params.add(visit(param)));
+        inst.getParamVReg().forEach(param -> params.add(visit(param)));
         print(params.toString());
         println(") {");
-        visit(function.getStartBasicBlock());
+        inst.getBlocks().forEach(this::visit);
         println("}");
         //TODO
         return null;
     }
 
     @Override
-    public String visit(MoveInst moveInst) {
+    public String visit(MoveInst inst) {
         addIndent();
-        println(visit(moveInst.getDst()) + " = move " + visit(moveInst.getVal()));
+        println(visit(inst.getDst()) + " = move " + visit(inst.getVal()));
+        subIndent();
+        return null;
+    }
+
+    @Override
+    public String visit(CondJumpInst inst) {
+        addIndent();
+        println("if " + visit(inst.getCond()) + " " + inst.getIfTrue().getName() + " " + inst.getIfFalse().getName());
+        subIndent();
+        return null;
+    }
+
+    @Override
+    public String visit(DirectJumpInst inst) {
+        addIndent();
+        println("jmp " + inst.getTarget().getName());
         subIndent();
         return null;
     }

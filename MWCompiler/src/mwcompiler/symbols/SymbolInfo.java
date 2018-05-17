@@ -1,6 +1,6 @@
 package mwcompiler.symbols;
 
-import mwcompiler.ir.nodes.Register;
+import mwcompiler.ir.operands.Register;
 
 public class SymbolInfo {
     private TypeSymbol typeSymbol;

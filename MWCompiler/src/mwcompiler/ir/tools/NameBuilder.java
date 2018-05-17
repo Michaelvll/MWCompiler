@@ -10,7 +10,7 @@ public class NameBuilder {
         if (preText == null)
             throw new RuntimeException("Compiler bug: (IR Building) Can not build a name with null pretext");
         sufTextMap.put(preText, sufTextMap.getOrDefault(preText, -1) + 1);
-        return preText + "_" + sufTextMap.get(preText);
+        return preText + "." + sufTextMap.get(preText);
     }
 
     public static String builder(Object object) {

@@ -1,7 +1,7 @@
-package mwcompiler.ir.nodes;
+package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public abstract class RegOrImm {
+public abstract class Operand {
     public abstract <T>T accept(IRVisitor<T> visitor);
 }

@@ -1,10 +1,12 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Function {
@@ -14,7 +16,9 @@ public class Function {
     private BasicBlock startBasicBlock;
     private BasicBlock endBasicBlock;
 
-    private List<Return> returns = new ArrayList<>();
+    private List<ReturnInst> returnInsts = new ArrayList<>();
+
+    private List<BasicBlock> blocks = new LinkedList<>();
 
     public Function(InstanceSymbol instanceSymbol, FunctionTypeSymbol functionTypeSymbol) {
         this.functionTypeSymbol = functionTypeSymbol;
@@ -26,8 +30,8 @@ public class Function {
         paramVReg.add(reg);
     }
 
-    public void AddReturn(Return ret) {
-        returns.add(ret);
+    public void AddReturn(ReturnInst ret) {
+        returnInsts.add(ret);
     }
 
     public FunctionTypeSymbol getFunctionTypeSymbol() {
@@ -50,5 +54,13 @@ public class Function {
 
     public BasicBlock getStartBasicBlock() {
         return startBasicBlock;
+    }
+
+    public void pushBack(BasicBlock block) {
+        blocks.add(block);
+    }
+
+    public List<BasicBlock> getBlocks() {
+        return blocks;
     }
 }

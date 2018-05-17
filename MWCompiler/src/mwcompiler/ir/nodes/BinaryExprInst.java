@@ -1,14 +1,16 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.ExprOps;
 
 public class BinaryExprInst extends AssignInst {
     private ExprOps op;
-    private RegOrImm left;
-    private RegOrImm right;
+    private Operand left;
+    private Operand right;
 
-    public BinaryExprInst(Register dst, RegOrImm left, ExprOps op, RegOrImm right) {
+    public BinaryExprInst(Register dst, Operand left, ExprOps op, Operand right) {
         super(dst);
         this.left = left;
         this.op = op;
@@ -20,11 +22,11 @@ public class BinaryExprInst extends AssignInst {
         return visitor.visit(this);
     }
 
-    public RegOrImm getLeft() {
+    public Operand getLeft() {
         return left;
     }
 
-    public RegOrImm getRight() {
+    public Operand getRight() {
         return right;
     }
 

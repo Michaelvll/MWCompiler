@@ -1,6 +1,9 @@
 package mwcompiler.ir.nodes;
 
 
+import mwcompiler.ir.operands.IntLiteral;
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.TypeSymbol;
 
@@ -14,20 +17,23 @@ public class BasicBlock {
     private String name;
     private Function parentFunction;
 
+    public Boolean isEnded = false;
+
     private Set<BasicBlock> fromBasicBlock;
     private Set<BasicBlock> toBasicBlock;
 
-    private Map<Register, IntLiteral> regIntMap = new HashMap<>();
+//    private Map<Register, IntLiteral> regIntMap = new HashMap<>();
 
     public BasicBlock(Function parentFunction) {
         this.parentFunction = parentFunction;
-        this.name = NameBuilder.builder(this);
+        this.name = NameBuilder.builder(parentFunction.getInstanceSymbol().getName());
     }
 
     public BasicBlock(Function parentFunction, String name) {
         this.parentFunction = parentFunction;
         this.name = NameBuilder.builder(name);
     }
+
 
     public void pushFront(Instruction instruction) {
         instruction.setNext(front);
@@ -37,7 +43,7 @@ public class BasicBlock {
             front = instruction;
     }
 
-    public void pushBack(Instruction instruction) {
+    private void pushBack(Instruction instruction) {
         instruction.setPrev(end);
         if (end != null)
             end = end.setNext(instruction);
@@ -47,11 +53,21 @@ public class BasicBlock {
         }
     }
 
-    public void pushBack(Jump jump) {
-        pushBack((Instruction) jump);
-        if (jump instanceof Return)
-            parentFunction.AddReturn((Return) jump);
-        regIntMap.clear(); // Clear up the map when exit the Basic Block
+    public void pushBack(MoveInst moveInst) {
+        pushBack((Instruction) moveInst);
+        addKnownReg(moveInst.getDst(), moveInst.getVal());
+    }
+
+    public void pushBack(AssignInst assignInst) {
+        pushBack((Instruction) assignInst);
+        addKnownReg(assignInst.getDst(), null);
+    }
+
+    public void pushBack(JumpInst jumpInst) {
+        pushBack((Instruction) jumpInst);
+        isEnded = true;
+        if (jumpInst instanceof ReturnInst)
+            parentFunction.AddReturn((ReturnInst) jumpInst);
     }
 
     public void insert(Instruction pos, Instruction instruction) {
@@ -68,12 +84,11 @@ public class BasicBlock {
         return end;
     }
 
-    public void addKnownReg(Register reg, IntLiteral val) {
-        regIntMap.put(reg, val);
-    }
-
-    public IntLiteral getKnownReg(Register reg) {
-        return regIntMap.get(reg);
+    private void addKnownReg(Register reg, Operand val) {
+        if (val instanceof IntLiteral)
+            reg.setVal((IntLiteral) val);
+        else
+            reg.setVal(null);
     }
 
     public String getName() {

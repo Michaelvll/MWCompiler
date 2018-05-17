@@ -13,7 +13,7 @@ import mwcompiler.utility.Location;
 public class IfNode extends Node {
     private ExprNode condition;
     private BlockNode body;
-    private IfNode elseCondition;
+    private IfNode elseNode;
     private Location location;
 
     public IfNode(ExprNode condition, BlockNode body, Location pos) {
@@ -45,12 +45,12 @@ public class IfNode extends Node {
         return body;
     }
 
-    public IfNode getElseCondition() {
-        return elseCondition;
+    public IfNode getElseNode() {
+        return elseNode;
     }
 
-    public void setElseCondition(IfNode elseCondition) {
-        this.elseCondition = elseCondition;
+    public void setElseNode(IfNode elseNode) {
+        this.elseNode = elseNode;
     }
 
 }

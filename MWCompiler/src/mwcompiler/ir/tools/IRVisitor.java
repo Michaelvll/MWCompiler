@@ -1,6 +1,8 @@
 package mwcompiler.ir.tools;
 
 import mwcompiler.ir.nodes.*;
+import mwcompiler.ir.operands.IntLiteral;
+import mwcompiler.ir.operands.VirtualRegister;
 
 public interface IRVisitor<T> {
     T visit(VirtualRegister register);
@@ -11,9 +13,13 @@ public interface IRVisitor<T> {
 
     T visit(BasicBlock block);
 
-    T visit(Return inst);
+    T visit(ReturnInst inst);
 
-    T visit(Function function);
+    T visit(Function inst);
 
-    T visit(MoveInst moveInst);
+    T visit(MoveInst inst);
+
+    T visit(CondJumpInst inst);
+
+    T visit(DirectJumpInst inst);
 }

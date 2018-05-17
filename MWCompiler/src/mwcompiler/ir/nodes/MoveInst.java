@@ -1,10 +1,12 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 
 public class MoveInst extends AssignInst {
-    private RegOrImm val;
-    public MoveInst(Register dst, RegOrImm val) {
+    private Operand val;
+    public MoveInst(Register dst, Operand val) {
         super(dst);
         this.val = val;
     }
@@ -14,7 +16,7 @@ public class MoveInst extends AssignInst {
         return  visitor.visit(this);
     }
 
-    public RegOrImm getVal() {
+    public Operand getVal() {
         return val;
     }
 }
