@@ -37,7 +37,8 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private void getCurrentBasicBlock(Function function) {
-        currentBasicBlock = function.getStartBasicBlock();
+        currentBasicBlock = new BasicBlock(function, currentSymbolTable);
+        function.pushBack(currentBasicBlock);
     }
 
 
@@ -93,7 +94,6 @@ public class IRBuilder implements AstVisitor<Operand> {
         Function function = getFunction(functionSymbol, functionTypeSymbol);
         getCurrentSymbolTable(node.getBody());
         getCurrentBasicBlock(function);
-        function.pushBack(currentBasicBlock);
 
         isParamDecl = true;
         node.getParamList().forEach(param -> function.AddParam((VirtualRegister) visit(param)));
@@ -166,14 +166,14 @@ public class IRBuilder implements AstVisitor<Operand> {
         Function function = currentBasicBlock.getParentFunction();
         ExprOps op = node.getOp();
         Operand left = visit(node.getLeft());
-        BasicBlock next = new BasicBlock(function, "next");
+        BasicBlock next = new BasicBlock(function, currentSymbolTable, "next");
         switch (op) {
             case AND:
                 if (left instanceof IntLiteral) {
                     if (((IntLiteral) left).getVal() == 0) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valTrue = new BasicBlock(function, "val_true");
+                BasicBlock valTrue = new BasicBlock(function, null, "val_true");//TODO
                 currentBasicBlock.pushBack(new CondJumpInst(left, valTrue, next));
                 setCurrentBasicBlock(valTrue);
                 break;
@@ -182,7 +182,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (((IntLiteral) left).getVal() == 1) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valFalse = new BasicBlock(function, "val_false");
+                BasicBlock valFalse = new BasicBlock(function, null, "val_false");//TODO
                 currentBasicBlock.pushBack(new CondJumpInst(left, valFalse, next));
                 setCurrentBasicBlock(valFalse);
                 break;
@@ -341,10 +341,10 @@ public class IRBuilder implements AstVisitor<Operand> {
             if (((IntLiteral) cond).getVal() == 1) visit(node.getBody());
             else if (node.getElseNode() != null) visit(node.getElseNode());
         } else {
-            BasicBlock ifTrue = new BasicBlock(function, "if_then");
-            BasicBlock ifFalse = new BasicBlock(function, "if_else");
-            BasicBlock next = new BasicBlock(function);
             Boolean haveElse = node.getElseNode() != null;
+            BasicBlock ifTrue = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), "if_then"); //TODO
+            BasicBlock ifFalse = new BasicBlock(function, haveElse?node.getElseNode().getBody().getCurrentSymbolTable():null, "if_else");
+            BasicBlock next = new BasicBlock(function, currentSymbolTable);
             CondJumpInst condJump = new CondJumpInst(cond, ifTrue, haveElse ? ifFalse : next);
             currentBasicBlock.pushBack(condJump);
             setCurrentBasicBlock(ifTrue);

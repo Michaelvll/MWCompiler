@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class VirtualRegister extends Register {
     private String name;
-    private SymbolTable table;
+    private SymbolTable symbolTable;
     private Integer id = -1;
 
     private VirtualRegister(String name, Integer id) {
@@ -17,9 +17,9 @@ public class VirtualRegister extends Register {
         this.id = id;
     }
 
-    public VirtualRegister(InstanceSymbol symbol, SymbolTable table) {
+    public VirtualRegister(InstanceSymbol symbol, SymbolTable symbolTable) {
         this.name = symbol.getName();
-        this.table = table;
+        this.symbolTable = symbolTable;
     }
 
     private static Map<String, VirtualRegister> identifierMap = new HashMap<>();
@@ -54,4 +54,7 @@ public class VirtualRegister extends Register {
         return id == -1 ? name : name + "." + String.valueOf(id);
     }
 
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
 }

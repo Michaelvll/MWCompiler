@@ -4,6 +4,7 @@ import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,8 +24,8 @@ public class Function {
     public Function(InstanceSymbol instanceSymbol, FunctionTypeSymbol functionTypeSymbol) {
         this.functionTypeSymbol = functionTypeSymbol;
         this.instanceSymbol = instanceSymbol;
-        this.startBasicBlock = new BasicBlock(this, instanceSymbol.getName());
     }
+
 
     public void AddParam(VirtualRegister reg) {
         paramVReg.add(reg);
@@ -52,9 +53,9 @@ public class Function {
     }
 
 
-    public BasicBlock getStartBasicBlock() {
-        return startBasicBlock;
-    }
+//    public BasicBlock getStartBasicBlock() {
+//        return startBasicBlock;
+//    }
 
     public void pushBack(BasicBlock block) {
         blocks.add(block);
