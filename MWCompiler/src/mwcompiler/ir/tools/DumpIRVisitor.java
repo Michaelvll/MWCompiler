@@ -55,10 +55,13 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     public String visit(BasicBlock block) {
-        println("\n" + block.getName() + ":");
+        addIndent();
+        println("");
+        println(block.getName() + ":");
         for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
             visit(instruction);
         }
+        subIndent();
         return null;
     }
 
@@ -72,6 +75,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(Function inst) {
+        println("");
         print("define " + "@" + inst.getInstanceSymbol().getName() + "(");
         StringJoiner params = new StringJoiner(", ");
         inst.getParamVReg().forEach(param -> params.add(visit(param)));

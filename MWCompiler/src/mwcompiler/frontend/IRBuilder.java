@@ -11,6 +11,8 @@ import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.ExprOps;
 
+import java.util.Stack;
+
 import static mwcompiler.utility.ExprOps.*;
 
 public class IRBuilder implements AstVisitor<Operand> {
@@ -21,6 +23,16 @@ public class IRBuilder implements AstVisitor<Operand> {
     private Boolean isGetReg = false;
     private Boolean isParamDecl = false;
     private final IntLiteral ONE_LITERAL = new IntLiteral(1);
+
+    private Integer valTag = 0;
+
+    private void newValTag() {
+        ++valTag;
+    }
+
+    private void popValTag() {
+        --valTag;
+    }
 
 
     public ProgramIR build(Node node) {
@@ -64,7 +76,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (node.getInit() != null) {
             Operand value = visit(node.getInit());
             if (value instanceof IntLiteral) {
-                currentBasicBlock.pushBack(new MoveInst(reg, value));
+                currentBasicBlock.pushBack(new MoveInst(reg, value), valTag);
             } else {
                 assert currentBasicBlock.back() instanceof AssignInst;
                 ((AssignInst) currentBasicBlock.back()).setDst(reg);
@@ -72,7 +84,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         } else {
             if (!isParamDecl) {
                 IntLiteral val = new IntLiteral(0);
-                currentBasicBlock.pushBack(new MoveInst(reg, val));
+                currentBasicBlock.pushBack(new MoveInst(reg, val), valTag);
             }
         }
         return reg;
@@ -89,6 +101,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(FunctionDeclNode node) {
+        newValTag();
         InstanceSymbol functionSymbol = node.getInstanceSymbol();
         FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
         Function function = getFunction(functionSymbol, functionTypeSymbol);
@@ -107,6 +120,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                 currentBasicBlock.pushBack(new ReturnInst(new IntLiteral(0)));
             }
         }
+        popValTag();
         return null;
     }
 
@@ -141,11 +155,10 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand left = getReg(node.getLeft());
         Operand right = visit(node.getRight());
         if (right instanceof IntLiteral) {
-            currentBasicBlock.pushBack(new MoveInst((Register) left, right));
+            currentBasicBlock.pushBack(new MoveInst((Register) left, right), valTag);
         } else {
             ((AssignInst) currentBasicBlock.back()).setDst((Register) left);
-            ((Register) left).setVal(null);
-
+            ((Register) left).setVal(null, valTag);
         }
         return left;
     }
@@ -158,7 +171,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             return intLiteralCalc(left, op, right);
         }
         VirtualRegister dst = VirtualRegister.builder(op.toString());
-        currentBasicBlock.pushBack(new BinaryExprInst(dst, left, op, right));
+        currentBasicBlock.pushBack(new BinaryExprInst(dst, left, op, right), valTag);
         return dst;
     }
 
@@ -173,7 +186,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (((IntLiteral) left).getVal() == 0) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valTrue = new BasicBlock(function, null, "val_true");//TODO
+                BasicBlock valTrue = new BasicBlock(function, null, "val_true");//TODO: is null good enough?
                 currentBasicBlock.pushBack(new CondJumpInst(left, valTrue, next));
                 setCurrentBasicBlock(valTrue);
                 break;
@@ -182,13 +195,13 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (((IntLiteral) left).getVal() == 1) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valFalse = new BasicBlock(function, null, "val_false");//TODO
+                BasicBlock valFalse = new BasicBlock(function, null, "val_false");//TODO: is null good enough?
                 currentBasicBlock.pushBack(new CondJumpInst(left, valFalse, next));
                 setCurrentBasicBlock(valFalse);
                 break;
         }
         Operand right = visit(node.getRight());
-        currentBasicBlock.pushBack(new MoveInst((VirtualRegister) left, right));
+        currentBasicBlock.pushBack(new MoveInst((VirtualRegister) left, right), valTag);
         currentBasicBlock.pushBack(new DirectJumpInst(next));
         setCurrentBasicBlock(next);
         return left;
@@ -222,35 +235,35 @@ public class IRBuilder implements AstVisitor<Operand> {
             case SUB:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return new IntLiteral(-((IntLiteral) src).getVal());
-                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
                 return dst;
             case BITNOT:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return new IntLiteral(~((IntLiteral) src).getVal());
-                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
                 return dst;
             case NOT:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return new IntLiteral(((IntLiteral) src).getVal() == 1 ? 0 : 1);
-                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
                 return dst;
             case DEC: case INC: case DEC_SUFF: case INC_SUFF:
                 src = getReg(node.getExpr());
                 dst = (VirtualRegister) src;
                 Boolean isINC = op == INC || op == INC_SUFF;
                 Boolean isSUF = op == INC_SUFF || op == DEC_SUFF;
-                IntLiteral val = ((Register) src).getVal();
+                IntLiteral val = ((Register) src).getVal(valTag);
                 if (val != null) {
                     IntLiteral newVal = new IntLiteral(isINC ? val.getVal() + 1 : val.getVal() - 1);
-                    currentBasicBlock.pushBack(new MoveInst(dst, newVal));
+                    currentBasicBlock.pushBack(new MoveInst(dst, newVal), valTag);
                     return isSUF ? val : newVal;
                 }
                 VirtualRegister ret = (VirtualRegister) src;
                 if (isSUF) {
                     ret = VirtualRegister.builder("SUF");
-                    currentBasicBlock.pushBack(new MoveInst(ret, src));
+                    currentBasicBlock.pushBack(new MoveInst(ret, src), valTag);
                 }
-                currentBasicBlock.pushBack(new BinaryExprInst(dst, src, isINC ? ADD : SUB, ONE_LITERAL));
+                currentBasicBlock.pushBack(new BinaryExprInst(dst, src, isINC ? ADD : SUB, ONE_LITERAL), valTag);
                 return ret;
             default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for unary expression");
         }
@@ -264,11 +277,17 @@ public class IRBuilder implements AstVisitor<Operand> {
         return reg;
     }
 
+    private SymbolInfo findReg(SymbolTable symbolTable, InstanceSymbol instanceSymbol) {
+        SymbolInfo symbolInfo = symbolTable.findIn(instanceSymbol);
+        if (symbolInfo != null && symbolInfo.getReg() != null) return symbolInfo;
+        return findReg(symbolTable.getOuterSymbolTable(), instanceSymbol);
+    }
+
     @Override
     public Operand visit(IdentifierExprNode node) {
-        SymbolInfo symbolInfo = currentSymbolTable.findAll(node.getInstanceSymbol());
+        SymbolInfo symbolInfo = findReg(currentSymbolTable, node.getInstanceSymbol());
         Register reg = symbolInfo.getReg();
-        IntLiteral val = reg.getVal();
+        IntLiteral val = reg.getVal(valTag);
         return (isGetReg || val == null) ? reg : val;
     }
 
@@ -343,7 +362,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         } else {
             Boolean haveElse = node.getElseNode() != null;
             BasicBlock ifTrue = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), "if_then"); //TODO
-            BasicBlock ifFalse = new BasicBlock(function, haveElse?node.getElseNode().getBody().getCurrentSymbolTable():null, "if_else");
+            BasicBlock ifFalse = new BasicBlock(function, haveElse ? node.getElseNode().getBody().getCurrentSymbolTable() : null, "if_else");
             BasicBlock next = new BasicBlock(function, currentSymbolTable);
             CondJumpInst condJump = new CondJumpInst(cond, ifTrue, haveElse ? ifFalse : next);
             currentBasicBlock.pushBack(condJump);
@@ -360,13 +379,54 @@ public class IRBuilder implements AstVisitor<Operand> {
         return null;
     }
 
+    private Stack<BasicBlock> loopCondStack = new Stack<>();
+    private Stack<BasicBlock> loopEndStack = new Stack<>();
+
     @Override
     public Operand visit(LoopNode node) {
+        Function function = currentBasicBlock.getParentFunction();
+        BasicBlock loopEnd = new BasicBlock(function, currentSymbolTable, "loop_end");
+        BasicBlock loopCond = new BasicBlock(function, new SymbolTable(currentSymbolTable), "loop_cond");
+        BasicBlock loopBegin = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), "loop_begin");
+        if (node.getVarInit() != null) {
+            visit(node.getVarInit());
+            if (node.getCondition() != null) {
+                Operand cond1 = visit(node.getCondition());
+                if (cond1 instanceof IntLiteral) {
+                    if (((IntLiteral) cond1).getVal() == 0) {
+                        System.err.println("Never go into the loop " + node.getStartLocation().toString());
+                        return null; // Never go into the loop
+                    }
+                    currentBasicBlock.pushBack(new DirectJumpInst(loopBegin));
+                } else {
+                    currentBasicBlock.pushBack(new CondJumpInst(cond1, loopBegin, loopEnd));
+                }
+            }
+        }
+        newValTag();
+
+        loopCondStack.push(loopCond);
+        loopEndStack.push(loopEnd);
+        setCurrentBasicBlock(loopBegin);
+        visit(node.getBody());
+        currentBasicBlock.pushBack(new DirectJumpInst(loopCond));
+
+        setCurrentBasicBlock(loopCond);
+        if (node.getStep() != null)
+            visit(node.getStep());
+        Operand cond2 = visit(node.getCondition());
+        currentBasicBlock.pushBack(new CondJumpInst(cond2, loopBegin, loopEnd));
+        loopCondStack.pop();
+        loopEndStack.pop();
+
+        setCurrentBasicBlock(loopEnd);
+        popValTag();
         return null;
     }
 
     @Override
     public Operand visit(BreakNode node) {
+        currentBasicBlock.pushBack(new DirectJumpInst(loopEndStack.peek()));
         return null;
     }
 
@@ -382,6 +442,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(ContinueNode node) {
+        currentBasicBlock.pushBack(new DirectJumpInst(loopCondStack.peek()));
         return null;
     }
 

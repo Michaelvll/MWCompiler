@@ -8,7 +8,10 @@ import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
 import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.utility.Pair;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class BasicBlock {
@@ -57,14 +60,14 @@ public class BasicBlock {
         }
     }
 
-    public void pushBack(MoveInst moveInst) {
+    public void pushBack(MoveInst moveInst, Integer valTag) {
         pushBack((Instruction) moveInst);
-        addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal());
+        addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
     }
 
-    public void pushBack(AssignInst assignInst) {
+    public void pushBack(AssignInst assignInst, Integer valTag) {
         pushBack((Instruction) assignInst);
-        addKnownReg((VirtualRegister) assignInst.getDst(), null);
+        addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
     }
 
     public void pushBack(JumpInst jumpInst) {
@@ -72,12 +75,57 @@ public class BasicBlock {
         isEnded = true;
         if (jumpInst instanceof ReturnInst)
             parentFunction.AddReturn((ReturnInst) jumpInst);
+
+        eliminateAssignInst(); // eliminate the unused assignInst
+    }
+
+    private void eliminateAssignInst() {
+        // TODO: Uncheck for the Call instruction
+        Map<Register, Pair<AssignInst, Boolean>> regAssignTable = new HashMap<>();
+        for (Instruction inst = front; inst != null; inst = inst.next) {
+            if (inst instanceof AssignInst) {
+                AssignInst assignInst = (AssignInst) inst;
+                Register dst = assignInst.getDst();
+
+                for (Operand operand : assignInst.getOperand()) {
+                    if (operand instanceof Register) {
+                        Pair<AssignInst, Boolean> operandInst = regAssignTable.get(operand);
+                        if (operandInst != null) operandInst.second = true;
+                    }
+                }
+
+                Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
+                if (lastAssign != null && !lastAssign.second) {
+                    erase(lastAssign.first);
+                }
+                regAssignTable.put(dst, new Pair<>(assignInst, false));
+            }
+        }
+        //TODO: Code Below has a problem for
+//        for (Map.Entry<Register, Pair<AssignInst, Boolean>> item : regAssignTable.entrySet()) {
+//            if (!item.getValue().second) erase(item.getValue().first);
+//        }
     }
 
     public void insert(Instruction pos, Instruction instruction) {
         instruction.setPrev(pos);
         instruction.setNext(pos.next);
         pos.setNext(instruction);
+    }
+
+    public void erase(Instruction inst) {
+        if (inst.prev != null) {
+            inst.prev.next = inst.next;
+        } else {
+            front = inst.next;
+            front.prev = null;
+        }
+        if (inst.next != null) {
+            inst.next.prev = inst.prev;
+        } else {
+            end = inst.prev;
+            end.next = null;
+        }
     }
 
     public Instruction front() {
@@ -88,11 +136,11 @@ public class BasicBlock {
         return end;
     }
 
-    private void addKnownReg(VirtualRegister reg, Operand val) {
+    private void addKnownReg(VirtualRegister reg, Operand val, Integer valTag) {
         if (reg.getSymbolTable() == currentSymbolTable && val instanceof IntLiteral)
-            reg.setVal((IntLiteral) val);
+            reg.setVal((IntLiteral) val, valTag);
         else
-            reg.setVal(null);
+            reg.setVal(null, valTag);
     }
 
     public String getName() {

@@ -1,9 +1,13 @@
 package mwcompiler.ir.nodes;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.ExprOps;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BinaryExprInst extends AssignInst {
     private ExprOps op;
@@ -32,5 +36,13 @@ public class BinaryExprInst extends AssignInst {
 
     public ExprOps getOp() {
         return op;
+    }
+
+    @Override
+    public List<Operand> getOperand() {
+        return new ArrayList<Operand>(){{
+            add(left);
+            add(right);
+        }};
     }
 }

@@ -1,0 +1,13 @@
+int main(){
+    int n = 10;
+    int sum = 0;
+    int i;
+    int j;
+    for(i = 1; i < n; ++i) {
+        for (j = 1; j < i; ++j) {
+            sum = sum + j;
+        }
+        sum++;
+    }
+    return sum;
+}

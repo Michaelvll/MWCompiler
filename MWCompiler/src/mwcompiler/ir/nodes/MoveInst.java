@@ -4,6 +4,9 @@ import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MoveInst extends AssignInst {
     private Operand val;
     public MoveInst(Register dst, Operand val) {
@@ -18,5 +21,12 @@ public class MoveInst extends AssignInst {
 
     public Operand getVal() {
         return val;
+    }
+
+    @Override
+    public List<Operand> getOperand() {
+        return new ArrayList<Operand>() {{
+           add(val);
+        }};
     }
 }
