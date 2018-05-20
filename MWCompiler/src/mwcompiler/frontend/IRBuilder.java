@@ -11,6 +11,8 @@ import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.ExprOps;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import static mwcompiler.utility.ExprOps.*;
@@ -23,6 +25,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     private Boolean isGetReg = false;
     private Boolean isParamDecl = false;
     private final IntLiteral ONE_LITERAL = new IntLiteral(1);
+    private final IntLiteral ZERO_LITERAL = new IntLiteral(0);
 
     private Integer valTag = 0;
 
@@ -53,9 +56,15 @@ public class IRBuilder implements AstVisitor<Operand> {
         function.pushBack(currentBasicBlock);
     }
 
+    private void setCurrentBasicBlock(BasicBlock block) {
+        currentBasicBlock.getParentFunction().pushBack(block);
+        currentBasicBlock = block;
+    }
+
 
     @Override
     public Operand visit(ProgramNode node) {
+
         visit(node.getBlock());
         return null;
     }
@@ -83,8 +92,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             }
         } else {
             if (!isParamDecl) {
-                IntLiteral val = new IntLiteral(0);
-                currentBasicBlock.pushBack(new MoveInst(reg, val), valTag);
+                currentBasicBlock.pushBack(new MoveInst(reg, ZERO_LITERAL), valTag);
             }
         }
         return reg;
@@ -114,10 +122,10 @@ public class IRBuilder implements AstVisitor<Operand> {
 
         visit(node.getBody());
         if (!(currentBasicBlock.back() instanceof ReturnInst)) {
-            if (function.getFunctionTypeSymbol().getReturnType() == NonArrayTypeSymbol.VOID_TYPE_SYMBOL) {
+            if (function.needReturn()) {
                 currentBasicBlock.pushBack(new ReturnInst(null));
             } else {
-                currentBasicBlock.pushBack(new ReturnInst(new IntLiteral(0)));
+                currentBasicBlock.pushBack(new ReturnInst(ZERO_LITERAL));
             }
         }
         popValTag();
@@ -296,25 +304,6 @@ public class IRBuilder implements AstVisitor<Operand> {
         return null;
     }
 
-    @Override
-    public Operand visit(NullLiteralNode node) {
-        return null;
-    }
-
-    @Override
-    public Operand visit(StringLiteralNode node) {
-        return null;
-    }
-
-    @Override
-    public Operand visit(BoolLiteralNode node) {
-        return null;
-    }
-
-    @Override
-    public Operand visit(IntLiteralNode node) {
-        return new IntLiteral(node.getVal());
-    }
 
     @Override
     public Operand visit(EmptyExprNode node) {
@@ -324,33 +313,28 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(FunctionCallNode node) {
         ExprNode caller = node.getCaller();
-        Function function;
+        Function function = null;
         if (caller instanceof IdentifierExprNode) {
+            // TODO built in function
             InstanceSymbol functionSymbol = ((IdentifierExprNode) caller).getInstanceSymbol();
             SymbolInfo functionInfo = currentSymbolTable.findAll(functionSymbol);
             FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) functionInfo.getTypeSymbol();
             function = getFunction(functionSymbol, functionTypeSymbol);
         } else {
-            //TODO
+            //TODO for class function
         }
-        //TODO
-        return null;
+        List<Operand> args = new ArrayList<>();
+        node.getArgs().forEach(arg -> args.add(visit(arg)));
+        VirtualRegister dst = VirtualRegister.builder("call_ret_tmp");
+        currentBasicBlock.pushBack(new FunctionCallInst(function, args, dst), valTag);
+        return dst;
     }
 
     @Override
-    public Operand visit(DotMemberNode node) {
+    public Operand visit(ConstructorCallNode node) {
         return null;
     }
 
-    @Override
-    public Operand visit(BrackMemberNode node) {
-        return null;
-    }
-
-    private void setCurrentBasicBlock(BasicBlock block) {
-        currentBasicBlock.getParentFunction().pushBack(block);
-        currentBasicBlock = block;
-    }
 
     @Override
     public Operand visit(IfNode node) {
@@ -425,6 +409,17 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     @Override
+    public Operand visit(DotMemberNode node) {
+        return null;
+    }
+
+    @Override
+    public Operand visit(BrackMemberNode node) {
+        return null;
+    }
+
+
+    @Override
     public Operand visit(BreakNode node) {
         currentBasicBlock.pushBack(new DirectJumpInst(loopEndStack.peek()));
         return null;
@@ -447,8 +442,24 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     @Override
-    public Operand visit(ConstructorCallNode node) {
+    public Operand visit(NullLiteralNode node) {
         return null;
     }
+
+    @Override
+    public Operand visit(StringLiteralNode node) {
+        return null;
+    }
+
+    @Override
+    public Operand visit(BoolLiteralNode node) {
+        return null;
+    }
+
+    @Override
+    public Operand visit(IntLiteralNode node) {
+        return new IntLiteral(node.getVal());
+    }
+
 
 }

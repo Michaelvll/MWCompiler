@@ -7,7 +7,6 @@ import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
-import mwcompiler.symbols.TypeSymbol;
 import mwcompiler.utility.Pair;
 
 import java.util.HashMap;
@@ -19,7 +18,7 @@ public class BasicBlock {
     private Instruction end;
     private String name;
     private Function parentFunction;
-    SymbolTable currentSymbolTable;
+    private SymbolTable currentSymbolTable;
 
     public Boolean isEnded = false;
 
@@ -43,34 +42,30 @@ public class BasicBlock {
 
 
     public void pushFront(Instruction instruction) {
-        instruction.setNext(front);
-        if (front != null)
-            front = front.setPrev(instruction);
-        else
-            front = instruction;
+        if (end == null) end = instruction;
+        if (front != null) front.addPrev(instruction);
+        front = instruction;
     }
 
     private void pushBack(Instruction instruction) {
-        instruction.setPrev(end);
-        if (end != null)
-            end = end.setNext(instruction);
-        else {
-            front = instruction;
-            end = front;
-        }
+        if (front == null) front = instruction;
+        if (end != null) end.addNext(instruction);
+        end = instruction;
     }
 
     public void pushBack(MoveInst moveInst, Integer valTag) {
-        pushBack((Instruction) moveInst);
+        pushBack(moveInst);
         addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
     }
 
     public void pushBack(AssignInst assignInst, Integer valTag) {
-        pushBack((Instruction) assignInst);
+        pushBack(assignInst);
         addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
     }
 
+
     public void pushBack(JumpInst jumpInst) {
+        //TODO for function call
         pushBack((Instruction) jumpInst);
         isEnded = true;
         if (jumpInst instanceof ReturnInst)
@@ -93,39 +88,26 @@ public class BasicBlock {
                         if (operandInst != null) operandInst.second = true;
                     }
                 }
-
-                Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
-                if (lastAssign != null && !lastAssign.second) {
-                    erase(lastAssign.first);
+                if (dst != null) {
+                    Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
+                    if (lastAssign != null && !lastAssign.second) {
+                        delete(lastAssign.first);
+                    }
+                    regAssignTable.put(dst, new Pair<>(assignInst, false));
                 }
-                regAssignTable.put(dst, new Pair<>(assignInst, false));
             }
         }
         //TODO: Code Below has a problem for
 //        for (Map.Entry<Register, Pair<AssignInst, Boolean>> item : regAssignTable.entrySet()) {
-//            if (!item.getValue().second) erase(item.getValue().first);
+//            if (!item.getValue().second) delete(item.getValue().first);
 //        }
     }
 
-    public void insert(Instruction pos, Instruction instruction) {
-        instruction.setPrev(pos);
-        instruction.setNext(pos.next);
-        pos.setNext(instruction);
-    }
 
-    public void erase(Instruction inst) {
-        if (inst.prev != null) {
-            inst.prev.next = inst.next;
-        } else {
-            front = inst.next;
-            front.prev = null;
-        }
-        if (inst.next != null) {
-            inst.next.prev = inst.prev;
-        } else {
-            end = inst.prev;
-            end.next = null;
-        }
+    public void delete(Instruction inst) {
+        inst.delete();
+        if (inst.next == null) end = inst.prev;
+        if (inst.prev == null) front = inst.next;
     }
 
     public Instruction front() {
@@ -151,7 +133,4 @@ public class BasicBlock {
         return parentFunction;
     }
 
-    public TypeSymbol getFunctionReturnType() {
-        return parentFunction.getFunctionTypeSymbol().getReturnType();
-    }
 }

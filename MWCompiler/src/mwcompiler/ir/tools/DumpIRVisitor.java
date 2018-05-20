@@ -6,6 +6,7 @@ import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.utility.ExprOps;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.StringJoiner;
 
@@ -16,6 +17,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public DumpIRVisitor() {
         indent = "";
         this.out = new PrintStream(System.out);
+    }
+
+    public DumpIRVisitor(OutputStream out) {
+        indent = "";
+        this.out = new PrintStream(out);
     }
 
     public void apply(ProgramIR programIR) {
@@ -31,12 +37,20 @@ public class DumpIRVisitor implements IRVisitor<String> {
         indent = indent.substring(1);
     }
 
-    private void println(String s) {
+    private void iprintln(String s) {
         this.out.println(indent + s);
     }
 
-    private void print(String s) {
+    private void iprint(String s) {
         this.out.print(indent + s);
+    }
+
+    private void print(String s) {
+        this.out.print(s);
+    }
+
+    private void println(String s) {
+        this.out.println(s);
     }
 
     private String visit(Operand operand) {
@@ -56,11 +70,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     public String visit(BasicBlock block) {
         addIndent();
-        println("");
-        println(block.getName() + ":");
+        iprintln("%" + block.getName() + ":");
         for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
             visit(instruction);
         }
+        println("");
         subIndent();
         return null;
     }
@@ -68,7 +82,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(ReturnInst ret) {
         addIndent();
-        println("ret " + (ret.getRetVal() != null ? visit(ret.getRetVal()) : ""));
+        iprintln("ret " + (ret.getRetVal() != null ? visit(ret.getRetVal()) : ""));
         subIndent();
         return null;
     }
@@ -76,13 +90,13 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(Function inst) {
         println("");
-        print("define " + "@" + inst.getInstanceSymbol().getName() + "(");
-        StringJoiner params = new StringJoiner(", ");
+        iprint("func " + inst.getInstanceSymbol().getName() + " ");
+        StringJoiner params = new StringJoiner(" ");
         inst.getParamVReg().forEach(param -> params.add(visit(param)));
         print(params.toString());
-        println(") {");
+        println(" {");
         inst.getBlocks().forEach(this::visit);
-        println("}");
+        iprintln("}");
         //TODO
         return null;
     }
@@ -90,7 +104,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(MoveInst inst) {
         addIndent();
-        println(visit(inst.getDst()) + " = move " + visit(inst.getVal()));
+        iprintln(visit(inst.getDst()) + " = MOV " + visit(inst.getVal()));
         subIndent();
         return null;
     }
@@ -98,7 +112,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(CondJumpInst inst) {
         addIndent();
-        println("if " + visit(inst.getCond()) + " " + inst.getIfTrue().getName() + " " + inst.getIfFalse().getName());
+        iprintln("br " + visit(inst.getCond()) + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
         subIndent();
         return null;
     }
@@ -106,20 +120,32 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(DirectJumpInst inst) {
         addIndent();
-        println("jmp " + inst.getTarget().getName());
+        iprintln("jmp %" + inst.getTarget().getName());
+        subIndent();
+        return null;
+    }
+
+    @Override
+    public String visit(FunctionCallInst inst) {
+        addIndent();
+        if (inst.getDst() != null) iprint(visit(inst.getDst()) + " = ");
+        print("call " + inst.getFunctionName() + " ");
+        StringJoiner args = new StringJoiner(" ");
+        inst.getArgs().forEach(arg -> args.add(visit(arg)));
+        println(args.toString());
         subIndent();
         return null;
     }
 
     @Override
     public String visit(VirtualRegister register) {
-        return "%" + register.getName();
+        return "$" + register.getName();
     }
 
     @Override
     public String visit(BinaryExprInst binaryExprInst) {
         addIndent();
-        println(visit(binaryExprInst.getDst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
+        iprintln(visit(binaryExprInst.getDst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
                 + " " + visit(binaryExprInst.getRight()));
         subIndent();
         return null;

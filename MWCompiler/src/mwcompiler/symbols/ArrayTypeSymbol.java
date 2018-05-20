@@ -17,7 +17,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         TypeSymbol search = typeSymbolMap.get(combineName(name, dim));
         if (search == null) {
             search = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
-            typeSymbolMap.put(combineName(name,dim),search);
+            typeSymbolMap.put(combineName(name, dim), search);
         }
         return (ArrayTypeSymbol) search;
     }
@@ -37,11 +37,11 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
-        if (instanceSymbol == InstanceSymbol.SIZE_FUNCTION_IS) {
+        if (instanceSymbol == InstanceSymbol.SIZE) {
             List<TypeSymbol> params = new ArrayList<>();
-            return new SymbolInfo(FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params));
+            return new SymbolInfo(new FunctionTypeSymbol(NonArrayTypeSymbol.INT_TYPE_SYMBOL, params));
         }
-        throw new RuntimeException("(Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
+        throw new RuntimeException("(Type Checking) Array type only has <size> function, <" + instanceSymbol.getName() + ">");
     }
 
 
@@ -53,7 +53,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
     @Override
     public void checkLegal() {
         SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this.nonArrayTypeSymbol);
-        if (namedSymbolTable == null){
+        if (namedSymbolTable == null) {
             throw new RuntimeException(this.getName());
         }
     }

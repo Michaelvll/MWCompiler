@@ -107,7 +107,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         // Creator Function
         TypeSymbol search = TypeSymbol.searchSymbol(name);
         if (search instanceof NonArrayTypeSymbol) {
-            return new FunctionDeclNode(search, InstanceSymbol.CONSTRUCTOR_IS, params, body, null,
+            return new FunctionDeclNode(search, InstanceSymbol.CONSTRUCTOR, params, body, null,
                     identifierLocation, paramLocation, functionBodyLocation);
         }
 
@@ -186,7 +186,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             } else if (statement instanceof FunctionDeclNode) {
                 FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR_IS
+                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR
                         && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
                             , new Location(declarator));

@@ -38,7 +38,7 @@ public class FunctionDeclNode extends DeclaratorNode {
         this.bodyPos = bodyPos;
         List<TypeSymbol> typeParams = new ArrayList<>();
         paramList.forEach(x->typeParams.add(x.getTypeSymbol()));
-        this.functionTypeSymbol = FunctionTypeSymbol.builder(returnTypeSymbol, typeParams);
+        this.functionTypeSymbol = new FunctionTypeSymbol(returnTypeSymbol, typeParams);
     }
 
     public void setReturnType(TypeSymbol returnTypeSymbol, Location returnTypePos) {

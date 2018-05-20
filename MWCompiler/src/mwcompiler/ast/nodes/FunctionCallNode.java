@@ -1,6 +1,7 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.utility.Location;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class FunctionCallNode extends ExprNode {
     private ExprNode caller;
     private List<ExprNode> args;
+    private FunctionTypeSymbol functionTypeSymbol;
 
     public FunctionCallNode(ExprNode caller, List<ExprNode> args, Location pos) {
         super(pos);
@@ -33,5 +35,13 @@ public class FunctionCallNode extends ExprNode {
 
     public List<ExprNode> getArgs() {
         return args;
+    }
+
+    public FunctionTypeSymbol getFunctionTypeSymbol() {
+        return functionTypeSymbol;
+    }
+
+    public void setFunctionTypeSymbol(FunctionTypeSymbol functionTypeSymbol) {
+        this.functionTypeSymbol = functionTypeSymbol;
     }
 }

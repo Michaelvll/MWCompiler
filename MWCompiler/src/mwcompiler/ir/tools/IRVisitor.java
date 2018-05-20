@@ -22,4 +22,6 @@ public interface IRVisitor<T> {
     T visit(CondJumpInst inst);
 
     T visit(DirectJumpInst inst);
+
+    T visit(FunctionCallInst inst);
 }

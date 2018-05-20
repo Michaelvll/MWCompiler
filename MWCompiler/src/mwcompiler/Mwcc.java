@@ -40,6 +40,16 @@ public class Mwcc {
         buildIR();
     }
 
+    public static ProgramIR getProgramIRRoot(){
+        // For test
+        return programIRRoot;
+    }
+
+    public static ProgramNode getProgramAstRoot() {
+        // For test
+        return programAstRoot;
+    }
+
     private static void buildAst() {
         try {
             CharStream input = CharStreams.fromStream(CompilerOptions.in);
@@ -61,7 +71,7 @@ public class Mwcc {
             System.exit(1);
         }
 
-        if (CompilerOptions.ast) {
+        if (CompilerOptions.dumpAst) {
             DumpAstVisitor astDumper = new DumpAstVisitor();
             astDumper.apply(programAstRoot);
 //            System.exit(0);
@@ -88,7 +98,7 @@ public class Mwcc {
         IRBuilder irBuilder = new IRBuilder();
         programIRRoot = irBuilder.build(programAstRoot);
 
-        if (CompilerOptions.ir) {
+        if (CompilerOptions.dumpIR) {
             DumpIRVisitor irDumper = new DumpIRVisitor();
             irDumper.apply(programIRRoot);
         }

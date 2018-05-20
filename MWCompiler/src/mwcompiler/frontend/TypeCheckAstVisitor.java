@@ -153,7 +153,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     @Override
     public ExprType visit(FunctionDeclNode node) {
         FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        expectedReturnType = (node.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR_IS) ?
+        expectedReturnType = (node.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR) ?
                 VOID_TYPE_SYMBOL : functionTypeSymbol.getReturnType();
         try {
             functionTypeSymbol.checkLegal();
@@ -165,7 +165,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         ExprType blockReturn = visit(node.getBody());
         if (blockReturn == null) {
             if (node.getFunctionTypeSymbol().getReturnType() != VOID_TYPE_SYMBOL
-                    && node.getInstanceSymbol() != InstanceSymbol.CONSTRUCTOR_IS) {
+                    && node.getInstanceSymbol() != InstanceSymbol.CONSTRUCTOR) {
                 CompileWarining.add(stage, "Function " + StringProcess.getRefString(node.getInstanceSymbol().getName())
                         + "has no return statement ", node.getStartLocation());
             }
@@ -178,7 +178,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(ClassDeclNode node) {
         inClass = true;
         getCurrentSymbolTable(node.getBody());
-        currentSymbolTable.put(InstanceSymbol.THIS_IS, node.getClassSymbol());
+        currentSymbolTable.put(InstanceSymbol.THIS, node.getClassSymbol());
         visit(node.getBody());
         inClass = false;
         return null;
@@ -205,7 +205,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                     throw new CompileError(stage, "Can not assign to a Rvalue ", node.getStartLocation());
                 }
                 if (node.getLeft() instanceof IdentifierExprNode) {
-                    if (((IdentifierExprNode) node.getLeft()).getInstanceSymbol() == InstanceSymbol.THIS_IS)
+                    if (((IdentifierExprNode) node.getLeft()).getInstanceSymbol() == InstanceSymbol.THIS)
                         throw new CompileError(stage, "Can not assign to "
                                 + StringProcess.getRefString("this"), node.getStartLocation());
                 }
@@ -356,7 +356,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(ConstructorCallNode node) {
         NonArrayTypeSymbol classTypeSymbol = node.getClassTypeSymbol();
         FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) classTypeSymbol
-                .findIn(InstanceSymbol.CONSTRUCTOR_IS).getTypeSymbol();
+                .findIn(InstanceSymbol.CONSTRUCTOR).getTypeSymbol();
         List<ExprNode> args = node.getArgs();
         List<TypeSymbol> params = functionTypeSymbol.getParams();
         checkArgs(args, params, node.getStartLocation());

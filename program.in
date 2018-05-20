@@ -1,7 +1,9 @@
-int main() {
-	int i;
-	for (;i;);
-}
+int __print() {
 
+}
+int main() {
+int a = (new int[123])[31];
+__print();
+}
 
 

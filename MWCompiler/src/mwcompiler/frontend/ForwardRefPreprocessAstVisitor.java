@@ -7,8 +7,7 @@ import mwcompiler.utility.CompileError;
 import mwcompiler.utility.Location;
 import mwcompiler.utility.StringProcess;
 
-import java.util.ArrayList;
-import java.util.List;
+import static mwcompiler.symbols.SymbolTable.stringSymbolTable;
 
 /**
  * @author Michael Wu
@@ -27,31 +26,16 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         node.accept(this);
     }
 
-    private FunctionTypeSymbol getFunctionType(String returnType, String... params) {
-        TypeSymbol returnTypeSymbol = NonArrayTypeSymbol.builder(returnType);
-        List<TypeSymbol> paramList = new ArrayList<>();
-        for (String param : params) {
-            paramList.add(NonArrayTypeSymbol.builder(param));
-        }
-        return FunctionTypeSymbol.builder(returnTypeSymbol, paramList);
-    }
-
-    // Put builtin functions into Symbol Table
-    private void putBuiltin(String returnType, String name, String... params) {
-        currentSymbolTable.put(InstanceSymbol.builder(name), getFunctionType(returnType, params));
-    }
-
     private void initBuiltinFunction() {
-        putBuiltin("void", "print", "string");
-        putBuiltin("void", "println", "string");
-        putBuiltin("string", "getString");
-        putBuiltin("int", "getInt");
-        putBuiltin("string", "toString", "int");
-        SymbolTable stringSymbolTable = SymbolTable.getNamedSymbolTable(NonArrayTypeSymbol.builder("string"));
-        stringSymbolTable.put(InstanceSymbol.builder("length"), getFunctionType("int"));
-        stringSymbolTable.put(InstanceSymbol.builder("substring"), getFunctionType("string", "int", "int"));
-        stringSymbolTable.put(InstanceSymbol.builder("parseInt"), getFunctionType("int"));
-        stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
+        currentSymbolTable.put(InstanceSymbol.PRINT, FunctionTypeSymbol.PRINT);
+        currentSymbolTable.put(InstanceSymbol.PRINTLN, FunctionTypeSymbol.PRINTLN);
+        currentSymbolTable.put(InstanceSymbol.GET_STRING, FunctionTypeSymbol.GET_STRING);
+        currentSymbolTable.put(InstanceSymbol.GET_INT, FunctionTypeSymbol.GET_INT);
+        currentSymbolTable.put(InstanceSymbol.TO_STRING, FunctionTypeSymbol.TO_STRING);
+        stringSymbolTable.put(InstanceSymbol.LENGTH, FunctionTypeSymbol.LENGTH);
+        stringSymbolTable.put(InstanceSymbol.SUBSTRING, FunctionTypeSymbol.SUBSTRING);
+        stringSymbolTable.put(InstanceSymbol.PARSE_INT, FunctionTypeSymbol.PARSE_INT);
+        stringSymbolTable.put(InstanceSymbol.ORD, FunctionTypeSymbol.ORD);
     }
 
     private Location mainLocation;

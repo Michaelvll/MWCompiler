@@ -6,12 +6,13 @@ import java.util.Map;
 
 public class SymbolTable {
     private static Map<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new HashMap<>();
+    public static final SymbolTable stringSymbolTable = new SymbolTable(null);
 
     static {
-        namedSymbolTableMap.put(NonArrayTypeSymbol.builder("int"), new SymbolTable(null));
-        namedSymbolTableMap.put(NonArrayTypeSymbol.builder("string"), new SymbolTable(null));
-        namedSymbolTableMap.put(NonArrayTypeSymbol.builder("bool"), new SymbolTable(null));
-        namedSymbolTableMap.put(NonArrayTypeSymbol.builder("void"), new SymbolTable(null));
+        namedSymbolTableMap.put(NonArrayTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
+        namedSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, stringSymbolTable);
+        namedSymbolTableMap.put(NonArrayTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
+        namedSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
     }
 
     private Map<InstanceSymbol, SymbolInfo> currentMap = new HashMap<>();
@@ -37,7 +38,7 @@ public class SymbolTable {
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
-        symbolTable.put(InstanceSymbol.THIS_IS, nonArrayTypeSymbol);
+        symbolTable.put(InstanceSymbol.THIS, nonArrayTypeSymbol);
         namedSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 

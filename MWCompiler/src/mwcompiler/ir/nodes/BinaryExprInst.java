@@ -1,6 +1,5 @@
 package mwcompiler.ir.nodes;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
@@ -40,7 +39,7 @@ public class BinaryExprInst extends AssignInst {
 
     @Override
     public List<Operand> getOperand() {
-        return new ArrayList<Operand>(){{
+        return new ArrayList<Operand>() {{
             add(left);
             add(right);
         }};

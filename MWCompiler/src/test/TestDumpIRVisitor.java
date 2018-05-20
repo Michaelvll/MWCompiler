@@ -16,7 +16,7 @@ public class TestDumpIRVisitor {
 
     @Before
     public void build() throws Exception {
-        PreBuild.build(System.in);
+        PreBuild.build("../testcases/dumpIR/1.mx");
         program = PreBuild.program;
         ForwardRefPreprocessAstVisitor forwardRefPreprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
         forwardRefPreprocessAstVisitor.apply(program);
