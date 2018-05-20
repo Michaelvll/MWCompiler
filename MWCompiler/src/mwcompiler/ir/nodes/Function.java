@@ -49,7 +49,7 @@ public class Function {
     }
 
     public String getFunctionName() {
-        return functionSymbol.getInstanceSymbol().getName();
+        return functionSymbol.getName();
     }
 
     public List<VirtualRegister> getParamVReg() {

@@ -8,25 +8,25 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 
 // Each function has exactly one FunctionSymbol
 public class FunctionSymbol extends TypeSymbol {
-    private InstanceSymbol instanceSymbol;
+    private String funcName;
     private TypeSymbol returnType;
     private List<TypeSymbol> params;
 
     public FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol, List<TypeSymbol> params) {
         this.returnType = returnType;
-        this.instanceSymbol = instanceSymbol;
+        this.funcName = instanceSymbol.getName();
         this.params = params;
     }
 
     private FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol, TypeSymbol... params) {
         this.returnType = returnType;
-        this.instanceSymbol = instanceSymbol;
+        this.funcName = instanceSymbol.getName();
         this.params = new ArrayList<>(Arrays.asList(params));
     }
 
     private FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol) {
         this.returnType = returnType;
-        this.instanceSymbol = instanceSymbol;
+        this.funcName = instanceSymbol.getName();
         this.params = new ArrayList<>();
     }
 
@@ -49,9 +49,7 @@ public class FunctionSymbol extends TypeSymbol {
 
     @Override
     public String getName() {
-        StringBuilder name = new StringBuilder("returnType: " + returnType.getName() + "\nParams:\n");
-        params.forEach(param -> name.append("\t").append(param.getName()).append("\n"));
-        return String.valueOf(name);
+         return funcName;
     }
 
     @Override
@@ -65,8 +63,9 @@ public class FunctionSymbol extends TypeSymbol {
         throw new RuntimeException("(Type Checking) Function does not have a member ");
     }
 
-    public InstanceSymbol getInstanceSymbol() {
-        return instanceSymbol;
+
+    public void addNamePrefix(String prefix) {
+        this.funcName = prefix + funcName;
     }
 
     public static final FunctionSymbol PRINT = new FunctionSymbol(VOID_TYPE_SYMBOL, InstanceSymbol.PRINT, STRING_TYPE_SYMBOL);
