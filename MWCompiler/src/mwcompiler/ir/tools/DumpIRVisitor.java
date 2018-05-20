@@ -89,8 +89,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(Function inst) {
+        if (inst.isLib()) return null; // output extern func is good for nasm
         println("");
-        iprint("func " + inst.getInstanceSymbol().getName() + " ");
+        iprint("func " + inst.getFunctionName() + " ");
         StringJoiner params = new StringJoiner(" ");
         inst.getParamVReg().forEach(param -> params.add(visit(param)));
         print(params.toString());

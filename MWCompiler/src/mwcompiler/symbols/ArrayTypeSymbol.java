@@ -1,9 +1,6 @@
 package mwcompiler.symbols;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;
     private Integer dim;
@@ -38,8 +35,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
     @Override
     public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
         if (instanceSymbol == InstanceSymbol.SIZE) {
-            List<TypeSymbol> params = new ArrayList<>();
-            return new SymbolInfo(new FunctionTypeSymbol(NonArrayTypeSymbol.INT_TYPE_SYMBOL, params));
+            return new SymbolInfo(FunctionSymbol.SIZE);
         }
         throw new RuntimeException("(Type Checking) Array type only has <size> function, <" + instanceSymbol.getName() + ">");
     }

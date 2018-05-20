@@ -1,7 +1,7 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.FunctionTypeSymbol;
+import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
 
@@ -212,8 +212,8 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(FunctionDeclNode node) {
         addIndent();
         println("<<FunctionDeclNode>>");
-        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        println("type: <" + functionTypeSymbol.getReturnType() + ", " + functionTypeSymbol.getReturnType().getName() + ">");
+        FunctionSymbol functionSymbol = node.getFunctionSymbol();
+        println("type: <" + functionSymbol.getReturnType() + ", " + functionSymbol.getReturnType().getName() + ">");
         println("name: <" + node.getInstanceSymbol() + ", " + node.getInstanceSymbol().getName() + ">");
         println("params:");
         node.getParamList().forEach(this::visit);

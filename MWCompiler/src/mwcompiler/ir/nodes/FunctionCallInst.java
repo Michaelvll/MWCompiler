@@ -31,7 +31,7 @@ public class FunctionCallInst extends AssignInst {
     }
 
     public String getFunctionName() {
-        return function.getInstanceSymbol().getName();
+        return function.getFunctionName();
     }
 
     public List<Operand> getArgs() {

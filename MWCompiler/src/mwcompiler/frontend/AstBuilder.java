@@ -187,7 +187,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
                 FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
                 if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR
-                        && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
+                        && !(functionDeclNode.getFunctionSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
                             , new Location(declarator));
                 }

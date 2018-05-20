@@ -1,8 +1,8 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.utility.Location;
-import mwcompiler.symbols.FunctionTypeSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class FunctionDeclNode extends DeclaratorNode {
     private InstanceSymbol instanceSymbol;
-    private FunctionTypeSymbol functionTypeSymbol;
+    private FunctionSymbol functionSymbol;
     private List<VariableDeclNode> paramList;
     private BlockNode body;
     private Location returnTypePos;
@@ -38,12 +38,12 @@ public class FunctionDeclNode extends DeclaratorNode {
         this.bodyPos = bodyPos;
         List<TypeSymbol> typeParams = new ArrayList<>();
         paramList.forEach(x->typeParams.add(x.getTypeSymbol()));
-        this.functionTypeSymbol = new FunctionTypeSymbol(returnTypeSymbol, typeParams);
+        this.functionSymbol = new FunctionSymbol(returnTypeSymbol, instanceSymbol, typeParams);
     }
 
     public void setReturnType(TypeSymbol returnTypeSymbol, Location returnTypePos) {
         this.returnTypePos = returnTypePos;
-        this.functionTypeSymbol.setReturnType(returnTypeSymbol);
+        this.functionSymbol.setReturnType(returnTypeSymbol);
     }
 
 
@@ -82,8 +82,8 @@ public class FunctionDeclNode extends DeclaratorNode {
         return returnTypePos;
     }
 
-    public FunctionTypeSymbol getFunctionTypeSymbol() {
-        return functionTypeSymbol;
+    public FunctionSymbol getFunctionSymbol() {
+        return functionSymbol;
     }
 
 }

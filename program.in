@@ -1,9 +1,7 @@
-int __print() {
+int main()
+{
+int [][][]a = (new int[3][2][][])[1];
 
-}
-int main() {
-int a = (new int[123])[31];
-__print();
 }
 
 

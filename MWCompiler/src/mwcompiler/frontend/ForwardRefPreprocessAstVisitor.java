@@ -27,15 +27,15 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     }
 
     private void initBuiltinFunction() {
-        currentSymbolTable.put(InstanceSymbol.PRINT, FunctionTypeSymbol.PRINT);
-        currentSymbolTable.put(InstanceSymbol.PRINTLN, FunctionTypeSymbol.PRINTLN);
-        currentSymbolTable.put(InstanceSymbol.GET_STRING, FunctionTypeSymbol.GET_STRING);
-        currentSymbolTable.put(InstanceSymbol.GET_INT, FunctionTypeSymbol.GET_INT);
-        currentSymbolTable.put(InstanceSymbol.TO_STRING, FunctionTypeSymbol.TO_STRING);
-        stringSymbolTable.put(InstanceSymbol.LENGTH, FunctionTypeSymbol.LENGTH);
-        stringSymbolTable.put(InstanceSymbol.SUBSTRING, FunctionTypeSymbol.SUBSTRING);
-        stringSymbolTable.put(InstanceSymbol.PARSE_INT, FunctionTypeSymbol.PARSE_INT);
-        stringSymbolTable.put(InstanceSymbol.ORD, FunctionTypeSymbol.ORD);
+        currentSymbolTable.put(InstanceSymbol.PRINT, FunctionSymbol.PRINT);
+        currentSymbolTable.put(InstanceSymbol.PRINTLN, FunctionSymbol.PRINTLN);
+        currentSymbolTable.put(InstanceSymbol.GET_STRING, FunctionSymbol.GET_STRING);
+        currentSymbolTable.put(InstanceSymbol.GET_INT, FunctionSymbol.GET_INT);
+        currentSymbolTable.put(InstanceSymbol.TO_STRING, FunctionSymbol.TO_STRING);
+        stringSymbolTable.put(InstanceSymbol.LENGTH, FunctionSymbol.LENGTH);
+        stringSymbolTable.put(InstanceSymbol.SUBSTRING, FunctionSymbol.SUBSTRING);
+        stringSymbolTable.put(InstanceSymbol.PARSE_INT, FunctionSymbol.PARSE_INT);
+        stringSymbolTable.put(InstanceSymbol.ORD, FunctionSymbol.ORD);
     }
 
     private Location mainLocation;
@@ -46,7 +46,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         if (mainSymbolIfo == null) {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else {
-            FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) mainSymbolIfo.getTypeSymbol();
+            FunctionSymbol mainTypeSymbol = (FunctionSymbol) mainSymbolIfo.getTypeSymbol();
             if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
                     || mainTypeSymbol.getParams().size() != 0) {
                 throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
@@ -116,9 +116,9 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         }
         if (node.getInstanceSymbol().getName().equals("main"))
             mainLocation = node.getStartLocation();
-        currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+        currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionSymbol());
         if (inClass)
-            currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+            currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionSymbol());
         return null;
     }
 }

@@ -14,10 +14,10 @@ public class InstanceSymbol extends Symbol {
     public static final InstanceSymbol GET_INT = new InstanceSymbol("getInt");
     public static final InstanceSymbol TO_STRING = new InstanceSymbol("toString");
     public static final InstanceSymbol SIZE = new InstanceSymbol("size");
-    public static final InstanceSymbol LENGTH = new InstanceSymbol("length");
-    public static final InstanceSymbol SUBSTRING = new InstanceSymbol("substring");
-    public static final InstanceSymbol PARSE_INT = new InstanceSymbol("parseInt");
-    public static final InstanceSymbol ORD = new InstanceSymbol("ord");
+    public static final InstanceSymbol LENGTH = new InstanceSymbol("__str_length");
+    public static final InstanceSymbol SUBSTRING = new InstanceSymbol("__str_substring");
+    public static final InstanceSymbol PARSE_INT = new InstanceSymbol("__str_parseInt");
+    public static final InstanceSymbol ORD = new InstanceSymbol("__str_ord");
 
     public static final Set<InstanceSymbol> builtinSet = new HashSet<>();
 

@@ -152,11 +152,11 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
 
     @Override
     public ExprType visit(FunctionDeclNode node) {
-        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
+        FunctionSymbol functionSymbol = node.getFunctionSymbol();
         expectedReturnType = (node.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR) ?
-                VOID_TYPE_SYMBOL : functionTypeSymbol.getReturnType();
+                VOID_TYPE_SYMBOL : functionSymbol.getReturnType();
         try {
-            functionTypeSymbol.checkLegal();
+            functionSymbol.checkLegal();
         } catch (RuntimeException e) {
             throwNoSuchType(e.getMessage(), node.getStartLocation());
         }
@@ -164,7 +164,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         node.getParamList().forEach(this::visit);
         ExprType blockReturn = visit(node.getBody());
         if (blockReturn == null) {
-            if (node.getFunctionTypeSymbol().getReturnType() != VOID_TYPE_SYMBOL
+            if (node.getFunctionSymbol().getReturnType() != VOID_TYPE_SYMBOL
                     && node.getInstanceSymbol() != InstanceSymbol.CONSTRUCTOR) {
                 CompileWarining.add(stage, "Function " + StringProcess.getRefString(node.getInstanceSymbol().getName())
                         + "has no return statement ", node.getStartLocation());
@@ -336,29 +336,29 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     @Override
     public ExprType visit(FunctionCallNode node) {
         ExprType callerType = visit(node.getCaller());
-        if (!(callerType.typeSymbol instanceof FunctionTypeSymbol)) {
+        if (!(callerType.typeSymbol instanceof FunctionSymbol)) {
             throw new CompileError(stage, "A non function name "
                     + StringProcess.getRefString(callerType.typeSymbol.getName()) + "is not callable ",
                     node.getStartLocation());
         }
-        FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) callerType.typeSymbol;
+        FunctionSymbol functionSymbol = (FunctionSymbol) callerType.typeSymbol;
 
         List<ExprNode> args = node.getArgs();
-        List<TypeSymbol> params = functionTypeSymbol.getParams();
+        List<TypeSymbol> params = functionSymbol.getParams();
         checkArgs(args, params, node.getStartLocation());
-        if (functionTypeSymbol.getReturnType() instanceof ArrayTypeSymbol)
-            return new ExprType(functionTypeSymbol.getReturnType(), LVAL);
-        return new ExprType(functionTypeSymbol.getReturnType(), RVAL);
+        if (functionSymbol.getReturnType() instanceof ArrayTypeSymbol)
+            return new ExprType(functionSymbol.getReturnType(), LVAL);
+        return new ExprType(functionSymbol.getReturnType(), RVAL);
 
     }
 
     @Override
     public ExprType visit(ConstructorCallNode node) {
         NonArrayTypeSymbol classTypeSymbol = node.getClassTypeSymbol();
-        FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) classTypeSymbol
+        FunctionSymbol functionSymbol = (FunctionSymbol) classTypeSymbol
                 .findIn(InstanceSymbol.CONSTRUCTOR).getTypeSymbol();
         List<ExprNode> args = node.getArgs();
-        List<TypeSymbol> params = functionTypeSymbol.getParams();
+        List<TypeSymbol> params = functionSymbol.getParams();
         checkArgs(args, params, node.getStartLocation());
         return new ExprType(classTypeSymbol, LVAL);
     }

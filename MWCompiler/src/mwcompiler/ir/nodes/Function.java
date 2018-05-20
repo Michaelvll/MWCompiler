@@ -2,33 +2,31 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.IRVisitor;
-import mwcompiler.symbols.FunctionTypeSymbol;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.NonArrayTypeSymbol;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Function {
-    private FunctionTypeSymbol functionTypeSymbol;
-    private InstanceSymbol instanceSymbol;
+    private FunctionSymbol functionSymbol;
     private List<VirtualRegister> paramVReg = new ArrayList<>();
 
-    private Boolean isLib;
+    private final Boolean isLib;
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
     private List<BasicBlock> blocks = new LinkedList<>();
 
-    public Function(InstanceSymbol instanceSymbol, FunctionTypeSymbol functionTypeSymbol) {
-        this.functionTypeSymbol = functionTypeSymbol;
-        this.instanceSymbol = instanceSymbol;
+    public Function(FunctionSymbol functionSymbol) {
+        this.functionSymbol = functionSymbol;
+        this.isLib = false;
     }
 
-    private Function(InstanceSymbol instanceSymbol, FunctionTypeSymbol functionTypeSymbol, Boolean isLib) {
-        this.functionTypeSymbol = functionTypeSymbol;
-        this.instanceSymbol = instanceSymbol;
+    private Function(FunctionSymbol functionSymbol, Boolean isLib) {
+        this.functionSymbol = functionSymbol;
         this.isLib = isLib;
     }
 
@@ -43,11 +41,15 @@ public class Function {
 
 
     public Boolean needReturn() {
-        return functionTypeSymbol.getReturnType() != NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
+        return functionSymbol.getReturnType() != NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
     }
 
-    public InstanceSymbol getInstanceSymbol() {
-        return instanceSymbol;
+    public FunctionSymbol getFunctionSymbol() {
+        return functionSymbol;
+    }
+
+    public String getFunctionName() {
+        return functionSymbol.getInstanceSymbol().getName();
     }
 
     public List<VirtualRegister> getParamVReg() {
@@ -67,14 +69,20 @@ public class Function {
         return blocks;
     }
 
-    public static final Function PRINT = new Function(InstanceSymbol.PRINT, FunctionTypeSymbol.PRINT, true);
-    public static final Function PRINTLN = new Function(InstanceSymbol.PRINTLN, FunctionTypeSymbol.PRINTLN, true);
-    public static final Function GET_STRING = new Function(InstanceSymbol.GET_STRING, FunctionTypeSymbol.GET_STRING, true);
-    public static final Function GET_INT = new Function(InstanceSymbol.GET_INT, FunctionTypeSymbol.GET_INT, true);
-    public static final Function TO_STRING = new Function(InstanceSymbol.TO_STRING, FunctionTypeSymbol.TO_STRING, true);
-    public static final Function SIZE = new Function(InstanceSymbol.SIZE, FunctionTypeSymbol.SIZE, true);
-    public static final Function LENGTH = new Function(InstanceSymbol.LENGTH, FunctionTypeSymbol.LENGTH, true);
-    public static final Function SUBSTRING = new Function(InstanceSymbol.SUBSTRING, FunctionTypeSymbol.SUBSTRING, true);
-    public static final Function PARSE_INT = new Function(InstanceSymbol.PARSE_INT, FunctionTypeSymbol.PARSE_INT, true);
-    public static final Function ORD = new Function(InstanceSymbol.ORD, FunctionTypeSymbol.ORD, true);
+    public static final Function PRINT = new Function(FunctionSymbol.PRINT, true);
+    public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, true);
+    public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, true);
+    public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, true);
+    public static final Function TO_STRING = new Function(FunctionSymbol.TO_STRING, true);
+    public static final Function SIZE = new Function(FunctionSymbol.SIZE, true);
+    public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, true);
+    public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, true);
+    public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, true);
+    public static final Function ORD = new Function(FunctionSymbol.ORD, true);
+    public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT, PRINTLN, GET_STRING, GET_INT,
+            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD));
+
+    public Boolean isLib() {
+        return isLib;
+    }
 }

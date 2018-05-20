@@ -8,7 +8,10 @@ import mwcompiler.ir.operands.IntLiteral;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.VirtualRegister;
-import mwcompiler.symbols.*;
+import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.SymbolInfo;
+import mwcompiler.symbols.SymbolTable;
 import mwcompiler.utility.ExprOps;
 
 import java.util.ArrayList;
@@ -64,7 +67,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(ProgramNode node) {
-
+        Function.builtinFunctions.forEach(programIR::putFunction);
         visit(node.getBlock());
         return null;
     }
@@ -98,11 +101,11 @@ public class IRBuilder implements AstVisitor<Operand> {
         return reg;
     }
 
-    private Function getFunction(InstanceSymbol functionSymbol, FunctionTypeSymbol functionTypeSymbol) {
+    private Function getFunction(FunctionSymbol functionSymbol) {
         Function function = programIR.getFunction(functionSymbol);
         if (function == null) {
-            function = new Function(functionSymbol, functionTypeSymbol);
-            programIR.putFunction(functionSymbol, function);
+            function = new Function(functionSymbol);
+            programIR.putFunction(function);
         }
         return function;
     }
@@ -110,9 +113,8 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(FunctionDeclNode node) {
         newValTag();
-        InstanceSymbol functionSymbol = node.getInstanceSymbol();
-        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        Function function = getFunction(functionSymbol, functionTypeSymbol);
+        FunctionSymbol functionSymbol = node.getFunctionSymbol();
+        Function function = getFunction(functionSymbol);
         getCurrentSymbolTable(node.getBody());
         getCurrentBasicBlock(function);
 
@@ -316,10 +318,10 @@ public class IRBuilder implements AstVisitor<Operand> {
         Function function = null;
         if (caller instanceof IdentifierExprNode) {
             // TODO built in function
-            InstanceSymbol functionSymbol = ((IdentifierExprNode) caller).getInstanceSymbol();
-            SymbolInfo functionInfo = currentSymbolTable.findAll(functionSymbol);
-            FunctionTypeSymbol functionTypeSymbol = (FunctionTypeSymbol) functionInfo.getTypeSymbol();
-            function = getFunction(functionSymbol, functionTypeSymbol);
+            InstanceSymbol instanceSymbol = ((IdentifierExprNode) caller).getInstanceSymbol();
+            SymbolInfo functionInfo = currentSymbolTable.findAll(instanceSymbol);
+            FunctionSymbol functionSymbol = (FunctionSymbol) functionInfo.getTypeSymbol();
+            function = getFunction(functionSymbol);
         } else {
             //TODO for class function
         }
@@ -453,7 +455,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(BoolLiteralNode node) {
-        return null;
+        return node.getVal() ? ONE_LITERAL : ZERO_LITERAL;
     }
 
     @Override

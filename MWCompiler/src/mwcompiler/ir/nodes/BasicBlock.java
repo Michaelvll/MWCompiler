@@ -30,7 +30,7 @@ public class BasicBlock {
     public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable) {
         this.parentFunction = parentFunction;
         this.currentSymbolTable = currentSymbolTable;
-        this.name = NameBuilder.builder(parentFunction.getInstanceSymbol().getName());
+        this.name = NameBuilder.builder(parentFunction.getFunctionName());
 
     }
 

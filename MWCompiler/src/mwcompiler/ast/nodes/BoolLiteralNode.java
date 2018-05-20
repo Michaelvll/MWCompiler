@@ -10,26 +10,24 @@ import mwcompiler.utility.Location;
  * @since 2018-04-13
  */
 public class BoolLiteralNode extends LiteralExprNode {
-    public enum BoolVal{
-        TRUE, FALSE
-    };
-    private BoolVal val;
+
+    private Boolean val;
 
     public BoolLiteralNode(String val, Location pos) {
         super(pos);
         switch (val) {
             case "true":
-                this.val = BoolVal.TRUE;
+                this.val = true;
                 break;
             case "false":
-                this.val = BoolVal.FALSE;
+                this.val = false;
                 break;
             default:
                 throw new RuntimeException("Literal value not match BoolLiteral");
         }
     }
 
-    public BoolVal getVal() {
+    public Boolean getVal() {
         return val;
     }
 

@@ -1,22 +1,22 @@
 package mwcompiler.ir.nodes;
 
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.FunctionSymbol;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProgramIR {
-    private Map<InstanceSymbol, Function> functionMap = new HashMap<>();
+    private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
 
-    public void putFunction(InstanceSymbol functionSymbol,Function function) {
-        functionMap.put(functionSymbol, function);
+    public void putFunction(Function function) {
+        functionMap.put(function.getFunctionSymbol(), function);
     }
 
-    public Function getFunction(InstanceSymbol functionSymbol) {
+    public Function getFunction(FunctionSymbol functionSymbol) {
         return functionMap.get(functionSymbol);
     }
 
-    public Map<InstanceSymbol, Function> getFunctionMap() {
+    public Map<FunctionSymbol, Function> getFunctionMap() {
         return functionMap;
     }
 }
