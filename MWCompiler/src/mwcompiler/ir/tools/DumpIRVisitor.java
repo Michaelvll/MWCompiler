@@ -1,11 +1,13 @@
 package mwcompiler.ir.tools;
 
 import mwcompiler.ir.nodes.*;
-import mwcompiler.ir.operands.IntLiteral;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.StringLiteral;
-import mwcompiler.ir.operands.VirtualRegister;
-import mwcompiler.utility.ExprOps;
+import mwcompiler.ir.nodes.assign.BinaryExprInst;
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
+import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.jump.CondJumpInst;
+import mwcompiler.ir.nodes.jump.DirectJumpInst;
+import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.*;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -27,6 +29,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     public void apply(ProgramIR programIR) {
         programIR.getFunctionMap().values().forEach(this::visit);
+        programIR.getStringPool().values().forEach(s->println(s.getLabel() + " db " + s.getVal()));
         //TODO
     }
 
@@ -60,13 +63,6 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     private String visit(Instruction instruction) {
         return instruction.accept(this);
-    }
-
-    private String visit(ExprOps op) {
-        switch (op) {
-            case ADD: return "add";
-            default: return null;
-        }
     }
 
     public String visit(BasicBlock block) {
@@ -161,5 +157,10 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(IntLiteral intLiteral) {
         return String.valueOf(intLiteral.getVal());
+    }
+
+    @Override
+    public String visit(Address address) {
+        return null;
     }
 }

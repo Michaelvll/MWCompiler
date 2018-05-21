@@ -28,4 +28,8 @@ public class ProgramIR {
     public Map<FunctionSymbol, Function> getFunctionMap() {
         return functionMap;
     }
+
+    public Map<String, StringLiteral> getStringPool() {
+        return stringPool;
+    }
 }

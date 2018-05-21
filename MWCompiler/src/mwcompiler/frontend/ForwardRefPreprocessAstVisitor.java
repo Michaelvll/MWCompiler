@@ -1,6 +1,9 @@
 package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
 import mwcompiler.ast.tools.AstBaseVisitor;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.CompileError;

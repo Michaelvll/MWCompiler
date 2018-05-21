@@ -72,7 +72,7 @@ public class LLIRInterpreter {
 
     // instructions that have destination
     static private final Set<String> opnames2 = new HashSet<>(
-            Arrays.asList("load", "MOV", "alloc", "phi", "ADD", "SUB", "MUL", "DIV", "REM", "LSFT", "RSFT", "AND", "OR",
+            Arrays.asList("load", "MOV", "alloc", "phi", "ADD", "SUB", "MUL", "DIV", "MOD", "LSFT", "RSFT", "AND", "OR",
                     "XOR", "NEG", "NOT", "LT", "GT", "LTE", "GTE", "EQ", "NEQ", "call"));
 
     // instructions that have exactly 1 operand
@@ -378,7 +378,7 @@ public class LLIRInterpreter {
                 registerWrite(curInst.dest, readSrc(curInst.op1) / readSrc(curInst.op2));
                 return;
 
-            case "REM":
+            case "MOD":
                 if (readSrc(curInst.op2) == 0)
                     throw new RuntimeError("mod by zero");
                 registerWrite(curInst.dest, readSrc(curInst.op1) % readSrc(curInst.op2));

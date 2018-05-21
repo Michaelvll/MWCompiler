@@ -1,7 +1,14 @@
 package mwcompiler.ir.nodes;
 
 
-import mwcompiler.ir.operands.*;
+import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.jump.JumpInst;
+import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.Literal;
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
 import mwcompiler.utility.Pair;
@@ -91,20 +98,22 @@ public class BasicBlock {
         for (Instruction inst = front; inst != null; inst = inst.next) {
             if (inst instanceof AssignInst) {
                 AssignInst assignInst = (AssignInst) inst;
-                Register dst = assignInst.getDst();
+                if (assignInst.getDst() instanceof Register) {
+                    Register dst = (Register) assignInst.getDst();
 
-                for (Operand operand : assignInst.getOperand()) {
-                    if (operand instanceof Register) {
-                        Pair<AssignInst, Boolean> operandInst = regAssignTable.get(operand);
-                        if (operandInst != null) operandInst.second = true;
+                    for (Operand operand : assignInst.getOperand()) {
+                        if (operand instanceof Register) {
+                            Pair<AssignInst, Boolean> operandInst = regAssignTable.get(operand);
+                            if (operandInst != null) operandInst.second = true;
+                        }
                     }
-                }
-                if (dst != null) {
-                    Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
-                    if (lastAssign != null && !lastAssign.second) {
-                        delete(lastAssign.first);
+                    if (dst != null) {
+                        Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
+                        if (lastAssign != null && !lastAssign.second) {
+                            delete(lastAssign.first);
+                        }
+                        regAssignTable.put(dst, new Pair<>(assignInst, false));
                     }
-                    regAssignTable.put(dst, new Pair<>(assignInst, false));
                 }
             }
         }
@@ -119,10 +128,10 @@ public class BasicBlock {
     }
 
     private void addKnownReg(VirtualRegister reg, Operand val, Integer valTag) {
-        if (val instanceof IntLiteral) {
+        if (val instanceof Literal) {
             assignTable.put(reg, (Literal) val);
             if (reg.getSymbolTable() == currentSymbolTable) {
-                reg.setVal((IntLiteral) val, valTag);
+                reg.setVal((Literal) val, valTag);
                 return;
             }
         } else {
@@ -143,6 +152,10 @@ public class BasicBlock {
 
     public Function getParentFunction() {
         return parentFunction;
+    }
+
+    public SymbolTable getCurrentSymbolTable() {
+        return currentSymbolTable;
     }
 
     private Map<Register, Literal> assignTable = new HashMap<>();

@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.FunctionSymbol;
@@ -10,8 +11,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static mwcompiler.symbols.NonArrayTypeSymbol.BOOL_TYPE_SYMBOL;
-import static mwcompiler.symbols.NonArrayTypeSymbol.STRING_TYPE_SYMBOL;
+import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 
 public class Function {
     private FunctionSymbol functionSymbol;
@@ -92,6 +92,8 @@ public class Function {
     public static final Function STR_LTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
     public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
     public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+
+    public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "__lib_malloc_", INT_TYPE_SYMBOL), true);
 
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT, PRINTLN, GET_STRING, GET_INT,
             TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));

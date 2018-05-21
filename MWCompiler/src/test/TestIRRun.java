@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 public class TestIRRun {
     @Before
     public void build() throws Exception {
-        PreBuild.build("../testcases/ir/for.mx");
+        PreBuild.build("../testcases/ir/2.mx");
     }
 
     @Test
@@ -23,7 +23,7 @@ public class TestIRRun {
         DumpIRVisitor irDumper = new DumpIRVisitor(irOut);
         irDumper.apply(programIRRoot);
         System.out.println(irOut.toString());
-        ByteArrayInputStream irIn = new ByteArrayInputStream(irOut.toByteArray());
-        LLIRInterpreter.apply(irIn, false);
+//        ByteArrayInputStream irIn = new ByteArrayInputStream(irOut.toByteArray());
+//        LLIRInterpreter.apply(irIn, false);
     }
 }

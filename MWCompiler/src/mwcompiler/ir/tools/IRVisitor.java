@@ -1,6 +1,14 @@
 package mwcompiler.ir.tools;
 
-import mwcompiler.ir.nodes.*;
+import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.Function;
+import mwcompiler.ir.nodes.assign.BinaryExprInst;
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
+import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.jump.CondJumpInst;
+import mwcompiler.ir.nodes.jump.DirectJumpInst;
+import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.Address;
 import mwcompiler.ir.operands.IntLiteral;
 import mwcompiler.ir.operands.StringLiteral;
 import mwcompiler.ir.operands.VirtualRegister;
@@ -10,7 +18,9 @@ public interface IRVisitor<T> {
 
     T visit(BinaryExprInst binaryExprInst);
 
-    T visit(IntLiteral intLiteralSSA);
+    T visit(IntLiteral intLiteral);
+
+    T visit(Address address);
 
     T visit(BasicBlock block);
 
@@ -27,4 +37,5 @@ public interface IRVisitor<T> {
     T visit(FunctionCallInst inst);
 
     T visit(StringLiteral inst);
+
 }

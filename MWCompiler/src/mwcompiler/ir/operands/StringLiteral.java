@@ -3,17 +3,15 @@ package mwcompiler.ir.operands;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.ir.tools.NameBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class StringLiteral extends Literal {
     private String val;
     private String label;
 
 
-
     public StringLiteral(String val) {
         label = NameBuilder.builder("__str_literal_");
+        val = val.replaceFirst("^\"", "");
+        val = val.replaceFirst("\"$", "");
         this.val = val;
     }
 
@@ -27,6 +25,6 @@ public class StringLiteral extends Literal {
     }
 
     public String getVal() {
-        return val;
+        return "\"" + val + "\"";
     }
 }

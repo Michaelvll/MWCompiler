@@ -2,7 +2,7 @@ package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public abstract class Register extends Operand {
+public abstract class Register extends MutableOperand {
     private Literal val;
     private Integer valTag;
     private Boolean used = false;

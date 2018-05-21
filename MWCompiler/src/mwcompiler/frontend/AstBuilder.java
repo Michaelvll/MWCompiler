@@ -1,6 +1,12 @@
 package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.DeclarationNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
+import mwcompiler.ast.nodes.expressions.*;
+import mwcompiler.ast.nodes.literals.*;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.NonArrayTypeSymbol;
 import mwcompiler.symbols.TypeSymbol;
@@ -47,7 +53,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         buildClassSymbol(ctx);
         for (ParseTree child : ctx.declarator()) {
             Node childNode = visit(child);
-            if (childNode instanceof DeclaratorNode) {
+            if (childNode instanceof DeclarationNode) {
                 declarators.add(childNode);
                 if (childNode instanceof VariableDeclNode) {
                     VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;

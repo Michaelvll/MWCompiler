@@ -1,6 +1,14 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
+import mwcompiler.ast.nodes.expressions.*;
+import mwcompiler.ast.nodes.literals.BoolLiteralNode;
+import mwcompiler.ast.nodes.literals.IntLiteralNode;
+import mwcompiler.ast.nodes.literals.NullLiteralNode;
+import mwcompiler.ast.nodes.literals.StringLiteralNode;
 import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.InstanceSymbol;
 import mwcompiler.symbols.TypeSymbol;
