@@ -18,6 +18,12 @@ public class FunctionSymbol extends TypeSymbol {
         this.params = params;
     }
 
+    public FunctionSymbol(TypeSymbol returnType, String funcName, TypeSymbol... params) {
+        this.returnType = returnType;
+        this.funcName = funcName;
+        this.params = new ArrayList<>(Arrays.asList(params));
+    }
+
     private FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol, TypeSymbol... params) {
         this.returnType = returnType;
         this.funcName = instanceSymbol.getName();
@@ -49,7 +55,7 @@ public class FunctionSymbol extends TypeSymbol {
 
     @Override
     public String getName() {
-         return funcName;
+        return funcName;
     }
 
     @Override

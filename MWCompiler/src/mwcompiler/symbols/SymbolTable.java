@@ -1,6 +1,10 @@
 package mwcompiler.symbols;
 
 
+import mwcompiler.ir.nodes.Instruction;
+import mwcompiler.ir.operands.Register;
+import mwcompiler.utility.Pair;
+
 import java.util.HashMap;
 import java.util.Map;
 

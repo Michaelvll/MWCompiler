@@ -11,7 +11,7 @@ public abstract class Instruction {
     public abstract <T> T accept(IRVisitor<T> visitor);
 
 
-    public Instruction addPrev(Instruction prevInst) {
+    Instruction addPrev(Instruction prevInst) {
         if (this.prev != null) this.prev.next = prevInst;
         prevInst.next = this;
         prevInst.prev = this.prev;
@@ -19,7 +19,7 @@ public abstract class Instruction {
         return prevInst;
     }
 
-    public Instruction addNext(Instruction nextInst) {
+    Instruction addNext(Instruction nextInst) {
         if (this.next != null) this.next.prev = nextInst;
         nextInst.prev = this;
         nextInst.next = this.next;
@@ -27,7 +27,7 @@ public abstract class Instruction {
         return nextInst;
     }
 
-    public Instruction delete() {
+    Instruction delete() {
         if (prev != null) prev.next = next;
         if (next != null) next.prev = prev;
         return this;

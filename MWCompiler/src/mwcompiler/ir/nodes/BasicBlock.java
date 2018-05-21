@@ -1,10 +1,7 @@
 package mwcompiler.ir.nodes;
 
 
-import mwcompiler.ir.operands.IntLiteral;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
-import mwcompiler.ir.operands.VirtualRegister;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
 import mwcompiler.utility.Pair;
@@ -71,8 +68,22 @@ public class BasicBlock {
         if (jumpInst instanceof ReturnInst)
             parentFunction.AddReturn((ReturnInst) jumpInst);
 
+        assignTable.clear();
         eliminateAssignInst(); // eliminate the unused assignInst
     }
+
+    public Instruction popBack() {
+        return delete(end);
+    }
+
+    public Instruction front() {
+        return front;
+    }
+
+    public Instruction back() {
+        return end;
+    }
+
 
     private void eliminateAssignInst() {
         // TODO: Uncheck for the Call instruction
@@ -97,32 +108,33 @@ public class BasicBlock {
                 }
             }
         }
-        //TODO: Code Below has a problem for
-//        for (Map.Entry<Register, Pair<AssignInst, Boolean>> item : regAssignTable.entrySet()) {
-//            if (!item.getValue().second) delete(item.getValue().first);
-//        }
     }
 
 
-    public void delete(Instruction inst) {
+    private Instruction delete(Instruction inst) {
         inst.delete();
         if (inst.next == null) end = inst.prev;
         if (inst.prev == null) front = inst.next;
-    }
-
-    public Instruction front() {
-        return front;
-    }
-
-    public Instruction back() {
-        return end;
+        return inst;
     }
 
     private void addKnownReg(VirtualRegister reg, Operand val, Integer valTag) {
-        if (reg.getSymbolTable() == currentSymbolTable && val instanceof IntLiteral)
-            reg.setVal((IntLiteral) val, valTag);
-        else
-            reg.setVal(null, valTag);
+        if (val instanceof IntLiteral) {
+            assignTable.put(reg, (Literal) val);
+            if (reg.getSymbolTable() == currentSymbolTable) {
+                reg.setVal((IntLiteral) val, valTag);
+                return;
+            }
+        } else {
+            assignTable.put(reg, null);
+        }
+        reg.setVal(null, valTag);
+    }
+
+    public Literal getKnownReg(Register reg, Integer valTag) {
+        Literal val = assignTable.get(reg);
+        if (val != null) return val;
+        return reg.getVal(valTag);
     }
 
     public String getName() {
@@ -132,5 +144,7 @@ public class BasicBlock {
     public Function getParentFunction() {
         return parentFunction;
     }
+
+    private Map<Register, Literal> assignTable = new HashMap<>();
 
 }

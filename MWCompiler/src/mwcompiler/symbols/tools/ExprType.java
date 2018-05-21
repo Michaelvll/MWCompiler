@@ -4,17 +4,17 @@ import mwcompiler.symbols.TypeSymbol;
 
 // A Tool class for returning type and lvalue or rvalue of statement
 public class ExprType {
-    public enum LvalOrRval {
+    public enum ValType {
         LVAL,
         RVAL
     }
 
     public TypeSymbol typeSymbol;
-    public LvalOrRval lvalOrRval;
+    public ValType valType;
 
-    public ExprType(TypeSymbol typeSymbol, LvalOrRval lvalOrRval) {
+    public ExprType(TypeSymbol typeSymbol, ValType valType) {
         this.typeSymbol = typeSymbol;
-        this.lvalOrRval = lvalOrRval;
+        this.valType = valType;
     }
 
 }

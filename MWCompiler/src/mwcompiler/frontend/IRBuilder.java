@@ -4,14 +4,8 @@ package mwcompiler.frontend;
 import mwcompiler.ast.nodes.*;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ir.nodes.*;
-import mwcompiler.ir.operands.IntLiteral;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
-import mwcompiler.ir.operands.VirtualRegister;
-import mwcompiler.symbols.FunctionSymbol;
-import mwcompiler.symbols.InstanceSymbol;
-import mwcompiler.symbols.SymbolInfo;
-import mwcompiler.symbols.SymbolTable;
+import mwcompiler.ir.operands.*;
+import mwcompiler.symbols.*;
 import mwcompiler.utility.ExprOps;
 
 import java.util.ArrayList;
@@ -29,7 +23,6 @@ public class IRBuilder implements AstVisitor<Operand> {
     private Boolean isParamDecl = false;
     private final IntLiteral ONE_LITERAL = new IntLiteral(1);
     private final IntLiteral ZERO_LITERAL = new IntLiteral(0);
-
     private Integer valTag = 0;
 
     private void newValTag() {
@@ -64,6 +57,15 @@ public class IRBuilder implements AstVisitor<Operand> {
         currentBasicBlock = block;
     }
 
+    private StringLiteral stringLiteralBuilder(String val) {
+        StringLiteral search = programIR.getStringLiteral(val);
+        if (search == null) {
+            search = new StringLiteral(val);
+            programIR.putStringLiteral(val, search);
+        }
+
+        return search;
+    }
 
     @Override
     public Operand visit(ProgramNode node) {
@@ -91,7 +93,9 @@ public class IRBuilder implements AstVisitor<Operand> {
                 currentBasicBlock.pushBack(new MoveInst(reg, value), valTag);
             } else {
                 assert currentBasicBlock.back() instanceof AssignInst;
-                ((AssignInst) currentBasicBlock.back()).setDst(reg);
+                AssignInst assignInst = (AssignInst) currentBasicBlock.popBack();
+                assignInst.setDst(reg);
+                currentBasicBlock.pushBack(assignInst, valTag);
             }
         } else {
             if (!isParamDecl) {
@@ -139,36 +143,53 @@ public class IRBuilder implements AstVisitor<Operand> {
         return null;
     }
 
-    private IntLiteral intLiteralCalc(Operand left, ExprOps op, Operand right) {
-        Integer x = ((IntLiteral) left).getVal();
-        Integer y = ((IntLiteral) right).getVal();
-        switch (op) {
-            case ADD: return new IntLiteral(x + y);
-            case SUB: return new IntLiteral(x - y);
-            case MUL: return new IntLiteral(x * y);
-            case DIV: return new IntLiteral(x / y);
-            case MOD: return new IntLiteral(x % y);
-            case EQ: return new IntLiteral(x.equals(y) ? 1 : 0);
-            case NEQ: return new IntLiteral(!x.equals(y) ? 1 : 0);
-            case GTE: return new IntLiteral(x >= y ? 1 : 0);
-            case GT: return new IntLiteral(x > y ? 1 : 0);
-            case LTE: return new IntLiteral(x <= y ? 1 : 0);
-            case LT: return new IntLiteral(x < y ? 1 : 0);
-            case OR: case BITOR: return new IntLiteral(x | y);
-            case AND: case BITAND: return new IntLiteral(x & y);
-            case BITXOR: return new IntLiteral(x ^ y);
-            default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for IntLiteral");
+    private Literal literalCalc(Operand left, ExprOps op, Operand right) {
+        if (left instanceof IntLiteral) {
+            Integer x = ((IntLiteral) left).getVal();
+            Integer y = ((IntLiteral) right).getVal();
+            switch (op) {
+                case ADD: return new IntLiteral(x + y);
+                case SUB: return new IntLiteral(x - y);
+                case MUL: return new IntLiteral(x * y);
+                case DIV: return new IntLiteral(x / y);
+                case MOD: return new IntLiteral(x % y);
+                case EQ: return x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
+                case NEQ: return !x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
+                case GTE: return x >= y ? ONE_LITERAL : ZERO_LITERAL;
+                case GT: return x > y ? ONE_LITERAL : ZERO_LITERAL;
+                case LTE: return x <= y ? ONE_LITERAL : ZERO_LITERAL;
+                case LT: return x < y ? ONE_LITERAL : ZERO_LITERAL;
+                case OR: case BITOR: return new IntLiteral(x | y);
+                case AND: case BITAND: return new IntLiteral(x & y);
+                case BITXOR: return new IntLiteral(x ^ y);
+                default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for IntLiteral");
+            }
+        } else {
+            String x = ((StringLiteral) left).getVal();
+            String y = ((StringLiteral) right).getVal();
+            switch (op) {
+                case ADD: return stringLiteralBuilder(x + y);
+                case EQ: return x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
+                case NEQ: return !x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
+                case GTE: return x.compareTo(y) >= 0 ? ONE_LITERAL : ZERO_LITERAL;
+                case GT: return x.compareTo(y) > 0 ? ONE_LITERAL : ZERO_LITERAL;
+                case LTE: return x.compareTo(y) <= 0 ? ONE_LITERAL : ZERO_LITERAL;
+                case LT: return x.compareTo(y) < 0 ? ONE_LITERAL : ZERO_LITERAL;
+                default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for StringLiteral");
+            }
         }
     }
+
 
     private Operand visitAssign(BinaryExprNode node) {
         Operand left = getReg(node.getLeft());
         Operand right = visit(node.getRight());
-        if (right instanceof IntLiteral) {
+        if (right instanceof Literal) {
             currentBasicBlock.pushBack(new MoveInst((Register) left, right), valTag);
         } else {
-            ((AssignInst) currentBasicBlock.back()).setDst((Register) left);
-            ((Register) left).setVal(null, valTag);
+            AssignInst last = (AssignInst) currentBasicBlock.popBack();
+            last.setDst((Register) left);
+            currentBasicBlock.pushBack(last, valTag);
         }
         return left;
     }
@@ -177,11 +198,17 @@ public class IRBuilder implements AstVisitor<Operand> {
         ExprOps op = node.getOp();
         Operand left = visit(node.getLeft());
         Operand right = visit(node.getRight());
-        if (left instanceof IntLiteral && right instanceof IntLiteral) {
-            return intLiteralCalc(left, op, right);
+        if (left instanceof Literal && right instanceof Literal) {
+            return literalCalc(left, op, right);
         }
         VirtualRegister dst = VirtualRegister.builder(op.toString());
-        currentBasicBlock.pushBack(new BinaryExprInst(dst, left, op, right), valTag);
+        if (node.getType() == NonArrayTypeSymbol.STRING_TYPE_SYMBOL) {
+            switch (op) {
+
+            }
+        } else {
+            currentBasicBlock.pushBack(new BinaryExprInst(dst, left, op, right), valTag);
+        }
         return dst;
     }
 
@@ -220,16 +247,23 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(BinaryExprNode node) {
         ExprOps op = node.getOp();
-        switch (op) {
-            case ASSIGN:
-                return visitAssign(node);
-            case ADD: case SUB: case MUL: case DIV: case MOD: case EQ: case NEQ: case GT: case GTE: case LT: case LTE:
-            case BITAND: case BITOR: case BITXOR:
-                return visitArithComp(node);
-            case AND: case OR:
-                return visitLogic(node);
-            default:
-                throw new RuntimeException("Compiler Bug: (IR building) Unprocessed Binary operation");
+        if (node.getType() == NonArrayTypeSymbol.STRING_TYPE_SYMBOL) {
+            switch (op) {
+                default:
+                    throw new RuntimeException("Compiler Bug: (IR building) Unprocessed Binary operation");
+            }
+        } else {
+            switch (op) {
+                case ASSIGN:
+                    return visitAssign(node);
+                case ADD: case SUB: case MUL: case DIV: case MOD: case EQ: case NEQ: case GT: case GTE: case LT:
+                case LTE: case BITAND: case BITOR: case BITXOR:
+                    return visitArithComp(node);
+                case AND: case OR:
+                    return visitLogic(node);
+                default:
+                    throw new RuntimeException("Compiler Bug: (IR building) Unprocessed Binary operation");
+            }
         }
     }
 
@@ -262,7 +296,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                 dst = (VirtualRegister) src;
                 Boolean isINC = op == INC || op == INC_SUFF;
                 Boolean isSUF = op == INC_SUFF || op == DEC_SUFF;
-                IntLiteral val = ((Register) src).getVal(valTag);
+                IntLiteral val = (IntLiteral) ((Register) src).getVal(valTag);
                 if (val != null) {
                     IntLiteral newVal = new IntLiteral(isINC ? val.getVal() + 1 : val.getVal() - 1);
                     currentBasicBlock.pushBack(new MoveInst(dst, newVal), valTag);
@@ -297,8 +331,11 @@ public class IRBuilder implements AstVisitor<Operand> {
     public Operand visit(IdentifierExprNode node) {
         SymbolInfo symbolInfo = findReg(currentSymbolTable, node.getInstanceSymbol());
         Register reg = symbolInfo.getReg();
-        IntLiteral val = reg.getVal(valTag);
-        return (isGetReg || val == null) ? reg : val;
+        Literal val = currentBasicBlock.getKnownReg(reg, valTag);
+        if (isGetReg || val == null) {
+            return reg;
+        }
+        return val;
     }
 
     @Override
@@ -450,7 +487,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(StringLiteralNode node) {
-        return null;
+        return stringLiteralBuilder(node.getVal());
     }
 
     @Override

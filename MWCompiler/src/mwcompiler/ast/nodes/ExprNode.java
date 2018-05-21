@@ -1,5 +1,6 @@
 package mwcompiler.ast.nodes;
 
+import mwcompiler.symbols.TypeSymbol;
 import mwcompiler.utility.Location;
 
 /**
@@ -11,11 +12,19 @@ import mwcompiler.utility.Location;
  */
 public abstract class ExprNode extends Node {
     private Location location;
+    private TypeSymbol type;
 
     ExprNode(Location pos) {
         location = pos;
     }
 
+    public void setType(TypeSymbol type) {
+        this.type = type;
+    }
+
+    public TypeSymbol getType() {
+        return type;
+    }
 
     @Override
     public Location getStartLocation() {

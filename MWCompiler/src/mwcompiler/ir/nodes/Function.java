@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static mwcompiler.symbols.NonArrayTypeSymbol.BOOL_TYPE_SYMBOL;
+import static mwcompiler.symbols.NonArrayTypeSymbol.STRING_TYPE_SYMBOL;
+
 public class Function {
     private FunctionSymbol functionSymbol;
     private List<VirtualRegister> paramVReg = new ArrayList<>();
@@ -69,6 +72,7 @@ public class Function {
         return blocks;
     }
 
+    // Language BuiltIn Function
     public static final Function PRINT = new Function(FunctionSymbol.PRINT, true);
     public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, true);
     public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, true);
@@ -79,8 +83,18 @@ public class Function {
     public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, true);
     public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, true);
     public static final Function ORD = new Function(FunctionSymbol.ORD, true);
+
+    // BuiltIn Function for string Operation
+    public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "__string_add_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_GT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_LT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_GTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_LTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT, PRINTLN, GET_STRING, GET_INT,
-            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD));
+            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));
 
     public Boolean isLib() {
         return isLib;

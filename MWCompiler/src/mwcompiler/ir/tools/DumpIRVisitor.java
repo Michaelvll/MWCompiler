@@ -3,6 +3,7 @@ package mwcompiler.ir.tools;
 import mwcompiler.ir.nodes.*;
 import mwcompiler.ir.operands.IntLiteral;
 import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.StringLiteral;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.utility.ExprOps;
 
@@ -136,6 +137,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
         println(args.toString());
         subIndent();
         return null;
+    }
+
+    @Override
+    public String visit(StringLiteral inst) {
+        return inst.getLabel();
     }
 
     @Override

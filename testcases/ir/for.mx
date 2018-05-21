@@ -5,7 +5,8 @@ int main(){
     int j;
     for(i = 1; i < n; ++i) {
         for (j = 1; j < i; ++j) {
-            sum = sum + j;
+            int t = 3;
+            sum = sum + j + t;
         }
         sum++;
     }

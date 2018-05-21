@@ -2,7 +2,7 @@ package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
-public class IntLiteral extends Operand {
+public class IntLiteral extends Literal {
     private Integer val;
 
     public IntLiteral(Integer val) {
