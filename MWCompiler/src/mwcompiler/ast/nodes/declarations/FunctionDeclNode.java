@@ -4,7 +4,7 @@ import mwcompiler.ast.nodes.BlockNode;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.utility.Location;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.TypeSymbol;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.List;
  * @since 2018-04-13
  */
 public class FunctionDeclNode extends DeclarationNode {
-    private InstanceSymbol instanceSymbol;
+    private Instance instance;
     private FunctionSymbol functionSymbol;
     private List<VariableDeclNode> paramList;
     private BlockNode body;
@@ -27,11 +27,11 @@ public class FunctionDeclNode extends DeclarationNode {
     private Location paramListPos;
     private Location bodyPos;
 
-    public FunctionDeclNode(TypeSymbol returnTypeSymbol, InstanceSymbol instanceSymbol, List<VariableDeclNode> paramList, BlockNode body,
+    public FunctionDeclNode(TypeSymbol returnTypeSymbol, Instance instance, List<VariableDeclNode> paramList, BlockNode body,
                             Location returnTypePos, Location namePos, Location paramListPos, Location bodyPos) {
         this.paramList = paramList;
         this.body = body;
-        this.instanceSymbol = instanceSymbol;
+        this.instance = instance;
 
         this.returnTypePos = returnTypePos;
         this.namePos = namePos;
@@ -39,7 +39,7 @@ public class FunctionDeclNode extends DeclarationNode {
         this.bodyPos = bodyPos;
         List<TypeSymbol> typeParams = new ArrayList<>();
         paramList.forEach(x->typeParams.add(x.getTypeSymbol()));
-        this.functionSymbol = new FunctionSymbol(returnTypeSymbol, instanceSymbol, typeParams);
+        this.functionSymbol = new FunctionSymbol(returnTypeSymbol, instance, typeParams);
     }
 
     public void setReturnType(TypeSymbol returnTypeSymbol, Location returnTypePos) {
@@ -73,8 +73,8 @@ public class FunctionDeclNode extends DeclarationNode {
         return body;
     }
 
-    public InstanceSymbol getInstanceSymbol() {
-        return instanceSymbol;
+    public Instance getInstance() {
+        return instance;
     }
 
 

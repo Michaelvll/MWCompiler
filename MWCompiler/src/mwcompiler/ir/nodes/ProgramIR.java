@@ -3,11 +3,14 @@ package mwcompiler.ir.nodes;
 import mwcompiler.ir.operands.StringLiteral;
 import mwcompiler.symbols.FunctionSymbol;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
-    public Map<String, StringLiteral> stringPool = new HashMap<>();
+    private Map<String, StringLiteral> stringPool = new HashMap<>();
+    private BasicBlock globalBasicBlock;
+
 
     public void putFunction(Function function) {
         functionMap.put(function.getFunctionSymbol(), function);
@@ -31,5 +34,13 @@ public class ProgramIR {
 
     public Map<String, StringLiteral> getStringPool() {
         return stringPool;
+    }
+
+    public BasicBlock getGlobalBasicBlock() {
+        return globalBasicBlock;
+    }
+
+    public void setGlobalBasicBlock(BasicBlock globalBasicBlock) {
+        this.globalBasicBlock = globalBasicBlock;
     }
 }

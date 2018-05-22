@@ -1,8 +1,8 @@
 package mwcompiler.ast.nodes.expressions;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.Instance;
 import mwcompiler.utility.Location;
-import mwcompiler.symbols.InstanceSymbol;
 
 /**
  * IdentifierExprNode.java
@@ -12,16 +12,16 @@ import mwcompiler.symbols.InstanceSymbol;
  * @since 2018-04-06
  */
 public class IdentifierExprNode extends ExprNode {
-    private InstanceSymbol instanceSymbol;
+    private Instance instance;
 
     public IdentifierExprNode(String name, Location pos) {
         super(pos);
-        this.instanceSymbol = InstanceSymbol.builder(name);
+        this.instance = Instance.builder(name);
     }
 
-    public IdentifierExprNode(InstanceSymbol instanceSymbol, Location pos) {
+    public IdentifierExprNode(Instance instance, Location pos) {
         super(pos);
-        this.instanceSymbol = instanceSymbol;
+        this.instance = instance;
     }
 
 
@@ -30,7 +30,7 @@ public class IdentifierExprNode extends ExprNode {
         return visitor.visit(this);
     }
 
-    public InstanceSymbol getInstanceSymbol() {
-        return instanceSymbol;
+    public Instance getInstance() {
+        return instance;
     }
 }

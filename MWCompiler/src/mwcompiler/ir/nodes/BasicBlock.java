@@ -57,14 +57,13 @@ public class BasicBlock {
         end = instruction;
     }
 
-    public void pushBack(MoveInst moveInst, Integer valTag) {
-        pushBack(moveInst);
-        addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
-    }
-
     public void pushBack(AssignInst assignInst, Integer valTag) {
         pushBack(assignInst);
-        addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
+        if (assignInst instanceof MoveInst) {
+            MoveInst moveInst = (MoveInst) assignInst;
+            if (moveInst.getDst() instanceof Register)
+                addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
+        } else addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
     }
 
 
@@ -120,14 +119,15 @@ public class BasicBlock {
     }
 
 
-    private Instruction delete(Instruction inst) {
+    public Instruction delete(Instruction inst) {
         inst.delete();
         if (inst.next == null) end = inst.prev;
         if (inst.prev == null) front = inst.next;
         return inst;
     }
 
-    private void addKnownReg(VirtualRegister reg, Operand val, Integer valTag) {
+    private void addKnownReg(Register operand, Operand val, Integer valTag) {
+        VirtualRegister reg = (VirtualRegister) operand;
         if (val instanceof Literal) {
             assignTable.put(reg, (Literal) val);
             if (reg.getSymbolTable() == currentSymbolTable) {

@@ -5,7 +5,7 @@ import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.tools.IRVisitor;
 
 public class CondJumpInst extends JumpInst {
-    private Operand cond;
+    private Operand cond; // if cond != 0 -> ifTrue, else ->ifFalse
     private BasicBlock ifTrue;
     private BasicBlock ifFalse;
 

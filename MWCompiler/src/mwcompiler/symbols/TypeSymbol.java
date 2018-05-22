@@ -10,9 +10,11 @@ public abstract class TypeSymbol extends Symbol {
         return typeSymbolMap.get(name);
     }
 
-    public abstract void checkLegal();
 
-    public abstract SymbolInfo findIn(InstanceSymbol instanceSymbol);
+
+    public Boolean isPrimitiveTypeBase() {
+        return false;
+    }
 
     public Boolean isPrimitiveType() {
         return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL

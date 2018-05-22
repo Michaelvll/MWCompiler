@@ -18,6 +18,8 @@ import java.util.List;
 public class NewExprNode extends ExprNode {
     private TypeSymbol createType;
     private List<ExprNode> dimArgs;
+    private Integer emptyDim = 0;
+
 
     public NewExprNode(String createType, Integer dim, List<ExprNode> dimArgs, Location pos) {
         super(pos);
@@ -25,6 +27,7 @@ public class NewExprNode extends ExprNode {
             this.createType = NonArrayTypeSymbol.builder(createType);
         } else {
             this.createType = ArrayTypeSymbol.builder(createType, dim);
+            this.emptyDim = dim - dimArgs.size();
         }
         this.dimArgs = dimArgs;
     }
@@ -40,5 +43,9 @@ public class NewExprNode extends ExprNode {
 
     public List<ExprNode> getDimArgs() {
         return dimArgs;
+    }
+
+    public Integer getEmptyDim() {
+        return emptyDim;
     }
 }

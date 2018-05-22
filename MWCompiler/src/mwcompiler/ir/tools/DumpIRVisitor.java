@@ -1,6 +1,9 @@
 package mwcompiler.ir.tools;
 
-import mwcompiler.ir.nodes.*;
+import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.Function;
+import mwcompiler.ir.nodes.Instruction;
+import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
@@ -28,8 +31,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     public void apply(ProgramIR programIR) {
+        visit(programIR.getGlobalBasicBlock());
         programIR.getFunctionMap().values().forEach(this::visit);
-        programIR.getStringPool().values().forEach(s->println(s.getLabel() + " db " + s.getVal()));
+        programIR.getStringPool().values().forEach(s -> println(s.getLabel() + " db " + s.getVal()));
         //TODO
     }
 
@@ -160,7 +164,14 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(Address address) {
-        return null;
+    public String visit(Memory memory) {
+        addIndent();
+        String s = "[";
+        if (memory.getBaseReg() != null) s += visit(memory.getBaseReg());
+        if (memory.getIndexReg() != null) s += " + " + visit(memory.getIndexReg()) + " * " + memory.getScale();
+        if (memory.getDisplacement() != 0) s += " + " + memory.getDisplacement();
+        s += "]";
+        subIndent();
+        return s;
     }
 }

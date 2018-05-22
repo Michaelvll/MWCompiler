@@ -1,11 +1,11 @@
 package mwcompiler.symbols;
 
 public class NonArrayTypeSymbol extends TypeSymbol {
-    public final static NonArrayTypeSymbol INT_TYPE_SYMBOL = new NonArrayTypeSymbol("int", true);
-    public final static NonArrayTypeSymbol STRING_TYPE_SYMBOL = new NonArrayTypeSymbol("string", true);
-    public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool", true);
-    public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void", true);
-    public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null", true);
+    public final static NonArrayTypeSymbol INT_TYPE_SYMBOL = new NonArrayTypeSymbol("int");
+    public final static NonArrayTypeSymbol STRING_TYPE_SYMBOL = new NonArrayTypeSymbol("string");
+    public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool");
+    public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void");
+    public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null");
 
     static {
         typeSymbolMap.put("int", INT_TYPE_SYMBOL);
@@ -16,12 +16,11 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     private String typename;
-    private Boolean isPrimaryType;
+    private Integer size = 8;
 
 
-    private NonArrayTypeSymbol(String typename, Boolean isPrimaryType) {
+    private NonArrayTypeSymbol(String typename) {
         this.typename = typename.intern();
-        this.isPrimaryType = isPrimaryType;
     }
 
 
@@ -35,7 +34,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         }
         TypeSymbol search = typeSymbolMap.get(typename);
         if (search == null) {
-            search = new NonArrayTypeSymbol(typename, false);
+            search = new NonArrayTypeSymbol(typename);
             typeSymbolMap.put(typename, search);
         }
 
@@ -52,15 +51,24 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
+    public SymbolInfo findIn(Instance instance) {
         SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException("No declared class named " + this.typename);
         }
-        return namedSymbolTable.findIn(instanceSymbol);
+        return namedSymbolTable.findIn(instance);
     }
 
-    public Boolean isPrimaryType() {
-        return isPrimaryType;
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public Boolean isPrimitiveTypeBase() {
+        return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
+                || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
     }
 }

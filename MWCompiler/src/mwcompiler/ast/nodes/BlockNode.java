@@ -1,8 +1,8 @@
 package mwcompiler.ast.nodes;
 
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.utility.Location;
 import mwcompiler.symbols.SymbolTable;
+import mwcompiler.utility.Location;
 
 import java.util.List;
 
@@ -48,5 +48,9 @@ public class BlockNode extends Node {
 
     public void setCurrentSymbolTable(SymbolTable currentSymbolTable) {
         this.currentSymbolTable = currentSymbolTable;
+    }
+
+    public void clearStatement(Integer i) {
+        statements = statements.subList(0, i);
     }
 }

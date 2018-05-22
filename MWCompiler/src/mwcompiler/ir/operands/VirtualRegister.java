@@ -1,7 +1,7 @@
 package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.SymbolTable;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class VirtualRegister extends Register {
         this.id = id;
     }
 
-    public VirtualRegister(InstanceSymbol symbol, SymbolTable symbolTable) {
+    public VirtualRegister(Instance symbol, SymbolTable symbolTable) {
         this.name = symbol.getName();
         this.symbolTable = symbolTable;
     }
@@ -38,7 +38,7 @@ public class VirtualRegister extends Register {
     }
 
     //
-//    public static VirtualRegister builder(InstanceSymbol symbol) {
+//    public static VirtualRegister builder(Instance symbol) {
 //        return builder(symbol.getName());
 //    }
 //

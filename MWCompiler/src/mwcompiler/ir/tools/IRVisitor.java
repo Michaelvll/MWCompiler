@@ -8,7 +8,7 @@ import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
-import mwcompiler.ir.operands.Address;
+import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.IntLiteral;
 import mwcompiler.ir.operands.StringLiteral;
 import mwcompiler.ir.operands.VirtualRegister;
@@ -20,7 +20,7 @@ public interface IRVisitor<T> {
 
     T visit(IntLiteral intLiteral);
 
-    T visit(Address address);
+    T visit(Memory memory);
 
     T visit(BasicBlock block);
 

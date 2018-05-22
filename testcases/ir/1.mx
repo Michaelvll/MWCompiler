@@ -1,5 +1,14 @@
-//int d = 10;
+int[][] d = new int[5][];
+string s = "abc";
+
 int main() {
+    d[0] = new int[3];
+    int[][][] t;
+    t = new int[5][4][];
+    t[0][1] = new int[3];
+    t[1][2][2] = 3;
+    return t[1][2][2];
+
     int a ;
     int c;
     c = 5;
@@ -9,7 +18,7 @@ int main() {
 }
 
 
-
+/*
 int function(int a) {
     int b = 2;
     int c = 12;
@@ -26,3 +35,4 @@ int function(int a) {
 
     return b;
 }
+*/

@@ -15,7 +15,7 @@ public class SymbolTable {
         namedSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
     }
 
-    private Map<InstanceSymbol, SymbolInfo> currentMap = new HashMap<>();
+    private Map<Instance, SymbolInfo> currentMap = new HashMap<>();
     private SymbolTable outerSymbolTable;
 
     public SymbolTable(SymbolTable outerSymbolTable) {
@@ -25,20 +25,20 @@ public class SymbolTable {
     /**
      * Put entries into symbol table
      *
-     * @param instanceSymbol
+     * @param instance
      * @param typeSymbol
      */
-    public void put(InstanceSymbol instanceSymbol, TypeSymbol typeSymbol) {
-        SymbolInfo search = currentMap.get(instanceSymbol);
+    public void put(Instance instance, Symbol typeSymbol) {
+        SymbolInfo search = currentMap.get(instance);
         if (search != null) {
-            if (!search.getTypeSymbol().equals(typeSymbol))
+            if (!search.getSymbol().equals(typeSymbol))
                 throw new RuntimeException("Variable and function can not use the same name ");
         } else
-            currentMap.put(instanceSymbol, new SymbolInfo(typeSymbol));
+            currentMap.put(instance, new SymbolInfo(typeSymbol));
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
-        symbolTable.put(InstanceSymbol.THIS, nonArrayTypeSymbol);
+        symbolTable.put(Instance.THIS, nonArrayTypeSymbol);
         namedSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 
@@ -46,19 +46,27 @@ public class SymbolTable {
         return namedSymbolTableMap.get(nonArrayTypeSymbol);
     }
 
-    public SymbolInfo findAll(InstanceSymbol instanceSymbol) {
-        SymbolInfo search = currentMap.get(instanceSymbol);
+    public SymbolInfo findAll(Instance instance) {
+        SymbolInfo search = currentMap.get(instance);
         if (search == null && outerSymbolTable != null) {
-            search = outerSymbolTable.findAll(instanceSymbol);
+            search = outerSymbolTable.findAll(instance);
         }
         return search;
     }
 
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
-        return currentMap.get(instanceSymbol);
+    public SymbolInfo findIn(Instance instance) {
+        return currentMap.get(instance);
     }
 
     public SymbolTable getOuterSymbolTable() {
         return outerSymbolTable;
+    }
+
+    public Integer getVariableDeclSize() {
+        Integer cnt = 0;
+        for (SymbolInfo info : currentMap.values()) {
+            if (!(info.getSymbol() instanceof FunctionSymbol)) ++cnt;
+        }
+        return cnt;
     }
 }

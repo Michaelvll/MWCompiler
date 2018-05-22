@@ -33,11 +33,11 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
-        if (instanceSymbol == InstanceSymbol.SIZE) {
+    public SymbolInfo findIn(Instance instance) {
+        if (instance == Instance.SIZE) {
             return new SymbolInfo(FunctionSymbol.SIZE);
         }
-        throw new RuntimeException("(Type Checking) Array type only has <size> function, <" + instanceSymbol.getName() + ">");
+        throw new RuntimeException("(Type Checking) Array type only has <size> function, <" + instance.getName() + ">");
     }
 
 
@@ -52,5 +52,10 @@ public class ArrayTypeSymbol extends TypeSymbol {
         if (namedSymbolTable == null) {
             throw new RuntimeException(this.getName());
         }
+    }
+
+    @Override
+    public Boolean isPrimitiveTypeBase(){
+        return nonArrayTypeSymbol.isPrimitiveType();
     }
 }

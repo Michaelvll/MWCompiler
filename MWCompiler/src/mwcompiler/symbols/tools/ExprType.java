@@ -1,6 +1,6 @@
 package mwcompiler.symbols.tools;
 
-import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.symbols.Symbol;
 
 // A Tool class for returning type and lvalue or rvalue of statement
 public class ExprType {
@@ -9,11 +9,11 @@ public class ExprType {
         RVAL
     }
 
-    public TypeSymbol typeSymbol;
+    public Symbol symbol;
     public ValType valType;
 
-    public ExprType(TypeSymbol typeSymbol, ValType valType) {
-        this.typeSymbol = typeSymbol;
+    public ExprType(Symbol symbol, ValType valType) {
+        this.symbol = symbol;
         this.valType = valType;
     }
 

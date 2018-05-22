@@ -13,8 +13,7 @@ import mwcompiler.utility.Location;
 
 public class ProgramNode extends Node {
     private BlockNode block;
-    Location location;
-    private Location mainLocation;
+    private Location location;
 
     public ProgramNode(BlockNode block, Location pos) {
         this.block = block;
@@ -33,13 +32,5 @@ public class ProgramNode extends Node {
     @Override
     public <T> T accept(AstVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    public Location getMainLocation() {
-        return mainLocation;
-    }
-
-    public void setMainLocation(Location mainLocation) {
-        this.mainLocation = mainLocation;
     }
 }

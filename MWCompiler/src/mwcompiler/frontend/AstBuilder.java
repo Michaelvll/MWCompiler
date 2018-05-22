@@ -7,7 +7,7 @@ import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
 import mwcompiler.ast.nodes.declarations.VariableDeclNode;
 import mwcompiler.ast.nodes.expressions.*;
 import mwcompiler.ast.nodes.literals.*;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.NonArrayTypeSymbol;
 import mwcompiler.symbols.TypeSymbol;
 import mwcompiler.utility.CompileError;
@@ -113,19 +113,19 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         // Creator Function
         TypeSymbol search = TypeSymbol.searchSymbol(name);
         if (search instanceof NonArrayTypeSymbol) {
-            return new FunctionDeclNode(search, InstanceSymbol.CONSTRUCTOR, params, body, null,
+            return new FunctionDeclNode(search, Instance.CONSTRUCTOR, params, body, null,
                     identifierLocation, paramLocation, functionBodyLocation);
         }
 
-        InstanceSymbol instanceSymbol;
+        Instance instance;
         try {
-            instanceSymbol = InstanceSymbol.builder(name);
+            instance = Instance.builder(name);
         } catch (RuntimeException e) {
             throw new CompileError(
                     stage, e.getMessage(), new Location(identifier));
         }
 
-        return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
+        return new FunctionDeclNode(null, instance, params, body, null, new Location(identifier),
                 new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
 
@@ -192,7 +192,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             } else if (statement instanceof FunctionDeclNode) {
                 FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR
+                if (functionDeclNode.getInstance() == Instance.CONSTRUCTOR
                         && !(functionDeclNode.getFunctionSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
                             , new Location(declarator));

@@ -7,14 +7,14 @@ import java.util.List;
 import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 
 // Each function has exactly one FunctionSymbol
-public class FunctionSymbol extends TypeSymbol {
+public class FunctionSymbol extends Symbol {
     private String funcName;
     private TypeSymbol returnType;
     private List<TypeSymbol> params;
 
-    public FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol, List<TypeSymbol> params) {
+    public FunctionSymbol(TypeSymbol returnType, Instance instance, List<TypeSymbol> params) {
         this.returnType = returnType;
-        this.funcName = instanceSymbol.getName();
+        this.funcName = instance.getName();
         this.params = params;
     }
 
@@ -24,15 +24,15 @@ public class FunctionSymbol extends TypeSymbol {
         this.params = new ArrayList<>(Arrays.asList(params));
     }
 
-    private FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol, TypeSymbol... params) {
+    private FunctionSymbol(TypeSymbol returnType, Instance instance, TypeSymbol... params) {
         this.returnType = returnType;
-        this.funcName = instanceSymbol.getName();
+        this.funcName = instance.getName();
         this.params = new ArrayList<>(Arrays.asList(params));
     }
 
-    private FunctionSymbol(TypeSymbol returnType, InstanceSymbol instanceSymbol) {
+    private FunctionSymbol(TypeSymbol returnType, Instance instance) {
         this.returnType = returnType;
-        this.funcName = instanceSymbol.getName();
+        this.funcName = instance.getName();
         this.params = new ArrayList<>();
     }
 
@@ -65,7 +65,7 @@ public class FunctionSymbol extends TypeSymbol {
     }
 
     @Override
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
+    public SymbolInfo findIn(Instance instance) {
         throw new RuntimeException("(Type Checking) Function does not have a member ");
     }
 
@@ -74,15 +74,15 @@ public class FunctionSymbol extends TypeSymbol {
         this.funcName = prefix + funcName;
     }
 
-    public static final FunctionSymbol PRINT = new FunctionSymbol(VOID_TYPE_SYMBOL, InstanceSymbol.PRINT, STRING_TYPE_SYMBOL);
-    public static final FunctionSymbol PRINTLN = new FunctionSymbol(VOID_TYPE_SYMBOL, InstanceSymbol.PRINTLN, STRING_TYPE_SYMBOL);
-    public static final FunctionSymbol GET_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, InstanceSymbol.GET_STRING);
-    public static final FunctionSymbol GET_INT = new FunctionSymbol(INT_TYPE_SYMBOL, InstanceSymbol.GET_INT);
-    public static final FunctionSymbol TO_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, InstanceSymbol.TO_STRING, INT_TYPE_SYMBOL);
-    public static final FunctionSymbol SIZE = new FunctionSymbol(INT_TYPE_SYMBOL, InstanceSymbol.SIZE);
-    public static final FunctionSymbol LENGTH = new FunctionSymbol(INT_TYPE_SYMBOL, InstanceSymbol.LENGTH);
-    public static final FunctionSymbol SUBSTRING = new FunctionSymbol(STRING_TYPE_SYMBOL, InstanceSymbol.SUBSTRING, INT_TYPE_SYMBOL, INT_TYPE_SYMBOL);
-    public static final FunctionSymbol PARSE_INT = new FunctionSymbol(INT_TYPE_SYMBOL, InstanceSymbol.PARSE_INT);
-    public static final FunctionSymbol ORD = new FunctionSymbol(INT_TYPE_SYMBOL, InstanceSymbol.ORD, INT_TYPE_SYMBOL);
+    public static final FunctionSymbol PRINT = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINT, STRING_TYPE_SYMBOL);
+    public static final FunctionSymbol PRINTLN = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINTLN, STRING_TYPE_SYMBOL);
+    public static final FunctionSymbol GET_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.GET_STRING);
+    public static final FunctionSymbol GET_INT = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.GET_INT);
+    public static final FunctionSymbol TO_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.TO_STRING, INT_TYPE_SYMBOL);
+    public static final FunctionSymbol SIZE = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.SIZE);
+    public static final FunctionSymbol LENGTH = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.LENGTH);
+    public static final FunctionSymbol SUBSTRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.SUBSTRING, INT_TYPE_SYMBOL, INT_TYPE_SYMBOL);
+    public static final FunctionSymbol PARSE_INT = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.PARSE_INT);
+    public static final FunctionSymbol ORD = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.ORD, INT_TYPE_SYMBOL);
 
 }
