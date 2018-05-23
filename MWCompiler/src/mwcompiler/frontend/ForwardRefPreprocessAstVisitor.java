@@ -47,16 +47,17 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private Location mainLocation;
 
     private void checkMain() {
-        SymbolInfo mainSymbolIfo = currentSymbolTable
+        SymbolInfo mainSymbolInfo = currentSymbolTable
                 .findIn(Instance.builder("main"));
-        if (mainSymbolIfo == null) {
+        if (mainSymbolInfo == null) {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else {
-            FunctionSymbol mainTypeSymbol = (FunctionSymbol) mainSymbolIfo.getSymbol();
-            if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
-                    || mainTypeSymbol.getParams().size() != 0) {
+            FunctionSymbol mainSymbol = (FunctionSymbol) mainSymbolInfo.getSymbol();
+            if (mainSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
+                    || mainSymbol.getParams().size() != 0) {
                 throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
             }
+            FunctionSymbol.MAIN = mainSymbol;
         }
     }
 
@@ -76,7 +77,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         inClass = true;
         funcPrefix = "__" + node.getClassSymbol().getName() + "_";
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
-        if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
+        if (SymbolTable.getClassSymbolTable(node.getClassSymbol()) != null) {
             throw new CompileError(stage,
                     "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName()),
                     node.getStartLocation());
@@ -85,7 +86,6 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
 
         visit(node.getBody());
-        node.getClassSymbol().setSize(currentSymbolTable.getVariableDeclSize());
         funcPrefix = "";
         inClass = false;
         return null;

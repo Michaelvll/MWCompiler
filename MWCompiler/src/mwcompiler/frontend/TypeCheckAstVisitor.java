@@ -387,7 +387,11 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         ExprType container = visit(node.getContainer());
         TypeSymbol containerTypeSymbol = (TypeSymbol) container.symbol;
         Symbol memberType;
-        memberType = containerTypeSymbol.findIn(node.getMember().getInstance()).getSymbol();
+        try {
+            memberType = containerTypeSymbol.findIn(node.getMember().getInstance()).getSymbol();
+        } catch (RuntimeException e) {
+            throw new CompileError(stage, e.getMessage(), node.getStartLocation());
+        }
         return setType(node, memberType, LVAL);
     }
 

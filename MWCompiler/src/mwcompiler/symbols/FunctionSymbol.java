@@ -74,6 +74,8 @@ public class FunctionSymbol extends Symbol {
         this.funcName = prefix + funcName;
     }
 
+    public static FunctionSymbol MAIN;
+
     public static final FunctionSymbol PRINT = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINT, STRING_TYPE_SYMBOL);
     public static final FunctionSymbol PRINTLN = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINTLN, STRING_TYPE_SYMBOL);
     public static final FunctionSymbol GET_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.GET_STRING);

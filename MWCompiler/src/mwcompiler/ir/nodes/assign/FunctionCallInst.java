@@ -1,10 +1,10 @@
 package mwcompiler.ir.nodes.assign;
 
 import mwcompiler.ir.nodes.Function;
-import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
+import mwcompiler.symbols.NonArrayTypeSymbol;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class FunctionCallInst extends AssignInst {
     private List<Operand> args;
 
     public FunctionCallInst(Function function, List<Operand> args, Register dst) {
-        super(dst);
+        super((function.getFunctionSymbol().getReturnType() != NonArrayTypeSymbol.VOID_TYPE_SYMBOL) ? dst : null);
         this.function = function;
         this.args = args;
     }

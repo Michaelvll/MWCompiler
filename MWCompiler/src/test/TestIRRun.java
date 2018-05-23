@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 public class TestIRRun {
     @Before
     public void build() throws Exception {
-        PreBuild.build("../testcases/ir/1.mx");
+        PreBuild.build("../testcases/ir/2.mx");
     }
 
     @Test

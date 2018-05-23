@@ -31,7 +31,6 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     public void apply(ProgramIR programIR) {
-        visit(programIR.getGlobalBasicBlock());
         programIR.getFunctionMap().values().forEach(this::visit);
         programIR.getStringPool().values().forEach(s -> println(s.getLabel() + " db " + s.getVal()));
         //TODO
@@ -130,7 +129,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(FunctionCallInst inst) {
         addIndent();
-        if (inst.getDst() != null) iprint(visit(inst.getDst()) + " = ");
+        iprint("");
+        if (inst.getDst() != null) print(visit(inst.getDst()) + " = ");
         print("call " + inst.getFunctionName() + " ");
         StringJoiner args = new StringJoiner(" ");
         inst.getArgs().forEach(arg -> args.add(visit(arg)));
@@ -146,7 +146,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(VirtualRegister register) {
-        return "$" + register.getName();
+        String name = "$" + register.getName();
+        if (register.getSymbolTable() !=null) {
+            name += "_" + register.getSymbolTable().hashCode();
+        }
+        return name;
     }
 
     @Override

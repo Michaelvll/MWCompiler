@@ -37,7 +37,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         if (instance == Instance.SIZE) {
             return new SymbolInfo(FunctionSymbol.SIZE);
         }
-        throw new RuntimeException("(Type Checking) Array type only has <size> function, <" + instance.getName() + ">");
+        throw new RuntimeException("Array type only has <size> function, <" + instance.getName() + ">");
     }
 
 
@@ -48,7 +48,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public void checkLegal() {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this.nonArrayTypeSymbol);
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this.nonArrayTypeSymbol);
         if (namedSymbolTable == null) {
             throw new RuntimeException(this.getName());
         }

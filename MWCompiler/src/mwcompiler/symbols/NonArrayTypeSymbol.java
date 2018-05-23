@@ -44,7 +44,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public void checkLegal() {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException(this.typename);
         }
@@ -52,7 +52,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public SymbolInfo findIn(Instance instance) {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException("No declared class named " + this.typename);
         }

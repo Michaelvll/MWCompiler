@@ -9,7 +9,6 @@ import java.util.Map;
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
     private Map<String, StringLiteral> stringPool = new HashMap<>();
-    private BasicBlock globalBasicBlock;
 
 
     public void putFunction(Function function) {
@@ -34,13 +33,5 @@ public class ProgramIR {
 
     public Map<String, StringLiteral> getStringPool() {
         return stringPool;
-    }
-
-    public BasicBlock getGlobalBasicBlock() {
-        return globalBasicBlock;
-    }
-
-    public void setGlobalBasicBlock(BasicBlock globalBasicBlock) {
-        this.globalBasicBlock = globalBasicBlock;
     }
 }

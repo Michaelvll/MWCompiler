@@ -21,7 +21,7 @@ public class Function {
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
-    private List<BasicBlock> blocks = new LinkedList<>();
+    private LinkedList<BasicBlock> blocks = new LinkedList<>();
 
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
@@ -65,8 +65,10 @@ public class Function {
 
 
     public void pushBack(BasicBlock block) {
-        blocks.add(block);
+        blocks.addLast(block);
     }
+
+    public void pushFront(BasicBlock block) {blocks.addFirst(block);}
 
     public List<BasicBlock> getBlocks() {
         return blocks;

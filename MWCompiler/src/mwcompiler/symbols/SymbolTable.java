@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
-    private static Map<NonArrayTypeSymbol, SymbolTable> namedSymbolTableMap = new HashMap<>();
+    private static Map<NonArrayTypeSymbol, SymbolTable> classSymbolTableMap = new HashMap<>();
     public static final SymbolTable stringSymbolTable = new SymbolTable(null);
 
     static {
-        namedSymbolTableMap.put(NonArrayTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
-        namedSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, stringSymbolTable);
-        namedSymbolTableMap.put(NonArrayTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
-        namedSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(NonArrayTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, stringSymbolTable);
+        classSymbolTableMap.put(NonArrayTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
     }
 
     private Map<Instance, SymbolInfo> currentMap = new HashMap<>();
@@ -39,11 +39,11 @@ public class SymbolTable {
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
         symbolTable.put(Instance.THIS, nonArrayTypeSymbol);
-        namedSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
+        classSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
     }
 
-    public static SymbolTable getNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol) {
-        return namedSymbolTableMap.get(nonArrayTypeSymbol);
+    public static SymbolTable getClassSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol) {
+        return classSymbolTableMap.get(nonArrayTypeSymbol);
     }
 
     public SymbolInfo findAll(Instance instance) {
@@ -62,11 +62,4 @@ public class SymbolTable {
         return outerSymbolTable;
     }
 
-    public Integer getVariableDeclSize() {
-        Integer cnt = 0;
-        for (SymbolInfo info : currentMap.values()) {
-            if (!(info.getSymbol() instanceof FunctionSymbol)) ++cnt;
-        }
-        return cnt;
-    }
 }

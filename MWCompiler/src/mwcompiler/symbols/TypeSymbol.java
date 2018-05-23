@@ -10,11 +10,11 @@ public abstract class TypeSymbol extends Symbol {
         return typeSymbolMap.get(name);
     }
 
-
-
-    public Boolean isPrimitiveTypeBase() {
-        return false;
+    public NonArrayTypeSymbol getBaseType() {
+        return this instanceof NonArrayTypeSymbol ? (NonArrayTypeSymbol) this : ((ArrayTypeSymbol) this).getNonArrayTypeSymbol();
     }
+
+    public abstract Boolean isPrimitiveTypeBase();
 
     public Boolean isPrimitiveType() {
         return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL

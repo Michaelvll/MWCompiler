@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class Instance {
+    public static final Instance MAIN = new Instance("main");
     public static final Instance THIS = new Instance("this");
-    public static final Instance CONSTRUCTOR = new Instance("~constructor");
+    public static final Instance CONSTRUCTOR = new Instance("_constructor");
     public static final Instance PRINT = new Instance("printf");
     public static final Instance PRINTLN = new Instance("printf");
     public static final Instance GET_STRING = new Instance("getString");
@@ -25,6 +26,7 @@ public class Instance {
     private static Map<String, Instance> instanceSymbolMap = new HashMap<>();
 
     static {
+        instanceSymbolMap.put("main", MAIN);
         instanceSymbolMap.put("this", THIS);
         // inner functions
         instanceSymbolMap.put("print", PRINT);
