@@ -1,0 +1,26 @@
+int t = 1;
+class A{
+    int a;
+    B b;
+    A() {
+        a = t;
+        this.b = new B; 
+    }
+}
+
+class B {
+    int[] c;
+    B() {
+        c = new int[3];
+        c[2] = 3;
+    }
+}
+
+A c = new A;
+
+int main(){
+    A[] a;
+    a = new A[5];
+    return a.size() + a[1].b.c[2];
+
+}

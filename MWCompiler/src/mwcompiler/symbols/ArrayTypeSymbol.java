@@ -1,9 +1,6 @@
 package mwcompiler.symbols;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;
     private Integer dim;
@@ -17,7 +14,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         TypeSymbol search = typeSymbolMap.get(combineName(name, dim));
         if (search == null) {
             search = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
-            typeSymbolMap.put(combineName(name,dim),search);
+            typeSymbolMap.put(combineName(name, dim), search);
         }
         return (ArrayTypeSymbol) search;
     }
@@ -36,12 +33,11 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
-        if (instanceSymbol == InstanceSymbol.SIZE_FUNCTION_IS) {
-            List<TypeSymbol> params = new ArrayList<>();
-            return new SymbolInfo(FunctionTypeSymbol.builder(NonArrayTypeSymbol.builder("int"),params));
+    public SymbolInfo findIn(Instance instance) {
+        if (instance == Instance.SIZE) {
+            return new SymbolInfo(FunctionSymbol.SIZE);
         }
-        throw new RuntimeException("(Type Checking) Array type only has <size> function, <"+instanceSymbol.getName()+">");
+        throw new RuntimeException("Array type only has <size> function, <" + instance.getName() + ">");
     }
 
 
@@ -52,9 +48,14 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public void checkLegal() {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this.nonArrayTypeSymbol);
-        if (namedSymbolTable == null){
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this.nonArrayTypeSymbol);
+        if (namedSymbolTable == null) {
             throw new RuntimeException(this.getName());
         }
+    }
+
+    @Override
+    public Boolean isPrimitiveTypeBase(){
+        return nonArrayTypeSymbol.isPrimitiveType();
     }
 }

@@ -6,6 +6,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool");
     public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void");
     public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null");
+    public final static NonArrayTypeSymbol GLOBAL = new NonArrayTypeSymbol("__global");
 
     static {
         typeSymbolMap.put("int", INT_TYPE_SYMBOL);
@@ -16,6 +17,8 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     private String typename;
+    private Integer size = 8;
+
 
     private NonArrayTypeSymbol(String typename) {
         this.typename = typename.intern();
@@ -39,20 +42,34 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         return (NonArrayTypeSymbol) search;
     }
 
+
     @Override
     public void checkLegal() {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException(this.typename);
         }
     }
 
     @Override
-    public SymbolInfo findIn(InstanceSymbol instanceSymbol) {
-        SymbolTable namedSymbolTable = SymbolTable.getNamedSymbolTable(this);
+    public SymbolInfo findIn(Instance instance) {
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this);
         if (namedSymbolTable == null) {
             throw new RuntimeException("No declared class named " + this.typename);
         }
-        return namedSymbolTable.findIn(instanceSymbol);
+        return namedSymbolTable.findIn(instance);
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public Boolean isPrimitiveTypeBase() {
+        return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
+                || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
     }
 }

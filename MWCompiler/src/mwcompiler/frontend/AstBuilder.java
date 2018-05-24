@@ -1,10 +1,17 @@
 package mwcompiler.frontend;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.DeclarationNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
+import mwcompiler.ast.nodes.expressions.*;
+import mwcompiler.ast.nodes.literals.*;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.NonArrayTypeSymbol;
 import mwcompiler.symbols.TypeSymbol;
 import mwcompiler.utility.CompileError;
+import mwcompiler.utility.ExprOps;
 import mwcompiler.utility.Location;
 import mwcompiler.utility.StringProcess;
 import mx_gram.tools.MxBaseVisitor;
@@ -25,8 +32,8 @@ import java.util.List;
 public class AstBuilder extends MxBaseVisitor<Node> {
     private String stage = "Building Ast";
 
-    public Node build(MxParser.ProgramContext ctx) {
-        return visit(ctx);
+    public ProgramNode build(MxParser.ProgramContext ctx) {
+        return (ProgramNode) visit(ctx);
     }
 
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
@@ -46,7 +53,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         buildClassSymbol(ctx);
         for (ParseTree child : ctx.declarator()) {
             Node childNode = visit(child);
-            if (childNode instanceof DeclaratorNode) {
+            if (childNode instanceof DeclarationNode) {
                 declarators.add(childNode);
                 if (childNode instanceof VariableDeclNode) {
                     VariableDeclNode variableDeclNode = (VariableDeclNode) childNode;
@@ -99,27 +106,26 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         Location paramLocation = new Location(paramExprFieldContext);
         Location functionBodyLocation = new Location(functionBodyContext);
         List<VariableDeclNode> params = new ArrayList<>();
-        for (MxParser.ParamExprContext param : paramExprFieldContext.paramExpr()) {
-            params.add((VariableDeclNode) visit(param));
-        }
+        paramExprFieldContext.paramExpr().forEach(param -> params.add((VariableDeclNode) visit(param)));
+
         BlockNode body = (BlockNode) visit(functionBodyContext);
         String name = identifier.getText();
         // Creator Function
         TypeSymbol search = TypeSymbol.searchSymbol(name);
         if (search instanceof NonArrayTypeSymbol) {
-            return new FunctionDeclNode(search, InstanceSymbol.CONSTRUCTOR_IS, params, body, null,
+            return new FunctionDeclNode(search, Instance.CONSTRUCTOR, params, body, null,
                     identifierLocation, paramLocation, functionBodyLocation);
         }
 
-        InstanceSymbol instanceSymbol;
+        Instance instance;
         try {
-            instanceSymbol = InstanceSymbol.builder(name);
+            instance = Instance.builder(name);
         } catch (RuntimeException e) {
             throw new CompileError(
                     stage, e.getMessage(), new Location(identifier));
         }
 
-        return new FunctionDeclNode(null, instanceSymbol, params, body, null, new Location(identifier),
+        return new FunctionDeclNode(null, instance, params, body, null, new Location(identifier),
                 new Location(paramExprFieldContext), new Location(functionBodyContext));
     }
 
@@ -186,8 +192,8 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             } else if (statement instanceof FunctionDeclNode) {
                 FunctionDeclNode functionDeclNode = (FunctionDeclNode) statement;
                 body.add(visit(declarator));
-                if (functionDeclNode.getInstanceSymbol() == InstanceSymbol.CONSTRUCTOR_IS
-                        && !(functionDeclNode.getFunctionTypeSymbol().getReturnType().getName().equals(declClass))) {
+                if (functionDeclNode.getInstance() == Instance.CONSTRUCTOR
+                        && !(functionDeclNode.getFunctionSymbol().getReturnType().getName().equals(declClass))) {
                     throw new CompileError(stage, "Creator function must have the same name as the class"
                             , new Location(declarator));
                 }
@@ -210,9 +216,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     @Override
     public Node visitBlock(MxParser.BlockContext ctx) {
         List<Node> statements = new ArrayList<>();
-        for (MxParser.StatementContext state : ctx.statement()) {
-            statements.add(visit(state));
-        }
+        ctx.statement().forEach(state -> statements.add(visit(state)));
         return new BlockNode(statements, new Location(ctx));
     }
 
@@ -267,46 +271,46 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     // Binary Expression
     @Override
     public Node visitBinaryExpr_(MxParser.BinaryExpr_Context ctx) {
-        ExprNode.OPs op;
+        ExprOps op;
         Location opPos = new Location(ctx);
         switch (ctx.op.getType()) {
-            case MxParser.MUL: op = ExprNode.OPs.MUL;
+            case MxParser.MUL: op = ExprOps.MUL;
                 break;
-            case MxParser.DIV: op = ExprNode.OPs.DIV;
+            case MxParser.DIV: op = ExprOps.DIV;
                 break;
-            case MxParser.MOD: op = ExprNode.OPs.MOD;
+            case MxParser.MOD: op = ExprOps.MOD;
                 break;
-            case MxParser.ADD: op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprOps.ADD;
                 break;
-            case MxParser.SUB: op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprOps.SUB;
                 break;
-            case MxParser.LSFT: op = ExprNode.OPs.LSFT;
+            case MxParser.LSFT: op = ExprOps.LSFT;
                 break;
-            case MxParser.RSFT: op = ExprNode.OPs.RSFT;
+            case MxParser.RSFT: op = ExprOps.RSFT;
                 break;
-            case MxParser.LT: op = ExprNode.OPs.LT;
+            case MxParser.LT: op = ExprOps.LT;
                 break;
-            case MxParser.GT: op = ExprNode.OPs.GT;
+            case MxParser.GT: op = ExprOps.GT;
                 break;
-            case MxParser.LTE: op = ExprNode.OPs.LTE;
+            case MxParser.LTE: op = ExprOps.LTE;
                 break;
-            case MxParser.GTE: op = ExprNode.OPs.GTE;
+            case MxParser.GTE: op = ExprOps.GTE;
                 break;
-            case MxParser.EQ: op = ExprNode.OPs.EQ;
+            case MxParser.EQ: op = ExprOps.EQ;
                 break;
-            case MxParser.NEQ: op = ExprNode.OPs.NEQ;
+            case MxParser.NEQ: op = ExprOps.NEQ;
                 break;
-            case MxParser.BITAND: op = ExprNode.OPs.BITAND;
+            case MxParser.BITAND: op = ExprOps.BITAND;
                 break;
-            case MxParser.BITXOR: op = ExprNode.OPs.BITXOR;
+            case MxParser.BITXOR: op = ExprOps.BITXOR;
                 break;
-            case MxParser.BITOR: op = ExprNode.OPs.BITOR;
+            case MxParser.BITOR: op = ExprOps.BITOR;
                 break;
-            case MxParser.AND: op = ExprNode.OPs.AND;
+            case MxParser.AND: op = ExprOps.AND;
                 break;
-            case MxParser.OR: op = ExprNode.OPs.OR;
+            case MxParser.OR: op = ExprOps.OR;
                 break;
-            case MxParser.ASSIGN: op = ExprNode.OPs.ASSIGN;
+            case MxParser.ASSIGN: op = ExprOps.ASSIGN;
                 break;
             default:
                 throw new CompileError(
@@ -319,13 +323,13 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     @Override
     public Node visitSuffixIncDec_(MxParser.SuffixIncDec_Context ctx) {
         ExprNode node = (ExprNode) visit(ctx.expr());
-        ExprNode.OPs op;
+        ExprOps op;
         Location opPos = new Location(ctx);
 
         switch (ctx.op.getType()) {
-            case MxParser.INC: op = ExprNode.OPs.INC_SUFF;
+            case MxParser.INC: op = ExprOps.INC_SUFF;
                 break;
-            case MxParser.DEC: op = ExprNode.OPs.DEC_SUFF;
+            case MxParser.DEC: op = ExprOps.DEC_SUFF;
                 break;
             default:
                 throw new CompileError(
@@ -337,20 +341,20 @@ public class AstBuilder extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitUnaryExpr_(MxParser.UnaryExpr_Context ctx) {
-        ExprNode.OPs op;
+        ExprOps op;
         Location opPos = new Location(ctx);
         switch (ctx.op.getType()) {
-            case MxParser.INC: op = ExprNode.OPs.INC;
+            case MxParser.INC: op = ExprOps.INC;
                 break;
-            case MxParser.DEC: op = ExprNode.OPs.DEC;
+            case MxParser.DEC: op = ExprOps.DEC;
                 break;
-            case MxParser.ADD: op = ExprNode.OPs.ADD;
+            case MxParser.ADD: op = ExprOps.ADD;
                 break;
-            case MxParser.SUB: op = ExprNode.OPs.SUB;
+            case MxParser.SUB: op = ExprOps.SUB;
                 break;
-            case MxParser.NOT: op = ExprNode.OPs.NOT;
+            case MxParser.NOT: op = ExprOps.NOT;
                 break;
-            case MxParser.BITNOT: op = ExprNode.OPs.BITNOT;
+            case MxParser.BITNOT: op = ExprOps.BITNOT;
                 break;
             default:
                 throw new CompileError(stage, "Get unexpected operator" + ctx.op.getText()
@@ -393,9 +397,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     public Node visitFunctionCall_(MxParser.FunctionCall_Context ctx) {
         List<ExprNode> args = new ArrayList<>();
         if (ctx.arguments().exprList() != null) {
-            for (MxParser.ExprContext expr : ctx.arguments().exprList().expr()) {
-                args.add((ExprNode) visit(expr));
-            }
+            ctx.arguments().exprList().expr().forEach(expr -> args.add((ExprNode) visit(expr)));
         }
         // For constructor
         if (ctx.expr() instanceof MxParser.Identifier_Context) {
@@ -445,12 +447,12 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         if (ctx.elseifConditionField().size() != 0) {
             for (MxParser.ElseifConditionFieldContext field : ctx.elseifConditionField()) {
                 IfNode nextCond = (IfNode) visit(field);
-                prevCond.setElseCondition(nextCond);
+                prevCond.setElseNode(nextCond);
                 prevCond = nextCond;
             }
         }
         if (ctx.elseConditionField() != null) {
-            prevCond.setElseCondition((IfNode) visit(ctx.elseConditionField()));
+            prevCond.setElseNode((IfNode) visit(ctx.elseConditionField()));
         }
         return ifNode;
     }
@@ -480,7 +482,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
             vardecl = new BinaryExprNode(
                     new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx)),
-                    ExprNode.OPs.ASSIGN, variableDeclNode.getInit(), new Location(ctx));
+                    ExprOps.ASSIGN, variableDeclNode.getInit(), new Location(ctx));
         }
 
         if (ctx.cond != null) {

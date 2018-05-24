@@ -1,10 +1,13 @@
 package mwcompiler;
 
-import mwcompiler.ast.nodes.Node;
+import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.frontend.AstBuilder;
 import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
+import mwcompiler.frontend.IRBuilder;
 import mwcompiler.frontend.TypeCheckAstVisitor;
+import mwcompiler.ir.nodes.ProgramIR;
+import mwcompiler.ir.tools.DumpIRVisitor;
 import mwcompiler.utility.*;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
@@ -23,7 +26,8 @@ import java.io.IOException;
  * @since 2018-04-05
  */
 public class Mwcc {
-    private static Node programAstRoot;
+    private static ProgramNode programAstRoot;
+    private static ProgramIR programIRRoot;
 
 
     /**
@@ -33,6 +37,17 @@ public class Mwcc {
         CompilerOptions.compilerArgSolve(args);
         buildAst();
         typeCheck();
+        buildIR();
+    }
+
+    public static ProgramIR getProgramIRRoot(){
+        // For test
+        return programIRRoot;
+    }
+
+    public static ProgramNode getProgramAstRoot() {
+        // For test
+        return programAstRoot;
     }
 
     private static void buildAst() {
@@ -56,12 +71,11 @@ public class Mwcc {
             System.exit(1);
         }
 
-        if (CompilerOptions.ast) {
+        if (CompilerOptions.dumpAst) {
             DumpAstVisitor astDumper = new DumpAstVisitor();
             astDumper.apply(programAstRoot);
-            System.exit(0);
+//            System.exit(0);
         }
-
     }
 
 
@@ -77,6 +91,16 @@ public class Mwcc {
         }
         if (CompilerOptions.warningLevel > 0) {
             CompileWarining.printWarings();
+        }
+    }
+
+    private static void buildIR() {
+        IRBuilder irBuilder = new IRBuilder();
+        programIRRoot = irBuilder.build(programAstRoot);
+
+        if (CompilerOptions.dumpIR) {
+            DumpIRVisitor irDumper = new DumpIRVisitor();
+            irDumper.apply(programIRRoot);
         }
     }
 

@@ -1,14 +1,18 @@
 package mwcompiler.frontend;
 
-import mwcompiler.ast.nodes.*;
+import mwcompiler.ast.nodes.BlockNode;
+import mwcompiler.ast.nodes.Node;
+import mwcompiler.ast.nodes.ProgramNode;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
 import mwcompiler.ast.tools.AstBaseVisitor;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.Location;
 import mwcompiler.utility.StringProcess;
 
-import java.util.ArrayList;
-import java.util.List;
+import static mwcompiler.symbols.SymbolTable.STRING_SYMBOL_TABLE;
 
 /**
  * @author Michael Wu
@@ -18,55 +22,42 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private SymbolTable currentSymbolTable;
     private Boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
+    private String funcPrefix = "";
 
     public void apply(Node node) {
         visit(node);
     }
 
-    private void visit(Node node){
+    private void visit(Node node) {
         node.accept(this);
     }
 
-    private FunctionTypeSymbol getFunctionType(String returnType, String... params) {
-        TypeSymbol returnTypeSymbol = NonArrayTypeSymbol.builder(returnType);
-        List<TypeSymbol> paramList = new ArrayList<>();
-        for (String param : params) {
-            paramList.add(NonArrayTypeSymbol.builder(param));
-        }
-        return FunctionTypeSymbol.builder(returnTypeSymbol, paramList);
-    }
-
-    // Put builtin functions into Symbol Table
-    private void putBuiltin(String returnType, String name, String... params) {
-        currentSymbolTable.put(InstanceSymbol.builder(name), getFunctionType(returnType, params));
-    }
-
     private void initBuiltinFunction() {
-        putBuiltin("void", "print", "string");
-        putBuiltin("void", "println", "string");
-        putBuiltin("string", "getString");
-        putBuiltin("int", "getInt");
-        putBuiltin("string", "toString", "int");
-        SymbolTable stringSymbolTable = SymbolTable.getNamedSymbolTable(NonArrayTypeSymbol.builder("string"));
-        stringSymbolTable.put(InstanceSymbol.builder("length"), getFunctionType("int"));
-        stringSymbolTable.put(InstanceSymbol.builder("substring"), getFunctionType("string", "int", "int"));
-        stringSymbolTable.put(InstanceSymbol.builder("parseInt"), getFunctionType("int"));
-        stringSymbolTable.put(InstanceSymbol.builder("ord"), getFunctionType("int", "int"));
+        currentSymbolTable.put(Instance.PRINT, FunctionSymbol.PRINT);
+        currentSymbolTable.put(Instance.PRINTLN, FunctionSymbol.PRINTLN);
+        currentSymbolTable.put(Instance.GET_STRING, FunctionSymbol.GET_STRING);
+        currentSymbolTable.put(Instance.GET_INT, FunctionSymbol.GET_INT);
+        currentSymbolTable.put(Instance.TO_STRING, FunctionSymbol.TO_STRING);
+        STRING_SYMBOL_TABLE.put(Instance.LENGTH, FunctionSymbol.LENGTH);
+        STRING_SYMBOL_TABLE.put(Instance.SUBSTRING, FunctionSymbol.SUBSTRING);
+        STRING_SYMBOL_TABLE.put(Instance.PARSE_INT, FunctionSymbol.PARSE_INT);
+        STRING_SYMBOL_TABLE.put(Instance.ORD, FunctionSymbol.ORD);
     }
 
     private Location mainLocation;
 
     private void checkMain() {
-        SymbolInfo mainSymbolIfo = currentSymbolTable
-                .findIn(InstanceSymbol.builder("main"));
-        if (mainSymbolIfo == null) {
+        SymbolInfo mainSymbolInfo = currentSymbolTable
+                .findIn(Instance.builder("main"));
+        if (mainSymbolInfo == null) {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else {
-            FunctionTypeSymbol mainTypeSymbol = (FunctionTypeSymbol) mainSymbolIfo.getTypeSymbol();
-            if (mainTypeSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
-                    || mainTypeSymbol.getParams().size() != 0) {
+            FunctionSymbol mainSymbol = (FunctionSymbol) mainSymbolInfo.getSymbol();
+            if (mainSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
+                    || mainSymbol.getParams().size() != 0) {
                 throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
             }
+            FunctionSymbol.MAIN = mainSymbol;
         }
     }
 
@@ -74,6 +65,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     public Void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
+        SymbolTable.globalSymbolTable = currentSymbolTable;
         initBuiltinFunction();
         visit(node.getBlock());
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();
@@ -84,8 +76,9 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     @Override
     public Void visit(ClassDeclNode node) {
         inClass = true;
+        funcPrefix = "__" + node.getClassSymbol().getName() + "_";
         node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
-        if (SymbolTable.getNamedSymbolTable(node.getClassSymbol()) != null) {
+        if (SymbolTable.getClassSymbolTable(node.getClassSymbol()) != null) {
             throw new CompileError(stage,
                     "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName()),
                     node.getStartLocation());
@@ -94,6 +87,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
 
         visit(node.getBody());
+        funcPrefix = "";
         inClass = false;
         return null;
     }
@@ -104,9 +98,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             currentSymbolTable = new SymbolTable(currentSymbolTable);
             node.setCurrentSymbolTable(currentSymbolTable);
         }
-        for (Node statement : node.getStatements()) {
-            visit(statement);
-        }
+        node.getStatements().forEach(this::visit);
         currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
         return null;
     }
@@ -127,16 +119,17 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
 
     @Override
     public Void visit(FunctionDeclNode node) {
-        if (currentSymbolTable.findIn(node.getInstanceSymbol()) != null) {
+        if (currentSymbolTable.findIn(node.getInstance()) != null) {
             throw new CompileError(stage, "Redeclare function "
-                    + StringProcess.getRefString(node.getInstanceSymbol().getName()) + "in the same scope ",
+                    + StringProcess.getRefString(node.getInstance().getName()) + "in the same scope ",
                     node.getStartLocation());
         }
-        if (node.getInstanceSymbol().getName().equals("main"))
+        if (node.getInstance().getName().equals("main"))
             mainLocation = node.getStartLocation();
-        currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+        currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());
         if (inClass)
-            currentSymbolTable.put(node.getInstanceSymbol(), node.getFunctionTypeSymbol());
+            currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());
+        node.getFunctionSymbol().addNamePrefix(funcPrefix);
         return null;
     }
 }

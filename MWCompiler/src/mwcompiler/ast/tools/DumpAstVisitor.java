@@ -1,8 +1,16 @@
 package mwcompiler.ast.tools;
 
 import mwcompiler.ast.nodes.*;
-import mwcompiler.symbols.FunctionTypeSymbol;
-import mwcompiler.symbols.InstanceSymbol;
+import mwcompiler.ast.nodes.declarations.ClassDeclNode;
+import mwcompiler.ast.nodes.declarations.FunctionDeclNode;
+import mwcompiler.ast.nodes.declarations.VariableDeclNode;
+import mwcompiler.ast.nodes.expressions.*;
+import mwcompiler.ast.nodes.literals.BoolLiteralNode;
+import mwcompiler.ast.nodes.literals.IntLiteralNode;
+import mwcompiler.ast.nodes.literals.NullLiteralNode;
+import mwcompiler.ast.nodes.literals.StringLiteralNode;
+import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.TypeSymbol;
 
 import java.io.PrintStream;
@@ -52,9 +60,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(ProgramNode node) {
         println("<<ProgramNode>>");
         List<Node> declarators = node.getBlock().getStatements();
-        for (Node declarator : declarators) {
-            visit(declarator);
-        }
+        declarators.forEach(this::visit);
         return null;
     }
 
@@ -64,9 +70,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<<ClassDeclNode>>");
         println("name: <" + node.getClassSymbol() + ", " + node.getClassSymbol().getName() + ">");
         println("body:");
-        for (Node declarator : node.getBody().getStatements()) {
-            visit(declarator);
-        }
+        node.getBody().getStatements().forEach(this::visit);
         subIndent();
         return null;
     }
@@ -88,9 +92,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         visit(node.getCaller());
         if (!node.getArgs().isEmpty()) {
             println("args: ");
-            for (ExprNode arg : node.getArgs()) {
-                visit(arg);
-            }
+            node.getArgs().forEach(this::visit);
         }
         subIndent();
         return null;
@@ -102,7 +104,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<DotMemberNode>");
         println("container: ");
         visit(node.getContainer());
-        println("member: <" + node.getMember().getInstanceSymbol() + ", " + node.getMember().getInstanceSymbol().getName() + ">");
+        println("member: <" + node.getMember().getInstance() + ", " + node.getMember().getInstance().getName() + ">");
         subIndent();
         return null;
     }
@@ -129,9 +131,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         }
         println("body: ");
         visit(node.getBody());
-        if (node.getElseCondition() != null) {
+        if (node.getElseNode() != null) {
             println("else: ");
-            visit(node.getElseCondition());
+            visit(node.getElseNode());
         }
         subIndent();
         return null;
@@ -193,9 +195,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("type: <" + node.getClassTypeSymbol() + ", " + node.getClassTypeSymbol().getName() + ">");
         if (!node.getArgs().isEmpty()) {
             println("args: ");
-            for (ExprNode arg : node.getArgs()) {
-                visit(arg);
-            }
+            node.getArgs().forEach(this::visit);
         }
         subIndent();
         return null;
@@ -220,13 +220,11 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(FunctionDeclNode node) {
         addIndent();
         println("<<FunctionDeclNode>>");
-        FunctionTypeSymbol functionTypeSymbol = node.getFunctionTypeSymbol();
-        println("type: <" + functionTypeSymbol.getReturnType() + ", " + functionTypeSymbol.getReturnType().getName() + ">");
-        println("name: <" + node.getInstanceSymbol() + ", " + node.getInstanceSymbol().getName() + ">");
+        FunctionSymbol functionSymbol = node.getFunctionSymbol();
+        println("type: <" + functionSymbol.getReturnType() + ", " + functionSymbol.getReturnType().getName() + ">");
+        println("name: <" + node.getInstance() + ", " + node.getInstance().getName() + ">");
         println("params:");
-        for (Node param : node.getParamList()) {
-            visit(param);
-        }
+        node.getParamList().forEach(this::visit);
         println("body:");
         visit(node.getBody());
         subIndent();
@@ -238,8 +236,8 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(IdentifierExprNode node) {
         addIndent();
         println("<IdentifierExprNode>");
-        InstanceSymbol instanceSymbol = node.getInstanceSymbol();
-        println("val: <" + instanceSymbol + ", " + instanceSymbol.getName() + ">");
+        Instance instance = node.getInstance();
+        println("val: <" + instance + ", " + instance.getName() + ">");
         subIndent();
         return null;
     }
@@ -276,9 +274,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         addIndent();
         println("<<BlockNode>>");
         subIndent();
-        for (Node statement : node.getStatements()) {
-            visit(statement);
-        }
+        node.getStatements().forEach(this::visit);
         return null;
     }
 
@@ -315,9 +311,7 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("type: <" + createType + ", " + createType.getName() + ">");
         if (node.getDimArgs().size() != 0) {
             println("dimArgs: ");
-            for (Node expr : node.getDimArgs()) {
-                visit(expr);
-            }
+            node.getDimArgs().forEach(this::visit);
         }
         subIndent();
         return null;

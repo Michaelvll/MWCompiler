@@ -3,46 +3,30 @@ package mwcompiler.ir.nodes;
 import mwcompiler.ir.tools.IRVisitor;
 
 public abstract class Instruction {
-    public Instruction pre;
+    public Instruction prev;
     public Instruction next;
 
-    private Register target;
-    private RegOrImm left;
-    private RegOrImm right;
 
     public abstract <T> T accept(IRVisitor<T> visitor);
 
-    public Instruction add_front(Instruction pre) {
-        this.pre = pre;
-        return pre;
+
+    void addPrev(Instruction prevInst) {
+        if (this.prev != null) this.prev.next = prevInst;
+        prevInst.next = this;
+        prevInst.prev = this.prev;
+        this.prev = prevInst;
     }
 
-    public Instruction add_back(Instruction next) {
-        this.next = next;
-        return next;
+    void addNext(Instruction nextInst) {
+        if (this.next != null) this.next.prev = nextInst;
+        nextInst.prev = this;
+        nextInst.next = this.next;
+        this.next = nextInst;
     }
 
-    public Register getTarget() {
-        return target;
+    void delete() {
+        if (prev != null) prev.next = next;
+        if (next != null) next.prev = prev;
     }
 
-    public void setTarget(Register target) {
-        this.target = target;
-    }
-
-    public RegOrImm getLeft() {
-        return left;
-    }
-
-    public void setLeft(RegOrImm left) {
-        this.left = left;
-    }
-
-    public RegOrImm getRight() {
-        return right;
-    }
-
-    public void setRight(RegOrImm right) {
-        this.right = right;
-    }
 }

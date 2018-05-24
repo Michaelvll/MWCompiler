@@ -1,0 +1,37 @@
+int[][] d = new int[5][];
+string s = "abc";
+
+int main() {
+    d[0] = new int[3];
+    int[][][] t;
+    t = new int[5][4][];
+    t[0][1] = new int[3];
+    t[1][2][2] = 3;
+    //return t[1][2][2];
+
+    int a;
+    int c;
+    c = 5;
+    a = c + -8;
+    c = function(a);
+    return c;
+}
+
+
+
+int function(int a) {
+    int b = 2;
+    int c = 12;
+    //c = b++ - c;
+    //b = ++b + a;
+    //b = a + b * c + c*a;
+
+
+    if (a != b && (c == 3 || a >b)) {
+            b = 3;
+    } else {
+        return b;
+    }
+
+    return b;
+}

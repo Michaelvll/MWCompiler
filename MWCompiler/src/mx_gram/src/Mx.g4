@@ -68,8 +68,8 @@ elseifConditionField:
 	;
 elseConditionField	: ELSE body;
 loopField			: forField | whileField;
-jumpField			: jump SEMI;
-jump:
+jumpField			: jumpInst SEMI;
+jumpInst:
 	RETURN expr?	# ReturnJump_
 	| BREAK			# BreakJump_
 	| CONTINUE		# ContinueJump_
