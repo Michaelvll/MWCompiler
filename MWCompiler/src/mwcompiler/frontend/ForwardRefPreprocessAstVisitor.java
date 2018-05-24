@@ -73,6 +73,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         return null;
     }
 
+
     @Override
     public Void visit(ClassDeclNode node) {
         inClass = true;

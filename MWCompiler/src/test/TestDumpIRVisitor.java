@@ -4,7 +4,6 @@ import mwcompiler.ast.nodes.Node;
 import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
 import mwcompiler.frontend.IRBuilder;
 import mwcompiler.frontend.TypeCheckAstVisitor;
-import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.tools.DumpIRVisitor;
 import org.junit.Before;
@@ -16,8 +15,9 @@ public class TestDumpIRVisitor {
 
     @Before
     public void build() throws Exception {
-        PreBuild.build("../testcases/dumpIR/1.mx");
-        program = PreBuild.program;
+        PreBuild preBuild = new PreBuild();
+        preBuild.build("../testcases/dumpIR/1.mx");
+        program = preBuild.program;
         ForwardRefPreprocessAstVisitor forwardRefPreprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
         forwardRefPreprocessAstVisitor.apply(program);
         TypeCheckAstVisitor typeCheckAstVisitor = new TypeCheckAstVisitor();

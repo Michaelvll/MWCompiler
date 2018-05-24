@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.IRVisitor;
@@ -22,6 +23,9 @@ public class Function {
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
     private LinkedList<BasicBlock> blocks = new LinkedList<>();
+
+    private Boolean isInlined = false;
+    private static final Integer INLINE_BOUND = 10;
 
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
@@ -68,10 +72,36 @@ public class Function {
         blocks.addLast(block);
     }
 
-    public void pushFront(BasicBlock block) {blocks.addFirst(block);}
+    public void pushFront(BasicBlock block) {
+        blocks.addFirst(block);
+    }
 
     public List<BasicBlock> getBlocks() {
         return blocks;
+    }
+
+    public void checkInlineable() {
+        // Will be used in the future
+        isInlined = true;
+        if (functionSymbol == FunctionSymbol.MAIN) isInlined = false;
+        else {
+            Integer cnt = 0;
+            for (BasicBlock block : blocks) {
+                if (block.getName().contains("loop") || cnt > INLINE_BOUND) isInlined = false;
+                for (Instruction inst = block.front(); inst != null; inst = inst.next) {
+                    ++cnt;
+                    if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).getFunction() == this) {
+                        isInlined = false;
+                        return;
+                    }
+                }
+                if (!isInlined) return;
+            }
+        }
+    }
+
+    public Boolean isInlined() {
+        return isInlined;
     }
 
     // Language BuiltIn Function

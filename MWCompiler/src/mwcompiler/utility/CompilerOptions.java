@@ -8,14 +8,14 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 public class CompilerOptions {
-    public static Boolean dumpAst = false;
-    public static Boolean dumpIR = false;
-    public static InputStream in = System.in;
-    public static PrintStream out = System.out;
-    public static Integer warningLevel = 0;
+    public Boolean dumpAst = false;
+    public Boolean dumpIR = false;
+    public InputStream in = System.in;
+    public PrintStream out = System.out;
+    public Integer warningLevel = 0;
 
 
-    public static void compilerArgSolve(String[] args) {
+    public void compilerArgSolve(String[] args) {
         Options options = new Options();
         Option input = Option.builder("i").longOpt("input").desc("Path to the input file").hasArg().type(String.class)
                 .argName("Input File").build();
@@ -79,11 +79,11 @@ public class CompilerOptions {
             }
 
             if (cmd.hasOption("dump_ast")) {
-                CompilerOptions.dumpAst = true;
+                this.dumpAst = true;
             }
 
             if (cmd.hasOption("dump_ir")) {
-                CompilerOptions.dumpIR = true;
+                this.dumpIR = true;
             }
 
         } catch (ParseException e) {

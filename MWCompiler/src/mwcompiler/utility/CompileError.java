@@ -13,7 +13,7 @@ public class CompileError extends RuntimeException {
         this.message = StringProcess.getErrWarning(bug, stage, msg, location);
     }
 
-    CompileError(String stage, String msg, int line, int charPosInline) {
+    public CompileError(String stage, String msg, int line, int charPosInline) {
         this.message = StringProcess.getErrWarning("Error", stage, msg, line, charPosInline);
     }
 

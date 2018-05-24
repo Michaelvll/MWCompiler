@@ -5,10 +5,7 @@ import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.JumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
-import mwcompiler.ir.operands.Literal;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
-import mwcompiler.ir.operands.VirtualRegister;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
 
@@ -56,14 +53,22 @@ public class BasicBlock {
         end = instruction;
     }
 
-    public void pushBack(AssignInst assignInst, Integer valTag) {
+    public Operand pushBack(AssignInst assignInst, Integer valTag) {
         pushBack(assignInst);
+        MutableOperand dst = assignInst.getDst();
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
-            if (moveInst.getDst() instanceof Register)
-                addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
-        } else if (assignInst.getDst() instanceof VirtualRegister)
+            if (dst instanceof VirtualRegister)
+                addKnownReg((VirtualRegister) dst, moveInst.getVal(), valTag);
+        } else if (dst instanceof VirtualRegister)
             addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
+        else if (dst instanceof Memory) {
+            VirtualRegister memDst = VirtualRegister.builder("mem_dst");
+            pushBack(new MoveInst(dst, memDst), valTag);
+            assignInst.setDst(memDst);
+            dst = memDst;
+        }
+        return dst;
     }
 
 

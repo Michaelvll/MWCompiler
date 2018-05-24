@@ -25,6 +25,11 @@ public class StringLiteral extends Literal {
     }
 
     public String getVal() {
-        return "\"" + val + "\"";
+        return "`" + val + "`";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof StringLiteral && ((StringLiteral) obj).val.equals(val);
     }
 }

@@ -34,8 +34,10 @@ public class SymbolTable {
         if (search != null) {
             if (!search.getSymbol().equals(typeSymbol))
                 throw new RuntimeException("Variable and function can not use the same name ");
-        } else
-            currentMap.put(instance, new SymbolInfo(typeSymbol));
+        } else {
+            SymbolInfo symbolInfo = new SymbolInfo(typeSymbol);
+            currentMap.put(instance, symbolInfo);
+        }
     }
 
     public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {

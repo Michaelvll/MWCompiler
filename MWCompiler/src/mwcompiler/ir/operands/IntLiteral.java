@@ -14,6 +14,11 @@ public class IntLiteral extends Literal {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return obj instanceof IntLiteral && ((IntLiteral) obj).getVal().equals(val);
+    }
+
+    @Override
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);
     }

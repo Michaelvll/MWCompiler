@@ -24,8 +24,9 @@ public class TestDumpAstVisitor {
 
     @Before
     public void build() throws Exception {
-        PreBuild.build();
-        program = PreBuild.program;
+        PreBuild preBuild = new PreBuild();
+        preBuild.build();
+        program = preBuild.program;
     }
 
 

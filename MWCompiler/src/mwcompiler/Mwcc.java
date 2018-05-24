@@ -2,13 +2,13 @@ package mwcompiler;
 
 import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
-import mwcompiler.frontend.AstBuilder;
-import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
-import mwcompiler.frontend.IRBuilder;
-import mwcompiler.frontend.TypeCheckAstVisitor;
+import mwcompiler.frontend.*;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.tools.DumpIRVisitor;
-import mwcompiler.utility.*;
+import mwcompiler.utility.CompileError;
+import mwcompiler.utility.CompileWarining;
+import mwcompiler.utility.CompilerOptions;
+import mwcompiler.utility.StringProcess;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
 import org.antlr.v4.runtime.CharStream;
@@ -26,33 +26,39 @@ import java.io.IOException;
  * @since 2018-04-05
  */
 public class Mwcc {
-    private static ProgramNode programAstRoot;
-    private static ProgramIR programIRRoot;
+    private ProgramNode programAstRoot;
+    private ProgramIR programIRRoot;
+    private CompilerOptions options = new CompilerOptions();
 
 
     /**
      * @param args The entry of Mwcc
      */
     public static void main(String[] args) {
-        CompilerOptions.compilerArgSolve(args);
+        Mwcc mwwcc = new Mwcc();
+        mwwcc.compile(args);
+    }
+
+    public void compile(String[] args) {
+        options.compilerArgSolve(args);
         buildAst();
         typeCheck();
         buildIR();
     }
 
-    public static ProgramIR getProgramIRRoot(){
+    public ProgramIR getProgramIRRoot() {
         // For test
         return programIRRoot;
     }
 
-    public static ProgramNode getProgramAstRoot() {
+    public ProgramNode getProgramAstRoot() {
         // For test
         return programAstRoot;
     }
 
-    private static void buildAst() {
+    private void buildAst() {
         try {
-            CharStream input = CharStreams.fromStream(CompilerOptions.in);
+            CharStream input = CharStreams.fromStream(options.in);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
@@ -71,7 +77,7 @@ public class Mwcc {
             System.exit(1);
         }
 
-        if (CompilerOptions.dumpAst) {
+        if (options.dumpAst) {
             DumpAstVisitor astDumper = new DumpAstVisitor();
             astDumper.apply(programAstRoot);
 //            System.exit(0);
@@ -79,7 +85,7 @@ public class Mwcc {
     }
 
 
-    private static void typeCheck() {
+    private void typeCheck() {
         try {
             ForwardRefPreprocessAstVisitor preprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
             preprocessAstVisitor.apply(programAstRoot);
@@ -89,16 +95,16 @@ public class Mwcc {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        if (CompilerOptions.warningLevel > 0) {
+        if (options.warningLevel > 0) {
             CompileWarining.printWarings();
         }
     }
 
-    private static void buildIR() {
+    private void buildIR() {
         IRBuilder irBuilder = new IRBuilder();
         programIRRoot = irBuilder.build(programAstRoot);
 
-        if (CompilerOptions.dumpIR) {
+        if (options.dumpIR) {
             DumpIRVisitor irDumper = new DumpIRVisitor();
             irDumper.apply(programIRRoot);
         }

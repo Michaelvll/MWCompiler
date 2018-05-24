@@ -1,9 +1,12 @@
 package mwcompiler.ast.nodes.declarations;
 
 import mwcompiler.ast.nodes.BlockNode;
+import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
-import mwcompiler.utility.Location;
 import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.SymbolInfo;
+import mwcompiler.symbols.SymbolTable;
+import mwcompiler.utility.Location;
 
 /**
  * ClassDeclNode.java
