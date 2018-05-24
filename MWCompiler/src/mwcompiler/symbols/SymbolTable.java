@@ -6,11 +6,12 @@ import java.util.Map;
 
 public class SymbolTable {
     private static Map<NonArrayTypeSymbol, SymbolTable> classSymbolTableMap = new HashMap<>();
-    public static final SymbolTable stringSymbolTable = new SymbolTable(null);
+    public static final SymbolTable STRING_SYMBOL_TABLE = new SymbolTable(null);
+    public static SymbolTable globalSymbolTable;
 
     static {
         classSymbolTableMap.put(NonArrayTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
-        classSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, stringSymbolTable);
+        classSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, STRING_SYMBOL_TABLE);
         classSymbolTableMap.put(NonArrayTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
         classSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
     }

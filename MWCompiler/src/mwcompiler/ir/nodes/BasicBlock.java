@@ -11,7 +11,6 @@ import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.VirtualRegister;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
-import mwcompiler.utility.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +62,8 @@ public class BasicBlock {
             MoveInst moveInst = (MoveInst) assignInst;
             if (moveInst.getDst() instanceof Register)
                 addKnownReg((VirtualRegister) moveInst.getDst(), moveInst.getVal(), valTag);
-        } else if (assignInst.getDst() != null) addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
+        } else if (assignInst.getDst() instanceof VirtualRegister)
+            addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
     }
 
 
@@ -92,25 +92,23 @@ public class BasicBlock {
 
 
     private void eliminateAssignInst() {
-        Map<Register, Pair<AssignInst, Boolean>> regAssignTable = new HashMap<>();
-        for (Instruction inst = front; inst != null; inst = inst.next) {
+        Map<Register, Boolean> defineTable = new HashMap<>();
+        for (Instruction inst = end; inst != null; inst = inst.prev) {
             if (inst instanceof AssignInst) {
                 AssignInst assignInst = (AssignInst) inst;
-                for (Operand operand : assignInst.getOperand()) {
-                    if (operand instanceof Register) {
-                        Pair<AssignInst, Boolean> operandInst = regAssignTable.get(operand);
-                        if (operandInst != null) operandInst.second = true;
-                    }
-                }
                 if (assignInst.getDst() instanceof Register) {
                     Register dst = (Register) assignInst.getDst();
-                    Pair<AssignInst, Boolean> lastAssign = regAssignTable.get(dst);
-                    if (lastAssign != null && !lastAssign.second) {
-                        delete(lastAssign.first);
+                    Boolean latterDef = defineTable.get(dst);
+                    if (latterDef != null && latterDef) {
+                        delete(inst);
                     }
-                    regAssignTable.put(dst, new Pair<>(assignInst, false));
+                    defineTable.put(dst, true);
                 }
-
+                for (Register reg : assignInst.usedRegister()) {
+                    defineTable.put(reg, false);
+                }
+            } else if (inst instanceof ReturnInst) {
+                //Nothing to do, as last define of a register will always be kept
             }
         }
     }

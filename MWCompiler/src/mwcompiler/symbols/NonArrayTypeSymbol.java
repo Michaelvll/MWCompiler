@@ -6,6 +6,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool");
     public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void");
     public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null");
+    public final static NonArrayTypeSymbol GLOBAL = new NonArrayTypeSymbol("__global");
 
     static {
         typeSymbolMap.put("int", INT_TYPE_SYMBOL);

@@ -75,6 +75,8 @@ public class Function {
     }
 
     // Language BuiltIn Function
+    public static final Function PRINT_INT = new Function(FunctionSymbol.PRINT_INT, true);
+    public static final Function PRINT_STR = new Function(FunctionSymbol.PRINT_STR, true);
     public static final Function PRINT = new Function(FunctionSymbol.PRINT, true);
     public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, true);
     public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, true);
@@ -97,7 +99,7 @@ public class Function {
 
     public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "__lib_malloc_", INT_TYPE_SYMBOL), true);
 
-    public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT, PRINTLN, GET_STRING, GET_INT,
+    public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
             TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));
 
     public Boolean isLib() {

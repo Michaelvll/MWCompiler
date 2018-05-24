@@ -9,6 +9,7 @@ public class Instance {
     public static final Instance MAIN = new Instance("main");
     public static final Instance THIS = new Instance("this");
     public static final Instance CONSTRUCTOR = new Instance("_constructor");
+    public static final Instance PRINTF = new Instance("printf");
     public static final Instance PRINT = new Instance("printf");
     public static final Instance PRINTLN = new Instance("printf");
     public static final Instance GET_STRING = new Instance("getString");

@@ -24,7 +24,6 @@ public class VirtualRegister extends Register {
 
     private static Map<String, VirtualRegister> identifierMap = new HashMap<>();
 
-    //
     public static VirtualRegister builder(String preName) {
         String name = preName + "_tmp";
         VirtualRegister search = identifierMap.get(name);
@@ -37,13 +36,6 @@ public class VirtualRegister extends Register {
         return search;
     }
 
-    //
-//    public static VirtualRegister builder(Instance symbol) {
-//        return builder(symbol.getName());
-//    }
-//
-
-    //TODO: Add some action to delete unused register assignment
 
     @Override
     public <T> T accept(IRVisitor<T> visitor) {
@@ -56,5 +48,9 @@ public class VirtualRegister extends Register {
 
     public SymbolTable getSymbolTable() {
         return symbolTable;
+    }
+
+    public Boolean isTmp() {
+        return id >= 0;
     }
 }

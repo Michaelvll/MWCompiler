@@ -12,7 +12,7 @@ import mwcompiler.utility.CompileError;
 import mwcompiler.utility.Location;
 import mwcompiler.utility.StringProcess;
 
-import static mwcompiler.symbols.SymbolTable.stringSymbolTable;
+import static mwcompiler.symbols.SymbolTable.STRING_SYMBOL_TABLE;
 
 /**
  * @author Michael Wu
@@ -38,10 +38,10 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         currentSymbolTable.put(Instance.GET_STRING, FunctionSymbol.GET_STRING);
         currentSymbolTable.put(Instance.GET_INT, FunctionSymbol.GET_INT);
         currentSymbolTable.put(Instance.TO_STRING, FunctionSymbol.TO_STRING);
-        stringSymbolTable.put(Instance.LENGTH, FunctionSymbol.LENGTH);
-        stringSymbolTable.put(Instance.SUBSTRING, FunctionSymbol.SUBSTRING);
-        stringSymbolTable.put(Instance.PARSE_INT, FunctionSymbol.PARSE_INT);
-        stringSymbolTable.put(Instance.ORD, FunctionSymbol.ORD);
+        STRING_SYMBOL_TABLE.put(Instance.LENGTH, FunctionSymbol.LENGTH);
+        STRING_SYMBOL_TABLE.put(Instance.SUBSTRING, FunctionSymbol.SUBSTRING);
+        STRING_SYMBOL_TABLE.put(Instance.PARSE_INT, FunctionSymbol.PARSE_INT);
+        STRING_SYMBOL_TABLE.put(Instance.ORD, FunctionSymbol.ORD);
     }
 
     private Location mainLocation;
@@ -65,6 +65,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     public Void visit(ProgramNode node) {
         currentSymbolTable = new SymbolTable(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
+        SymbolTable.globalSymbolTable = currentSymbolTable;
         initBuiltinFunction();
         visit(node.getBlock());
         currentSymbolTable = node.getBlock().getCurrentSymbolTable();

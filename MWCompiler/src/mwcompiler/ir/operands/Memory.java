@@ -2,6 +2,9 @@ package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Memory extends MutableOperand {
     private Register baseReg;
     private Register indexReg;
@@ -56,5 +59,12 @@ public class Memory extends MutableOperand {
 
     public void setDisplacement(Integer displacement) {
         this.displacement = displacement;
+    }
+
+    public List<Register> usedRegister() {
+        List<Register> registers = new ArrayList<>();
+        if (baseReg != null) registers.add(baseReg);
+        if (indexReg != null) registers.add(baseReg);
+        return registers;
     }
 }

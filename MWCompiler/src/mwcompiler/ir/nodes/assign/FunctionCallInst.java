@@ -6,6 +6,8 @@ import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.NonArrayTypeSymbol;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class FunctionCallInst extends AssignInst {
@@ -19,8 +21,12 @@ public class FunctionCallInst extends AssignInst {
     }
 
     @Override
-    public List<Operand> getOperand() {
-        return args;
+    public List<Register> usedRegister() {
+        LinkedList<Register> registers = new LinkedList<>();
+        for (Operand operand:args) {
+            appendUsedRegister(operand, registers);
+        }
+        return registers;
     }
 
     @Override

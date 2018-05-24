@@ -2,9 +2,10 @@ package mwcompiler.ir.nodes.assign;
 
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.tools.IRVisitor;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MoveInst extends AssignInst {
@@ -25,9 +26,9 @@ public class MoveInst extends AssignInst {
     }
 
     @Override
-    public List<Operand> getOperand() {
-        return new ArrayList<Operand>() {{
-            add(val);
-        }};
+    public List<Register> usedRegister() {
+        LinkedList<Register> registers = new LinkedList<>();
+        appendUsedRegister(val, registers);
+        return registers;
     }
 }

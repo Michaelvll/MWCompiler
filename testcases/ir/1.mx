@@ -7,9 +7,9 @@ int main() {
     t = new int[5][4][];
     t[0][1] = new int[3];
     t[1][2][2] = 3;
-    return t[1][2][2];
+    //return t[1][2][2];
 
-    int a ;
+    int a;
     int c;
     c = 5;
     a = c + -8;
@@ -18,12 +18,12 @@ int main() {
 }
 
 
-/*
+
 int function(int a) {
     int b = 2;
     int c = 12;
-    c = b++ - c;
-    b = ++b + a;
+    //c = b++ - c;
+    //b = ++b + a;
     //b = a + b * c + c*a;
 
 
@@ -35,4 +35,3 @@ int function(int a) {
 
     return b;
 }
-*/
