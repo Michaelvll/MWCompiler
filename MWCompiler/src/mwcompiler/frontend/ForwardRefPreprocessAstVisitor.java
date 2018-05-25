@@ -24,6 +24,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private String stage = "Symbol Table Pre-building";
     private String funcPrefix = "";
 
+
     public void apply(Node node) {
         visit(node);
     }
@@ -63,7 +64,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
 
     @Override
     public Void visit(ProgramNode node) {
-        currentSymbolTable = new SymbolTable(null);
+        currentSymbolTable = SymbolTable.builder(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
         SymbolTable.globalSymbolTable = currentSymbolTable;
         initBuiltinFunction();
@@ -78,7 +79,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     public Void visit(ClassDeclNode node) {
         inClass = true;
         funcPrefix = "__" + node.getClassSymbol().getName() + "_";
-        node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
+        node.getBody().setCurrentSymbolTable(SymbolTable.builder(currentSymbolTable));
         if (SymbolTable.getClassSymbolTable(node.getClassSymbol()) != null) {
             throw new CompileError(stage,
                     "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName()),
@@ -96,7 +97,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     @Override
     public Void visit(BlockNode node) {
         if (node.getCurrentSymbolTable() == null) {
-            currentSymbolTable = new SymbolTable(currentSymbolTable);
+            currentSymbolTable = SymbolTable.builder(currentSymbolTable);
             node.setCurrentSymbolTable(currentSymbolTable);
         }
         node.getStatements().forEach(this::visit);

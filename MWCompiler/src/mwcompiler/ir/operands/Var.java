@@ -18,20 +18,27 @@ public class Var extends Register {
         this.id = id;
     }
 
-    public Var(Instance symbol, SymbolTable symbolTable) {
+    private Var(Instance symbol, SymbolTable symbolTable) {
         this.name = symbol.getName();
         this.symbolTable = symbolTable;
     }
 
-    private static Map<String, Var> identifierMap = new HashMap<>();
+    private static Map<String, Integer> idMap = new HashMap<>();
 
-    public static Var builder(String preName) {
+    public static Var tmpBuilder(String preName) {
         String name = preName + "_tmp";
-        Var search = identifierMap.get(name);
-        if (search == null) search = new Var(name, 0);
-        else search = new Var(name, search.id + 1);
-        identifierMap.put(name, search);
-        return search;
+        Integer search = idMap.get(name);
+        Var newVar;
+        if (search == null) newVar = new Var(name, 0);
+        else newVar = new Var(name, search + 1);
+        idMap.put(name, newVar.id);
+        return newVar;
+    }
+
+    public static Var builder(Instance symbol, SymbolTable symbolTable) {
+        Var var = new Var(symbol, symbolTable);
+        symbolTable.addVar(var);
+        return var;
     }
 
 
@@ -42,7 +49,7 @@ public class Var extends Register {
 
     @Override
     public String toString() {
-        return "$" + name + "_" + ((symbolTable != null) ? symbolTable.hashCode() : id);
+        return "$" + name + "_" + (isTmp() ? id : symbolTable.hashCode());
     }
 
     public SymbolTable getSymbolTable() {

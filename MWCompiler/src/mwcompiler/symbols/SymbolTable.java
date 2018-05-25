@@ -1,7 +1,11 @@
 package mwcompiler.symbols;
 
 
+import mwcompiler.ir.operands.Var;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
@@ -18,9 +22,17 @@ public class SymbolTable {
 
     private Map<Instance, SymbolInfo> currentMap = new HashMap<>();
     private SymbolTable outerSymbolTable;
+    private List<Var> varList = new ArrayList<>();
+    private List<SymbolTable> children = new ArrayList<>();
 
-    public SymbolTable(SymbolTable outerSymbolTable) {
+    private SymbolTable(SymbolTable outerSymbolTable) {
         this.outerSymbolTable = outerSymbolTable;
+    }
+
+    public static SymbolTable builder(SymbolTable outerSymbolTable) {
+        SymbolTable symbolTable = new SymbolTable(outerSymbolTable);
+        if (outerSymbolTable != null) outerSymbolTable.addChild(symbolTable);
+        return symbolTable;
     }
 
     /**
@@ -65,4 +77,19 @@ public class SymbolTable {
         return outerSymbolTable;
     }
 
+    public void addVar(Var var) {
+        varList.add(var);
+    }
+
+    public void addChild(SymbolTable symbolTable) {
+        children.add(symbolTable);
+    }
+
+    public List<SymbolTable> getChildren(){
+        return children;
+    }
+
+    public List<Var> getVarList() {
+        return varList;
+    }
 }

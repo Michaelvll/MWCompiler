@@ -143,7 +143,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(VariableDeclNode node) {
         SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getVarSymbol());
-        Var reg = new Var(node.getVarSymbol(), currentSymbolTable);
+        Var reg = Var.builder(node.getVarSymbol(), currentSymbolTable);
         symbolInfo.setOperand(reg);
         if (isGlobal) reg.setGlobal();
         if (node.getInit() != null) {
@@ -180,7 +180,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (inClassFunc) {
             currentSymbolTable.put(Instance.THIS, classDeclSymbol);
             SymbolInfo thisInfo = currentSymbolTable.findIn(Instance.THIS);
-            classDeclThisReg = new Var(Instance.THIS, currentSymbolTable);
+            classDeclThisReg = Var.builder(Instance.THIS, currentSymbolTable);
             thisInfo.setOperand(classDeclThisReg);
             function.AddParam(classDeclThisReg);
         }
@@ -251,7 +251,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (leftVal instanceof Literal && rightVal instanceof Literal) {
             return literalCalc(leftVal, op, rightVal);
         }
-        Var dst = Var.builder(op.toString());
+        Var dst = Var.tmpBuilder(op.toString());
         if (type != NonArrayTypeSymbol.STRING_TYPE_SYMBOL) {
             return currentBasicBlock.pushBack(new BinaryExprInst(dst, leftVal, op, rightVal), valTag);
         }
@@ -282,7 +282,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (((IntLiteral) left).getVal() == 0) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valTrue = new BasicBlock(function, new SymbolTable(currentSymbolTable), "val_true");//TODO: is null good enough?
+                BasicBlock valTrue = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), "val_true");
                 currentBasicBlock.pushBack(new CondJumpInst(left, valTrue, next));
                 setCurrentEnv(valTrue);
                 break;
@@ -291,8 +291,8 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (((IntLiteral) left).getVal() == 1) return left;
                     return visit(node.getRight());
                 }
-                BasicBlock valFalse = new BasicBlock(function, new SymbolTable(currentSymbolTable), "val_false");//TODO: is null good enough?
-                currentBasicBlock.pushBack(new CondJumpInst(left, valFalse, next));
+                BasicBlock valFalse = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), "val_false");
+                currentBasicBlock.pushBack(new CondJumpInst(left, next, valFalse));
                 setCurrentEnv(valFalse);
                 break;
         }
@@ -323,7 +323,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     public Operand visit(UnaryExprNode node) {
         ExprOps op = node.getOp();
         Operand src;
-        Var dst = Var.builder(op.toString());
+        Var dst = Var.tmpBuilder(op.toString());
         switch (op) {
             case ADD:
                 return visit(node.getExpr());
@@ -352,7 +352,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                         return isSUF ? val : newVal;
                     }
                 }
-                MutableOperand sufTmpReg = Var.builder("SUF");
+                MutableOperand sufTmpReg = Var.tmpBuilder("SUF");
                 if (isSUF) {
                     currentBasicBlock.pushBack(new MoveInst(sufTmpReg, src), valTag);
                 }
@@ -364,7 +364,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private Operand visitCreateClass(NonArrayTypeSymbol classType) {
-        Var classReg = Var.builder("class_" + classType.getName());
+        Var classReg = Var.tmpBuilder("class_" + classType.getName());
         IntLiteral sizeLiteral = new IntLiteral(classType.getSize());
         currentBasicBlock.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(sizeLiteral)), classReg), valTag);
         SymbolInfo constructorSymbolInfo = SymbolTable.getClassSymbolTable(classType).findIn(Instance.CONSTRUCTOR);
@@ -376,7 +376,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private Operand visitCreateArray(NewExprNode node, Integer index) {
-        Var baseReg = Var.builder("array_base");
+        Var baseReg = Var.tmpBuilder("array_base");
 
         Operand size = visit(node.getDimArgs().get(index));
         Operand bitSize = visitArithComp(visitArithComp(size, MUL, PTR_SIZE, INT_TYPE_SYMBOL), ADD, LENGTH_SIZE, INT_TYPE_SYMBOL);
@@ -388,9 +388,9 @@ public class IRBuilder implements AstVisitor<Operand> {
         Boolean createClass = !node.getCreateType().isPrimitiveTypeBase() && node.getEmptyDim() == 0;
         // iterate for each subscript
         if (!terminal || createClass) {
-            Var indexReg = Var.builder("index");
+            Var indexReg = Var.tmpBuilder("index");
             currentBasicBlock.pushBack(new MoveInst(indexReg, ZERO_LITERAL), valTag);
-            BasicBlock creatorLoopBegin = new BasicBlock(currentBasicBlock.getParentFunction(), new SymbolTable(currentSymbolTable), "creator_loop");
+            BasicBlock creatorLoopBegin = new BasicBlock(currentBasicBlock.getParentFunction(), SymbolTable.builder(currentSymbolTable), "creator_loop");
             BasicBlock next = new BasicBlock(currentBasicBlock.getParentFunction(), currentSymbolTable, "creator_loop_end");
             currentBasicBlock.pushBack(new DirectJumpInst(creatorLoopBegin));
             setCurrentEnv(creatorLoopBegin);
@@ -449,7 +449,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             args.add(container);
         }
         if (function == Function.SIZE) {
-            Var dst = Var.builder("array_size");
+            Var dst = Var.tmpBuilder("array_size");
             currentBasicBlock.pushBack(new MoveInst(dst, container), valTag);
             return dst;
         }
@@ -461,7 +461,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             visitPrintCall(args, true);
             return null;
         }
-        Var dst = Var.builder("call_ret");
+        Var dst = Var.tmpBuilder("call_ret");
         return currentBasicBlock.pushBack(new FunctionCallInst(function, args, dst), valTag);
     }
 
@@ -507,7 +507,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     public Operand visit(LoopNode node) {
         Function function = currentBasicBlock.getParentFunction();
         BasicBlock loopEnd = new BasicBlock(function, currentSymbolTable, prefix("loop_end"));
-        BasicBlock loopCond = new BasicBlock(function, new SymbolTable(currentSymbolTable), prefix("loop_cond"));
+        BasicBlock loopCond = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), prefix("loop_cond"));
         BasicBlock loopBegin = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), prefix("loop_begin"));
         if (node.getVarInit() != null) {
             visit(node.getVarInit());
@@ -561,7 +561,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             SymbolTable symbolTable = SymbolTable.getClassSymbolTable((NonArrayTypeSymbol) containerType);
             SymbolInfo memberInfo = symbolTable.findIn(node.getMember().getInstance());
             if (memberInfo.isClassMember()) {
-                Register baseReg = Var.builder("container_base");
+                Register baseReg = Var.tmpBuilder("container_base");
                 if (container instanceof Memory) currentBasicBlock.pushBack(new MoveInst(baseReg, container), valTag);
                 else baseReg = (Var) container;
                 return new Memory(baseReg, null, 0,
@@ -585,7 +585,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     private Operand getParamForMem(Operand x, String name) {
         if (x instanceof Var || x instanceof Literal) return x;
-        Var tmp = Var.builder(name);
+        Var tmp = Var.tmpBuilder(name);
         currentBasicBlock.pushBack(new MoveInst(tmp, x), valTag);
         return tmp;
     }

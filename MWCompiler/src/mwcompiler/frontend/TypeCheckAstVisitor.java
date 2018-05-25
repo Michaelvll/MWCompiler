@@ -68,7 +68,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     // For Symbol Table
     private void getCurrentSymbolTable(BlockNode node) {
         if (node.getCurrentSymbolTable() == null) {
-            node.setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
+            node.setCurrentSymbolTable(SymbolTable.builder(currentSymbolTable));
         }
         currentSymbolTable = node.getCurrentSymbolTable();
     }

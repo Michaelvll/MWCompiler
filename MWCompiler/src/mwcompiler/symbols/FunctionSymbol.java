@@ -37,7 +37,7 @@ public class FunctionSymbol extends Symbol {
     }
 
 
-//    public static FunctionSymbol builder(TypeSymbol returnType, List<TypeSymbol> params) {
+//    public static FunctionSymbol tmpBuilder(TypeSymbol returnType, List<TypeSymbol> params) {
 //        return new FunctionSymbol(returnType, params);
 //    }
 

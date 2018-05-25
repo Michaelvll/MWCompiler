@@ -68,7 +68,7 @@ public class BasicBlock {
         } else if (dst instanceof Var)
             addKnownReg((Var) assignInst.getDst(), null, valTag);
         else if (dst instanceof Memory) {
-            Var memDst = Var.builder("mem_dst");
+            Var memDst = Var.tmpBuilder("mem_dst");
             pushBack(new MoveInst(dst, memDst), valTag);
             assignInst.setDst(memDst);
             dst = memDst;
@@ -86,7 +86,7 @@ public class BasicBlock {
             CondJumpInst condJumpInst = (CondJumpInst) jumpInst;
             assert condJumpInst.getCond() instanceof MutableOperand;
             MutableOperand cond = (MutableOperand) condJumpInst.getCond();
-            Var dst = Var.builder("cmp");
+            Var dst = Var.tmpBuilder("cmp");
             BinaryExprInst cmp = new BinaryExprInst(dst, cond, ExprOps.NEQ, ZERO_LITERAL);
             if (cond.isTmp() && end instanceof BinaryExprInst) {
                 cmp = (BinaryExprInst) popBack();

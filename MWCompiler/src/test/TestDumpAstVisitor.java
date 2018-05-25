@@ -10,7 +10,7 @@ import test.tools.PreBuild;
 
 /**
  * TestDumpAstVisitor.java
- * A test for the Ast builder and dumper only with variable declaration
+ * A test for the Ast tmpBuilder and dumper only with variable declaration
  *
  * @author Michael Wu
  * @since 2018-04-11
