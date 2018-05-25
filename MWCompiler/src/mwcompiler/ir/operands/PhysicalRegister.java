@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PhysicalRegister extends Register {
-    private Integer id;
+    private int id;
 
-    private PhysicalRegister(Integer id) {
+    private PhysicalRegister(int id) {
         this.id = id;
     }
 
@@ -45,7 +45,7 @@ public class PhysicalRegister extends Register {
     public static final List<String> names = new ArrayList<>(
             Arrays.asList("rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"));
 
-    public static PhysicalRegister get(Integer i) {
+    public static PhysicalRegister get(int i) {
         return physicalRegisters.get(i);
     }
 
@@ -61,7 +61,7 @@ public class PhysicalRegister extends Register {
     }
 
     @Override
-    public Boolean isTmp() {
+    public boolean isTmp() {
         throw new RuntimeException("Compiler Bug: Physical register do not have isTmp()");
     }
 }

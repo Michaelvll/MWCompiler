@@ -20,7 +20,7 @@ import static mwcompiler.symbols.SymbolTable.STRING_SYMBOL_TABLE;
  */
 public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private SymbolTable currentSymbolTable;
-    private Boolean inClass = false;
+    private boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
     private String funcPrefix = "";
 
@@ -101,7 +101,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             node.setCurrentSymbolTable(currentSymbolTable);
         }
         node.getStatements().forEach(this::visit);
-        currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
+        currentSymbolTable = currentSymbolTable.getParentSymbolTable();
         return null;
     }
 

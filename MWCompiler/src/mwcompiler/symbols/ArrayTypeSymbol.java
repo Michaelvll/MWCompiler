@@ -3,13 +3,13 @@ package mwcompiler.symbols;
 
 public class ArrayTypeSymbol extends TypeSymbol {
     private NonArrayTypeSymbol nonArrayTypeSymbol;
-    private Integer dim;
+    private int dim;
 
-    private static String combineName(String name, Integer dim) {
+    private static String combineName(String name, int dim) {
         return name + "~" + String.valueOf(dim);
     }
 
-    public static ArrayTypeSymbol builder(String name, Integer dim) {
+    public static ArrayTypeSymbol builder(String name, int dim) {
         NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.builder(name);
         TypeSymbol search = typeSymbolMap.get(combineName(name, dim));
         if (search == null) {
@@ -19,7 +19,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         return (ArrayTypeSymbol) search;
     }
 
-    private ArrayTypeSymbol(NonArrayTypeSymbol nonArrayTypeSymbol, Integer dim) {
+    private ArrayTypeSymbol(NonArrayTypeSymbol nonArrayTypeSymbol, int dim) {
         this.nonArrayTypeSymbol = nonArrayTypeSymbol;
         this.dim = dim;
     }
@@ -28,7 +28,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         return nonArrayTypeSymbol;
     }
 
-    public Integer getDim() {
+    public int getDim() {
         return dim;
     }
 
@@ -55,7 +55,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
     }
 
     @Override
-    public Boolean isPrimitiveTypeBase(){
+    public boolean isPrimitiveTypeBase(){
         return nonArrayTypeSymbol.isPrimitiveType();
     }
 }

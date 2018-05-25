@@ -29,12 +29,12 @@ import static mwcompiler.utility.ExprOps.*;
  */
 public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     private SymbolTable currentSymbolTable = null;
-    private Integer inLoop = 0;
-    private Boolean inClass = false;
+    private int inLoop = 0;
+    private boolean inClass = false;
     private String stage = "Type Checking";
     private TypeSymbol expectedReturnType;
 
-    private Boolean inNew = false;
+    private boolean inNew = false;
 
     public void apply(Node node) {
         visit(node);
@@ -74,7 +74,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     }
 
     private void getOuterSymbolTable() {
-        currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
+        currentSymbolTable = currentSymbolTable.getParentSymbolTable();
     }
 
     private ExprType setType(ExprNode node, Symbol type, ExprType.ValType valType) {
@@ -93,8 +93,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         ExprType currentReturn = null;
         getCurrentSymbolTable(node);
         List<Node> statements = node.getStatements();
-        Integer statementNum = node.getStatements().size();
-        for (Integer index = 0; index < statementNum; ++index) {
+        int statementNum = node.getStatements().size();
+        for (int index = 0; index < statementNum; ++index) {
             Node statement = statements.get(index);
             ExprType stmtReturn = visit(statement);
             if (statement instanceof ReturnNode) {
@@ -113,7 +113,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                             "Statements after " + StringProcess.getRefString("break") + "will never be executed",
                             statement.getStartLocation());
                 }
-                for (Integer removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
+                for (int removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
                 break;
             }
             if (statement instanceof ContinueNode) {
@@ -122,7 +122,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                             "Statements after " + StringProcess.getRefString("continue") + "will never be executed",
                             statement.getStartLocation());
                 }
-                for (Integer removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
+                for (int removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
                 break;
             }
         }
@@ -337,7 +337,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             throw new CompileError(stage,
                     "Number of arguments in function caller " + "does not match the declaration. ", location);
         }
-        for (Integer index = 0; index < args.size(); ++index) {
+        for (int index = 0; index < args.size(); ++index) {
             ExprType argType = visit(args.get(index));
             TypeSymbol paramType = params.get(index);
             if (argType.symbol != paramType && argType.symbol != NULL_TYPE_SYMBOL) {

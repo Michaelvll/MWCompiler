@@ -23,9 +23,9 @@ public class StringProcess {
 
 
     private static String getBefore(Location location) {
-        Integer start = location.getInterval().a;
+        int start = location.getInterval().a;
         if (start == 0 || tokens.get(start - 1).getText().contains("\n")) return "";
-        Integer lineStart = start - 1;
+        int lineStart = start - 1;
 
         while (lineStart >= 0 && !tokens.get(lineStart).getText().contains("\n")) {
             --lineStart;
@@ -38,9 +38,9 @@ public class StringProcess {
     }
 
     private static String getAfter(Location location) {
-        Integer end = location.getInterval().b;
+        int end = location.getInterval().b;
         if (end == tokens.size() || tokens.get(end + 1).getText().contains("\n")) return "";
-        Integer lineEnd = end + 1;
+        int lineEnd = end + 1;
         while (lineEnd < tokens.size() && !tokens.get(lineEnd).getText().contains("\n")) {
             ++lineEnd;
         }

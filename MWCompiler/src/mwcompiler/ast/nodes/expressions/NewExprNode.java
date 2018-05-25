@@ -18,10 +18,10 @@ import java.util.List;
 public class NewExprNode extends ExprNode {
     private TypeSymbol createType;
     private List<ExprNode> dimArgs;
-    private Integer emptyDim = 0;
+    private int emptyDim = 0;
 
 
-    public NewExprNode(String createType, Integer dim, List<ExprNode> dimArgs, Location pos) {
+    public NewExprNode(String createType, int dim, List<ExprNode> dimArgs, Location pos) {
         super(pos);
         if (dim == 0) {
             this.createType = NonArrayTypeSymbol.builder(createType);
@@ -45,7 +45,7 @@ public class NewExprNode extends ExprNode {
         return dimArgs;
     }
 
-    public Integer getEmptyDim() {
+    public int getEmptyDim() {
         return emptyDim;
     }
 }

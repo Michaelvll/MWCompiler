@@ -8,10 +8,10 @@ import java.util.List;
 public class Memory extends MutableOperand {
     private Register baseReg;
     private Register indexReg;
-    private Integer scale;
-    private Integer displacement;
+    private int scale;
+    private int displacement;
 
-    public Memory(Register baseReg, Operand indexReg, Integer scale, Integer displacement) {
+    public Memory(Register baseReg, Operand indexReg, int scale, int displacement) {
         this.baseReg = baseReg;
         if (indexReg instanceof IntLiteral) {
             this.indexReg = null;
@@ -45,19 +45,19 @@ public class Memory extends MutableOperand {
         this.indexReg = indexReg;
     }
 
-    public Integer getScale() {
+    public int getScale() {
         return scale;
     }
 
-    public void setScale(Integer scale) {
+    public void setScale(int scale) {
         this.scale = scale;
     }
 
-    public Integer getDisplacement() {
+    public int getDisplacement() {
         return displacement;
     }
 
-    public void setDisplacement(Integer displacement) {
+    public void setDisplacement(int displacement) {
         this.displacement = displacement;
     }
 
@@ -78,7 +78,7 @@ public class Memory extends MutableOperand {
     }
 
     @Override
-    public Boolean isTmp() {
+    public boolean isTmp() {
         return false;
     }
 }

@@ -8,13 +8,18 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 public class CompilerOptions {
-    public Boolean dumpAst = false;
-    public Boolean dumpIR = false;
+    // Machine settings
+    public int PTR_SIZE = 8;
+    public int LENGTH_SIZE = 8;
+    public int STACK_ALIGN_SIZE = 8;
+
+
+    // Compiling Options
+    public boolean dumpAst = false;
+    public boolean dumpIR = false;
     public InputStream in = System.in;
     public PrintStream out = System.out;
-    public Integer warningLevel = 0;
-    public Integer PTR_SIZE = 8;
-    public Integer LENGTH_SIZE = 8;
+    public int warningLevel = 0;
 
 
     public void compilerArgSolve(String[] args) {
@@ -33,10 +38,10 @@ public class CompilerOptions {
         Option help = Option.builder("h").longOpt("help").hasArg(false).desc("Print help message (this message)").build();
         options.addOption(help);
 
-        Option dumpAst = Option.builder().longOpt("dump_ast").desc("Dump dumpAst for source code").hasArg(false).build();
+        Option dumpAst = Option.builder().longOpt("dump-ast").desc("Dump dumpAst for source code").hasArg(false).build();
         options.addOption(dumpAst);
 
-        Option dumpIR = Option.builder().longOpt("dump_ir").desc("Dump dumpIR for source code").hasArg(false).build();
+        Option dumpIR = Option.builder().longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build();
         options.addOption(dumpIR);
 
         CommandLineParser parser = new DefaultParser();
@@ -80,11 +85,11 @@ public class CompilerOptions {
                 warningLevel = 1;
             }
 
-            if (cmd.hasOption("dump_ast")) {
+            if (cmd.hasOption("dump-ast")) {
                 this.dumpAst = true;
             }
 
-            if (cmd.hasOption("dump_ir")) {
+            if (cmd.hasOption("dump-ir")) {
                 this.dumpIR = true;
             }
 

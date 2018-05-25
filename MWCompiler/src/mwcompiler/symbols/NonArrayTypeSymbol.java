@@ -17,7 +17,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     private String typename;
-    private Integer size = 8;
+    private int size = 8;
 
 
     private NonArrayTypeSymbol(String typename) {
@@ -60,15 +60,15 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         return namedSymbolTable.findIn(instance);
     }
 
-    public Integer getSize() {
+    public int getSize() {
         return size;
     }
 
-    public void setSize(Integer size) {
+    public void setSize(int size) {
         this.size = size;
     }
 
-    public Boolean isPrimitiveTypeBase() {
+    public boolean isPrimitiveTypeBase() {
         return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
                 || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
     }

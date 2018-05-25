@@ -114,7 +114,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(CondJumpInst inst) {
         visit(inst.getCmp());
         addIndent();
-        iprintln( inst.getOp() + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
+//        iprintln( inst.getOp() + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
+        iprintln("br " + visit(inst.getCmp().getDst()) + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
         subIndent();
         return null;
     }

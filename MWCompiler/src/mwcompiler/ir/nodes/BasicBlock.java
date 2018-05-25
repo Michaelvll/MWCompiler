@@ -25,7 +25,7 @@ public class BasicBlock {
     private Function parentFunction;
     private SymbolTable currentSymbolTable;
 
-    public Boolean isEnded = false;
+    public boolean isEnded = false;
 
     private Set<BasicBlock> fromBasicBlock;
     private Set<BasicBlock> toBasicBlock;
@@ -58,7 +58,7 @@ public class BasicBlock {
         end = instruction;
     }
 
-    public Operand pushBack(AssignInst assignInst, Integer valTag) {
+    public Operand pushBack(AssignInst assignInst, int valTag) {
         pushBack(assignInst);
         MutableOperand dst = assignInst.getDst();
         if (assignInst instanceof MoveInst) {
@@ -116,18 +116,21 @@ public class BasicBlock {
         for (Instruction inst = end; inst != null; inst = inst.prev) {
             if (inst instanceof AssignInst) {
                 AssignInst assignInst = (AssignInst) inst;
+//                if (assignInst instanceof MoveInst && assignInst.getDst() == ((MoveInst) assignInst).getVal())
+//                    delete(inst);
                 if (assignInst.getDst() instanceof Register) {
-                    Register dst = (Register) assignInst.getDst();
+                    Var dst = (Var) assignInst.getDst();
                     Boolean latterDef = defineTable.get(dst);
-                    if (latterDef != null && latterDef) {
-                        delete(inst);
+                    if (latterDef != null && latterDef) delete(inst);
+                    else {
+                        defineTable.put(dst, true);
+                        if (parentFunction != null) parentFunction.addTmpVar((Var) assignInst.getDst());
                     }
-                    defineTable.put(dst, true);
                 }
                 for (Register reg : assignInst.usedRegister()) {
                     defineTable.put(reg, false);
                 }
-            } else if (inst instanceof ReturnInst) {
+            } else if (inst instanceof JumpInst) {
                 //Nothing to do, as last define of a register will always be kept
             }
         }
@@ -141,7 +144,7 @@ public class BasicBlock {
         return inst;
     }
 
-    private void addKnownReg(Register operand, Operand val, Integer valTag) {
+    private void addKnownReg(Register operand, Operand val, int valTag) {
         Var reg = (Var) operand;
         if (val instanceof Literal) {
             assignTable.put(reg, (Literal) val);
@@ -155,7 +158,7 @@ public class BasicBlock {
         reg.setVal(null, valTag);
     }
 
-    public Literal getKnownReg(Register reg, Integer valTag) {
+    public Literal getKnownReg(Register reg, int valTag) {
         Literal val = assignTable.get(reg);
         if (val != null) return val;
         return reg.getVal(valTag);

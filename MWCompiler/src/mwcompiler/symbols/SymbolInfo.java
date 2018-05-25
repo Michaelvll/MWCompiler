@@ -24,15 +24,15 @@ public class SymbolInfo {
         operand.setSymbolInfo(this);
     }
 
-    public Integer getOffset() {
+    public int getOffset() {
         return offset;
     }
 
-    public void setOffset(Integer offset) {
+    public void setOffset(int offset) {
         this.offset = offset;
     }
 
-    public Boolean isClassMember() {
+    public boolean isClassMember() {
         return offset != null;
     }
 }

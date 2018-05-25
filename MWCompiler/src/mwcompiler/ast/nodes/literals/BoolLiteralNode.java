@@ -12,7 +12,7 @@ import mwcompiler.utility.Location;
  */
 public class BoolLiteralNode extends LiteralExprNode {
 
-    private Boolean val;
+    private boolean val;
 
     public BoolLiteralNode(String val, Location pos) {
         super(pos);
@@ -28,7 +28,7 @@ public class BoolLiteralNode extends LiteralExprNode {
         }
     }
 
-    public Boolean getVal() {
+    public boolean getVal() {
         return val;
     }
 

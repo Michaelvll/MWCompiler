@@ -3,19 +3,19 @@ package mwcompiler.ir.operands;
 import mwcompiler.ir.tools.IRVisitor;
 
 public class IntLiteral extends Literal {
-    private Integer val;
+    private int val;
 
-    public IntLiteral(Integer val) {
+    public IntLiteral(int val) {
         this.val = val;
     }
 
-    public Integer getVal() {
+    public int getVal() {
         return val;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof IntLiteral && ((IntLiteral) obj).getVal().equals(val);
+        return obj instanceof IntLiteral && ((IntLiteral) obj).getVal() == val;
     }
 
     @Override

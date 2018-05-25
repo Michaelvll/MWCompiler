@@ -15,7 +15,7 @@ public class TypeNode extends Node {
     private TypeSymbol typeSymbol;
     Location location;
 
-    public TypeNode(String type, Integer dim, Location pos) {
+    public TypeNode(String type, int dim, Location pos) {
         if (dim == 0) {
             this.typeSymbol = NonArrayTypeSymbol.builder(type);
         } else {

@@ -43,6 +43,14 @@ public class CondJumpInst extends JumpInst {
         this.cmp = cmp;
     }
 
+    public void setIfTrue(BasicBlock ifTrue) {
+        this.ifTrue = ifTrue;
+    }
+
+    public void setIfFalse(BasicBlock ifFalse) {
+        this.ifFalse = ifFalse;
+    }
+
     public String getOp() {
         switch (cmp.getOp()) {
             case EQ: return "je";

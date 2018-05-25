@@ -14,9 +14,9 @@ public abstract class TypeSymbol extends Symbol {
         return this instanceof NonArrayTypeSymbol ? (NonArrayTypeSymbol) this : ((ArrayTypeSymbol) this).getNonArrayTypeSymbol();
     }
 
-    public abstract Boolean isPrimitiveTypeBase();
+    public abstract boolean isPrimitiveTypeBase();
 
-    public Boolean isPrimitiveType() {
+    public boolean isPrimitiveType() {
         return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
                 || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
     }

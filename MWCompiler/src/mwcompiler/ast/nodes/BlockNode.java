@@ -50,7 +50,7 @@ public class BlockNode extends Node {
         this.currentSymbolTable = currentSymbolTable;
     }
 
-    public void clearStatement(Integer i) {
+    public void clearStatement(int i) {
         statements = statements.subList(0, i);
     }
 }

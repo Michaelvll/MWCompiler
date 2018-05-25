@@ -21,12 +21,12 @@ public class SymbolTable {
     }
 
     private Map<Instance, SymbolInfo> currentMap = new HashMap<>();
-    private SymbolTable outerSymbolTable;
+    private SymbolTable parentSymbolTable;
     private List<Var> varList = new ArrayList<>();
     private List<SymbolTable> children = new ArrayList<>();
 
-    private SymbolTable(SymbolTable outerSymbolTable) {
-        this.outerSymbolTable = outerSymbolTable;
+    private SymbolTable(SymbolTable parentSymbolTable) {
+        this.parentSymbolTable = parentSymbolTable;
     }
 
     public static SymbolTable builder(SymbolTable outerSymbolTable) {
@@ -63,8 +63,8 @@ public class SymbolTable {
 
     public SymbolInfo findAll(Instance instance) {
         SymbolInfo search = currentMap.get(instance);
-        if (search == null && outerSymbolTable != null) {
-            search = outerSymbolTable.findAll(instance);
+        if (search == null && parentSymbolTable != null) {
+            search = parentSymbolTable.findAll(instance);
         }
         return search;
     }
@@ -73,8 +73,8 @@ public class SymbolTable {
         return currentMap.get(instance);
     }
 
-    public SymbolTable getOuterSymbolTable() {
-        return outerSymbolTable;
+    public SymbolTable getParentSymbolTable() {
+        return parentSymbolTable;
     }
 
     public void addVar(Var var) {

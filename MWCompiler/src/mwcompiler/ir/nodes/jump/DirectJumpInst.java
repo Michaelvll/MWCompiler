@@ -14,6 +14,10 @@ public class DirectJumpInst extends JumpInst {
         return target;
     }
 
+    public void setTarget(BasicBlock target) {
+        this.target = target;
+    }
+
     @Override
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);

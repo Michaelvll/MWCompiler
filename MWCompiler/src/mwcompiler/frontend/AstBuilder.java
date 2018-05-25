@@ -372,12 +372,12 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     @Override
     public Node visitCreator(MxParser.CreatorContext ctx) {
         String createType = ctx.createdName().getText();
-        Integer dim = 0;
+        int dim = 0;
         List<ExprNode> dimArgs = new ArrayList<>();
         if (ctx.arrayCreatorRest() != null) {
             List<MxParser.CreatorInnerContext> creatorInnerContext = ctx.arrayCreatorRest().creatorInner();
             dim = creatorInnerContext.size();
-            for (Integer index = 0; index < dim; ++index) {
+            for (int index = 0; index < dim; ++index) {
                 MxParser.ExprContext exprContext = creatorInnerContext.get(index).expr();
                 if (exprContext != null) {
                     if (index != dimArgs.size()) {
