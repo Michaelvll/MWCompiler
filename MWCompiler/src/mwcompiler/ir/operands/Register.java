@@ -19,4 +19,6 @@ public abstract class Register extends MutableOperand {
     }
 
     public abstract <T> T accept(IRVisitor<T> visitor);
+
+    public abstract String toString();
 }

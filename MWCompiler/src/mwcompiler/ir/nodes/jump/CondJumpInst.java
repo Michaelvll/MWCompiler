@@ -1,6 +1,7 @@
 package mwcompiler.ir.nodes.jump;
 
 import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.tools.IRVisitor;
 
@@ -8,6 +9,8 @@ public class CondJumpInst extends JumpInst {
     private Operand cond; // if cond != 0 -> ifTrue, else ->ifFalse
     private BasicBlock ifTrue;
     private BasicBlock ifFalse;
+    private BinaryExprInst cmp;
+
 
     public CondJumpInst(Operand cond, BasicBlock ifTrue, BasicBlock ifFalse) {
         this.cond = cond;
@@ -31,4 +34,25 @@ public class CondJumpInst extends JumpInst {
     public Operand getCond() {
         return cond;
     }
+
+    public BinaryExprInst getCmp() {
+        return cmp;
+    }
+
+    public void setCmp(BinaryExprInst cmp) {
+        this.cmp = cmp;
+    }
+
+    public String getOp() {
+        switch (cmp.getOp()) {
+            case EQ: return "je";
+            case NEQ: return "jne";
+            case GT: return "jg";
+            case GTE: return "jge";
+            case LT: return "jl";
+            case LTE: return "jle";
+            default: throw new RuntimeException("Compiler Bug: Unknown ExprOp for condition jump");
+        }
+    }
+
 }

@@ -22,4 +22,7 @@ public class IntLiteral extends Literal {
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);
     }
+
+    public static final IntLiteral ONE_LITERAL = new IntLiteral(1);
+    public static final IntLiteral ZERO_LITERAL = new IntLiteral(0);
 }

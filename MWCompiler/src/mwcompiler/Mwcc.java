@@ -101,7 +101,7 @@ public class Mwcc {
     }
 
     private void buildIR() {
-        IRBuilder irBuilder = new IRBuilder();
+        IRBuilder irBuilder = new IRBuilder(options);
         programIRRoot = irBuilder.build(programAstRoot);
 
         if (options.dumpIR) {

@@ -67,4 +67,18 @@ public class Memory extends MutableOperand {
         if (indexReg != null) registers.add(baseReg);
         return registers;
     }
+
+    public String toString(){
+        StringBuilder s =new StringBuilder("[");
+        if (baseReg != null) s.append(baseReg.toString());
+        if (indexReg != null) s.append(" + ").append(indexReg.toString()).append(" * ").append(scale);
+        if (displacement != 0) s.append(" + ").append(displacement);
+        s.append("]");
+        return s.toString();
+    }
+
+    @Override
+    public Boolean isTmp() {
+        return false;
+    }
 }

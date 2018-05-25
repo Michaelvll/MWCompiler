@@ -13,6 +13,8 @@ public class CompilerOptions {
     public InputStream in = System.in;
     public PrintStream out = System.out;
     public Integer warningLevel = 0;
+    public Integer PTR_SIZE = 8;
+    public Integer LENGTH_SIZE = 8;
 
 
     public void compilerArgSolve(String[] args) {

@@ -112,8 +112,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(CondJumpInst inst) {
+        visit(inst.getCmp());
         addIndent();
-        iprintln("br " + visit(inst.getCond()) + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
+        iprintln( inst.getOp() + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
         subIndent();
         return null;
     }
@@ -145,12 +146,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(VirtualRegister register) {
-        String name = "$" + register.getName();
-        if (register.getSymbolTable() !=null) {
-            name += "_" + register.getSymbolTable().hashCode();
-        }
-        return name;
+    public String visit(Var register) {
+        return register.toString();
     }
 
     @Override

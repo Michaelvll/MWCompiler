@@ -2,16 +2,21 @@ package mwcompiler.ir.nodes;
 
 
 import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.JumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
+import mwcompiler.utility.ExprOps;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static mwcompiler.ir.operands.IntLiteral.ZERO_LITERAL;
 
 public class BasicBlock {
     private Instruction front;
@@ -58,12 +63,12 @@ public class BasicBlock {
         MutableOperand dst = assignInst.getDst();
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
-            if (dst instanceof VirtualRegister)
-                addKnownReg((VirtualRegister) dst, moveInst.getVal(), valTag);
-        } else if (dst instanceof VirtualRegister)
-            addKnownReg((VirtualRegister) assignInst.getDst(), null, valTag);
+            if (dst instanceof Var)
+                addKnownReg((Var) dst, moveInst.getVal(), valTag);
+        } else if (dst instanceof Var)
+            addKnownReg((Var) assignInst.getDst(), null, valTag);
         else if (dst instanceof Memory) {
-            VirtualRegister memDst = VirtualRegister.builder("mem_dst");
+            Var memDst = Var.builder("mem_dst");
             pushBack(new MoveInst(dst, memDst), valTag);
             assignInst.setDst(memDst);
             dst = memDst;
@@ -74,11 +79,21 @@ public class BasicBlock {
 
     public void pushBack(JumpInst jumpInst) {
         //TODO for function call
-        pushBack((Instruction) jumpInst);
         isEnded = true;
         if (jumpInst instanceof ReturnInst)
             parentFunction.AddReturn((ReturnInst) jumpInst);
-
+        if (jumpInst instanceof CondJumpInst) {
+            CondJumpInst condJumpInst = (CondJumpInst) jumpInst;
+            assert condJumpInst.getCond() instanceof MutableOperand;
+            MutableOperand cond = (MutableOperand) condJumpInst.getCond();
+            Var dst = Var.builder("cmp");
+            BinaryExprInst cmp = new BinaryExprInst(dst, cond, ExprOps.NEQ, ZERO_LITERAL);
+            if (cond.isTmp() && end instanceof BinaryExprInst) {
+                cmp = (BinaryExprInst) popBack();
+            }
+            condJumpInst.setCmp(cmp);
+        }
+        pushBack((Instruction) jumpInst);
         assignTable.clear();
         eliminateAssignInst(); // eliminate the unused assignInst
     }
@@ -127,7 +142,7 @@ public class BasicBlock {
     }
 
     private void addKnownReg(Register operand, Operand val, Integer valTag) {
-        VirtualRegister reg = (VirtualRegister) operand;
+        Var reg = (Var) operand;
         if (val instanceof Literal) {
             assignTable.put(reg, (Literal) val);
             if (reg.getSymbolTable() == currentSymbolTable) {

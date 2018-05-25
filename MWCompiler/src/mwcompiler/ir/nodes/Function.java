@@ -2,7 +2,7 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
-import mwcompiler.ir.operands.VirtualRegister;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.NonArrayTypeSymbol;
@@ -16,7 +16,7 @@ import static mwcompiler.symbols.NonArrayTypeSymbol.*;
 
 public class Function {
     private FunctionSymbol functionSymbol;
-    private List<VirtualRegister> paramVReg = new ArrayList<>();
+    private List<Var> paramVReg = new ArrayList<>();
 
     private final Boolean isLib;
 
@@ -38,7 +38,7 @@ public class Function {
     }
 
 
-    public void AddParam(VirtualRegister reg) {
+    public void AddParam(Var reg) {
         paramVReg.add(reg);
     }
 
@@ -59,7 +59,7 @@ public class Function {
         return functionSymbol.getName();
     }
 
-    public List<VirtualRegister> getParamVReg() {
+    public List<Var> getParamVReg() {
         return paramVReg;
     }
 
@@ -127,7 +127,7 @@ public class Function {
     public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
     public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
 
-    public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "__lib_malloc_", INT_TYPE_SYMBOL), true);
+    public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), true);
 
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
             TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));

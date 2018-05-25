@@ -13,7 +13,7 @@ public class TestIRRun {
 
     @Before
     public void build() throws Exception {
-        preBuild.build("../testcases/ir/test.mx");
+        preBuild.build("../testcases/ir/1.mx");
     }
 
     @Test
