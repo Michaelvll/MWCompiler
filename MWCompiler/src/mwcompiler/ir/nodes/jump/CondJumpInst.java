@@ -3,7 +3,6 @@ package mwcompiler.ir.nodes.jump;
 import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
@@ -60,8 +59,8 @@ public class CondJumpInst extends JumpInst {
         this.ifFalse = ifFalse;
     }
 
-    public String getOp() {
-        switch (cmp.getOp()) {
+    public String cmdName() {
+        switch (cmp.op()) {
             case EQ: return "je";
             case NEQ: return "jne";
             case GT: return "jg";

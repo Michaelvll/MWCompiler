@@ -33,22 +33,26 @@ public class NaiveAllocator {
         for (BasicBlock block : function.getBasicBlocks()) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 for (Var var : inst.usedVar()) {
-                    var.addUseTime();
-                    vars.add(var);
+                    if (!var.isCompareTmp()) {
+                        var.addUseTime();
+                        vars.add(var);
+                    }
                 }
                 for (Var var : inst.dstVar()) {
-                    var.addUseTime();
-                    vars.add(var);
+                    if (!var.isCompareTmp()) {
+                        var.addUseTime();
+                        vars.add(var);
+                    }
                 }
             }
         }
         List<Var> usageRank = new ArrayList<>(vars);
-        usageRank.sort(Comparator.comparingInt(Var::useTime));
+        usageRank.sort(Comparator.comparingInt(Var::useTime).reversed());
 
         List<PhysicalRegister> allocateRegs = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
         int allocateIndex = 0;
         for (int index = 0; index < usageRank.size() && allocateIndex < allocateRegs.size(); ++index) {
-            if (!usageRank.get(index).isGlobal()) {
+            if (!usageRank.get(index).isGlobal() && !usageRank.get(index).isCompareTmp()) {
                 usageRank.get(index).setPhysicalRegister(allocateRegs.get(allocateIndex));
                 function.addUsedPReg(allocateRegs.get(allocateIndex));
                 ++allocateIndex;

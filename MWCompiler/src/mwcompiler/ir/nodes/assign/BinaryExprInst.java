@@ -26,16 +26,20 @@ public class BinaryExprInst extends AssignInst {
         return visitor.visit(this);
     }
 
-    public Operand getLeft() {
+    public Operand left() {
         return left;
     }
 
-    public Operand getRight() {
+    public Operand right() {
         return right;
     }
 
-    public ExprOps getOp() {
+    public ExprOps op() {
         return op;
+    }
+
+    public boolean isCompare() {
+        return op.isCompare();
     }
 
     @Override

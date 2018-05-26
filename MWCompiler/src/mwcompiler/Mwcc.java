@@ -47,8 +47,8 @@ public class Mwcc {
         typeCheck();
         buildIR();
 
-//        allocate();
-//        codeGenerate();
+        allocate();
+        codeGenerate();
     }
 
     public ProgramIR getProgramIR() {

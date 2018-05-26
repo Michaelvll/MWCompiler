@@ -21,6 +21,9 @@ public abstract class AssignInst extends Instruction {
         return dst;
     }
 
+    public boolean isCompare() {
+        return this instanceof BinaryExprInst && this.isCompare();
+    }
 
     void appendUsedVar(Operand operand, LinkedList<Var> registers) {
         if (operand instanceof Var) registers.addLast((Var) operand);

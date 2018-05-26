@@ -19,6 +19,7 @@ public class Var extends Register {
     // Physical Register
     private PhysicalRegister physicalRegister;
     private int useTime = 0;
+    private boolean compareTmp = false;
 
 
     private Var(String name, int id) {
@@ -43,6 +44,11 @@ public class Var extends Register {
         else newVar = new Var(name, search + 1);
         idMap.put(name, newVar.id);
         return newVar;
+    }
+    public static Var tmpBuilder(String preName, boolean compareTmp) {
+        Var tmp = tmpBuilder(preName);
+        tmp.compareTmp = compareTmp;
+        return tmp;
     }
 
     public static Var builder(Instance symbol, SymbolTable symbolTable, int size) {
@@ -98,5 +104,9 @@ public class Var extends Register {
 
     public PhysicalRegister physicalRegister() {
         return physicalRegister;
+    }
+
+    public boolean isCompareTmp() {
+        return compareTmp;
     }
 }

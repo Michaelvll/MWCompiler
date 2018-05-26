@@ -106,17 +106,19 @@ public class Function {
     public void cleanUp() {
         Map<BasicBlock, BasicBlock> jumpLabelChangeMap = new HashMap<>();
         LinkedList<BasicBlock> newBlocks = new LinkedList<>();
+//        Set<BasicBlock> includeBlocks = new HashSet<>();
+        // May need to rearrange the sequence of block
         int size = basicBlocks.size();
         for (int i = size - 1; i >= 0; --i) {
             BasicBlock block = basicBlocks.get(i);
             if (block.front() == block.back() && block.back() instanceof DirectJumpInst) {
                 DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
-                jumpLabelChangeMap.put(block, directJumpInst.getTarget());
+                jumpLabelChangeMap.put(block, directJumpInst.target());
             } else {
                 newBlocks.addFirst(block);
                 if (block.back() instanceof DirectJumpInst) {
                     DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
-                    BasicBlock search = jumpLabelChangeMap.get(block);
+                    BasicBlock search = jumpLabelChangeMap.get(directJumpInst.target());
                     if (search != null) directJumpInst.setTarget(search);
                 } else if (block.back() instanceof CondJumpInst) {
                     CondJumpInst condJumpInst = (CondJumpInst) block.back();

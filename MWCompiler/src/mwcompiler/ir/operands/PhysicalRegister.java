@@ -1,41 +1,43 @@
 package mwcompiler.ir.operands;
 
-import mwcompiler.ir.tools.IRVisitor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class PhysicalRegister extends Register {
+    private String name;
+    private String lowByteName;
     private int id;
     private boolean calleeSave;
     public static final int REG_NUM = 16;
 
-    private PhysicalRegister(int id, boolean calleeSave) {
+    private PhysicalRegister(String name, String lowByteName, int id, boolean calleeSave) {
         this.id = id;
         this.calleeSave = calleeSave;
+        this.name = name;
+        this.lowByteName = lowByteName;
     }
 
     public int id() {
         return id;
     }
 
-    public static final PhysicalRegister R0 = new PhysicalRegister(0, false);
-    public static final PhysicalRegister R1 = new PhysicalRegister(1, false);
-    public static final PhysicalRegister R2 = new PhysicalRegister(2, false);
-    public static final PhysicalRegister R3 = new PhysicalRegister(3, true);
-    public static final PhysicalRegister R4 = new PhysicalRegister(4, false);
-    public static final PhysicalRegister R5 = new PhysicalRegister(5, true);
-    public static final PhysicalRegister R6 = new PhysicalRegister(6, true);
-    public static final PhysicalRegister R7 = new PhysicalRegister(7, true);
-    public static final PhysicalRegister R8 = new PhysicalRegister(8, false);
-    public static final PhysicalRegister R9 = new PhysicalRegister(9, false);
-    public static final PhysicalRegister R10 = new PhysicalRegister(10, false);
-    public static final PhysicalRegister R11 = new PhysicalRegister(11, false);
-    public static final PhysicalRegister R12 = new PhysicalRegister(12, true);
-    public static final PhysicalRegister R13 = new PhysicalRegister(13, true);
-    public static final PhysicalRegister R14 = new PhysicalRegister(14, true);
-    public static final PhysicalRegister R15 = new PhysicalRegister(15, true);
+    public static final PhysicalRegister R0 = new PhysicalRegister("rax", "al", 0, false);
+    public static final PhysicalRegister R1 = new PhysicalRegister("rcx", "cl", 1, false);
+    public static final PhysicalRegister R2 = new PhysicalRegister("rdx", "dl", 2, false);
+    public static final PhysicalRegister R3 = new PhysicalRegister("rbx", "bl", 3, true);
+    public static final PhysicalRegister R4 = new PhysicalRegister("rsp", "spl", 4, false);
+    public static final PhysicalRegister R5 = new PhysicalRegister("rbp", "bpl", 5, true);
+    public static final PhysicalRegister R6 = new PhysicalRegister("rsi", "sil", 6, true);
+    public static final PhysicalRegister R7 = new PhysicalRegister("rdi", "dib", 7, true);
+    public static final PhysicalRegister R8 = new PhysicalRegister("r8", "r8b", 8, false);
+    public static final PhysicalRegister R9 = new PhysicalRegister("r9", "r9b", 9, false);
+    public static final PhysicalRegister R10 = new PhysicalRegister("r10", "r10b", 10, false);
+    public static final PhysicalRegister R11 = new PhysicalRegister("r11", "r11b", 11, false);
+    public static final PhysicalRegister R12 = new PhysicalRegister("r12", "r12b", 12, true);
+    public static final PhysicalRegister R13 = new PhysicalRegister("r13", "r13b", 13, true);
+    public static final PhysicalRegister R14 = new PhysicalRegister("r14", "r14b", 14, true);
+    public static final PhysicalRegister R15 = new PhysicalRegister("r15", "r15b", 15, true);
 
     public static final PhysicalRegister RAX = R0;
     public static final PhysicalRegister RCX = R1;
@@ -52,11 +54,8 @@ public class PhysicalRegister extends Register {
     public static final List<PhysicalRegister> paramRegs = new ArrayList<>(
             Arrays.asList(RDI, RSI, RDX, RCX, R8, R9));
 
-    public static final List<String> names = new ArrayList<>(
-            Arrays.asList("rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"));
-
     public static final List<PhysicalRegister> calleeSaveRegs = new ArrayList<>(
-            Arrays.asList(RBX, RBP, RBX, RBP, RDI, RSI, RSP, R12, R13, R14, R15));
+            Arrays.asList(RBX, RBP, R12, R13, R14, R15));
 
     public static PhysicalRegister get(int i) {
         return regs.get(i);
@@ -65,15 +64,17 @@ public class PhysicalRegister extends Register {
 
     @Override
     public String toString() {
-        return names.get(id);
+        return name;
     }
+
+    public String lowByte() {return lowByteName;}
 
     @Override
     public boolean isTmp() {
         throw new RuntimeException("Compiler Bug: Physical register do not have isTmp()");
     }
 
-    public PhysicalRegister physicalRegister(){
+    public PhysicalRegister physicalRegister() {
         return this;
     }
 }

@@ -151,6 +151,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (isGlobal) reg.setGlobal();
         if (node.getInit() != null) {
             Operand value = visit(node.getInit());
+//            System.err.println(node.getStartLocation().toString());
             resetCurrentBasicBlockBackDst(reg, value, node.getTypeSymbol());
 //            currentBasicBlock.pushBack(new MoveInst(reg, value), valTag);
         } else {
@@ -257,7 +258,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (leftVal instanceof Literal && rightVal instanceof Literal) {
             return literalCalc(leftVal, op, rightVal);
         }
-        Var dst = Var.tmpBuilder(op.toString());
+        Var dst = Var.tmpBuilder(op.toString(), op.isCompare());
         if (type != BaseTypeSymbol.STRING_TYPE_SYMBOL) {
             return currentBasicBlock.pushBack(new BinaryExprInst(dst, leftVal, op, rightVal), valTag);
         }
@@ -284,7 +285,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         Function function = currentBasicBlock.getParentFunction();
         ExprOps op = node.getOp();
         boolean outMost = cmpRes == null;
-        if (outMost){
+        if (outMost) {
             cmpRes = Var.tmpBuilder("cmp_res");
             outMostNext = new BasicBlock(function, currentSymbolTable, "next");
         }
@@ -324,6 +325,9 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (outMost) {
             currentBasicBlock.pushBack(new DirectJumpInst(next));
             setCurrentEnv(next);
+//            Var tmp = Var.tmpBuilder("invisible!!!");
+//            currentBasicBlock.pushBack(new MoveInst(tmp, dst),valTag);
+//            dst = tmp;
             cmpRes = null;
         }
         return dst;
@@ -364,7 +368,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             case NOT:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return ((IntLiteral) src).getVal() == 1 ? ZERO_LITERAL : ONE_LITERAL;
-                return currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
+                return currentBasicBlock.pushBack(new BinaryExprInst(dst, src, op, ZERO_LITERAL), valTag);
             case DEC: case INC: case DEC_SUFF: case INC_SUFF:
                 src = getMutableOperand(node.getExpr());
                 boolean isINC = op == INC || op == INC_SUFF;
@@ -512,14 +516,14 @@ public class IRBuilder implements AstVisitor<Operand> {
             BasicBlock next = new BasicBlock(function, currentSymbolTable);
             CondJumpInst condJump = new CondJumpInst(cond, ifTrue, haveElse ? ifFalse : next);
             currentBasicBlock.pushBack(condJump);
-            setCurrentEnv(ifTrue);
-            visit(node.getBody());
-            if (!currentBasicBlock.isEnded) currentBasicBlock.pushBack(new DirectJumpInst(next));
             if (haveElse) {
                 setCurrentEnv(ifFalse);
                 visit(node.getElseNode());
                 if (!currentBasicBlock.isEnded) currentBasicBlock.pushBack(new DirectJumpInst(next));
             }
+            setCurrentEnv(ifTrue);
+            visit(node.getBody());
+            if (!currentBasicBlock.isEnded) currentBasicBlock.pushBack(new DirectJumpInst(next));
             setCurrentEnv(next);
         }
         return null;
@@ -730,7 +734,10 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private void resetCurrentBasicBlockBackDst(MutableOperand dst, Operand origin, TypeSymbol typeSymbol) {
-        if (typeSymbol.isPrimitiveType() && origin instanceof Var && ((Var) origin).isTmp()) {
+        if (currentBasicBlock.empty()) currentBasicBlock.pushBack(new MoveInst(dst, origin), valTag);
+        else if (currentBasicBlock.back() instanceof BinaryExprInst && ((BinaryExprInst) currentBasicBlock.back()).isCompare())
+            currentBasicBlock.pushBack(new MoveInst(dst, origin), valTag);
+        else if (typeSymbol.isPrimitiveType() && origin instanceof Var && ((Var) origin).isTmp()) {
             assert currentBasicBlock.back() instanceof AssignInst;
             AssignInst assignInst = (AssignInst) currentBasicBlock.popBack();
             assignInst.setDst(dst);

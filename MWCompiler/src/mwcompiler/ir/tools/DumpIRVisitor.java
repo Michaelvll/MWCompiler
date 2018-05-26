@@ -114,7 +114,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(CondJumpInst inst) {
         visit(inst.getCmp());
         addIndent();
-//        iprintln( inst.getOp() + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
+//        iprintln( inst.op() + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
         iprintln("br " + visit(inst.getCmp().dst()) + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
         subIndent();
         return null;
@@ -123,7 +123,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(DirectJumpInst inst) {
         addIndent();
-        iprintln("jmp %" + inst.getTarget().name());
+        iprintln("jmp %" + inst.target().name());
         subIndent();
         return null;
     }
@@ -154,8 +154,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(BinaryExprInst binaryExprInst) {
         addIndent();
-        iprintln(visit(binaryExprInst.dst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
-                + " " + visit(binaryExprInst.getRight()));
+        iprintln(visit(binaryExprInst.dst()) + " = " + binaryExprInst.op().toString() + " " + visit(binaryExprInst.left())
+                + " " + visit(binaryExprInst.right()));
         subIndent();
         return null;
     }

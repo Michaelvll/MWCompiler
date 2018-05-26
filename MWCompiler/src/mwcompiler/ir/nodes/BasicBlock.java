@@ -127,7 +127,7 @@ public class BasicBlock {
                     if (latterDef != null && latterDef) delete(inst);
                     else {
                         defineTable.put(dst, true);
-                        if (parentFunction != null) parentFunction.addVar((Var) assignInst.dst());
+                        if (!assignInst.isCompare() && parentFunction != null) parentFunction.addVar(dst);
                     }
                 }
                 for (Register reg : assignInst.usedVar()) {
@@ -181,4 +181,7 @@ public class BasicBlock {
 
     private Map<Register, Literal> assignTable = new HashMap<>();
 
+    public boolean empty() {
+        return front == null;
+    }
 }

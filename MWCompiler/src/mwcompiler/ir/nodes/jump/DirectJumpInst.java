@@ -15,7 +15,7 @@ public class DirectJumpInst extends JumpInst {
         this.target = target;
     }
 
-    public BasicBlock getTarget() {
+    public BasicBlock target() {
         return target;
     }
 
