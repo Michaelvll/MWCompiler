@@ -2,11 +2,10 @@ package mwcompiler.ir.nodes.assign;
 
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.ExprOps;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,10 +39,10 @@ public class BinaryExprInst extends AssignInst {
     }
 
     @Override
-    public List<Register> usedRegister() {
-        LinkedList<Register> registers = new LinkedList<>();
-        appendUsedRegister(left, registers);
-        appendUsedRegister(right, registers);
+    public List<Var> usedVar() {
+        LinkedList<Var> registers = new LinkedList<>();
+        appendUsedVar(left, registers);
+        appendUsedVar(right, registers);
         return registers;
     }
 

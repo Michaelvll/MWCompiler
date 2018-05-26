@@ -30,7 +30,7 @@ import java.util.*;
 
 import static mwcompiler.ir.operands.IntLiteral.ONE_LITERAL;
 import static mwcompiler.ir.operands.IntLiteral.ZERO_LITERAL;
-import static mwcompiler.symbols.NonArrayTypeSymbol.INT_TYPE_SYMBOL;
+import static mwcompiler.symbols.BaseTypeSymbol.INT_TYPE_SYMBOL;
 import static mwcompiler.utility.ExprOps.*;
 
 public class IRBuilder implements AstVisitor<Operand> {
@@ -117,7 +117,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         visitGlobalClassVariable(block, global);
         visitFunction(block);
         Function mainFunction = programIR.getFunction(FunctionSymbol.MAIN);
-        global.pushBack(new DirectJumpInst(mainFunction.getBlocks().get(0)));
+        global.pushBack(new DirectJumpInst(mainFunction.getBasicBlocks().get(0)));
         mainFunction.pushFront(global);
         popValTag();
         return null;
@@ -131,7 +131,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         return null;
     }
 
-    private NonArrayTypeSymbol classDeclSymbol;
+    private BaseTypeSymbol classDeclSymbol;
     private Var classDeclThisReg;
     private boolean inClassFunc = false;
 
@@ -145,13 +145,14 @@ public class IRBuilder implements AstVisitor<Operand> {
         SymbolInfo symbolInfo = currentSymbolTable.findIn(node.getVarSymbol());
         TypeSymbol varSymbol = (TypeSymbol) symbolInfo.getSymbol();
         int varSize = options.PTR_SIZE;
-        if (varSymbol.isPrimitiveType()) varSize = ((NonArrayTypeSymbol) varSymbol).getSize();
+        if (varSymbol.isPrimitiveType()) varSize = ((BaseTypeSymbol) varSymbol).getSize();
         Var reg = Var.builder(node.getVarSymbol(), currentSymbolTable, varSize);
         symbolInfo.setOperand(reg);
         if (isGlobal) reg.setGlobal();
         if (node.getInit() != null) {
             Operand value = visit(node.getInit());
-            currentBasicBlock.pushBack(new MoveInst(reg, value), valTag);
+            resetCurrentBasicBlockBackDst(reg, value, node.getTypeSymbol());
+//            currentBasicBlock.pushBack(new MoveInst(reg, value), valTag);
         } else {
             // init un-init variable with 0
 //            if (!isParamDecl) {
@@ -175,7 +176,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         newValTag();
         FunctionSymbol functionSymbol = node.getFunctionSymbol();
         if (node.getInstance() == Instance.CONSTRUCTOR)
-            functionSymbol.setReturnType(NonArrayTypeSymbol.VOID_TYPE_SYMBOL);
+            functionSymbol.setReturnType(BaseTypeSymbol.VOID_TYPE_SYMBOL);
         Function function = getFunction(functionSymbol);
         function.setSymbolTable(node.getBody().getCurrentSymbolTable());
         setCurrentEnv(function, node.getBody().getCurrentSymbolTable());
@@ -257,7 +258,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             return literalCalc(leftVal, op, rightVal);
         }
         Var dst = Var.tmpBuilder(op.toString());
-        if (type != NonArrayTypeSymbol.STRING_TYPE_SYMBOL) {
+        if (type != BaseTypeSymbol.STRING_TYPE_SYMBOL) {
             return currentBasicBlock.pushBack(new BinaryExprInst(dst, leftVal, op, rightVal), valTag);
         }
         List<Operand> args = new ArrayList<>(Arrays.asList(leftVal, rightVal));
@@ -388,7 +389,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     }
 
-    private Operand visitCreateClass(NonArrayTypeSymbol classType) {
+    private Operand visitCreateClass(BaseTypeSymbol classType) {
         Var classReg = Var.tmpBuilder("class_" + classType.getName());
         IntLiteral sizeLiteral = new IntLiteral(classType.getSize());
         currentBasicBlock.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(sizeLiteral)), classReg), valTag);
@@ -448,7 +449,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand outputReg;
         if (lastInst instanceof FunctionCallInst) {
             FunctionCallInst lastFunctionCall = (FunctionCallInst) lastInst;
-            if (lastFunctionCall.getFunction() == Function.TO_STRING && lastFunctionCall.getDst() == args.get(0)) {
+            if (lastFunctionCall.getFunction() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
                 currentBasicBlock.popBack();
                 outputReg = lastFunctionCall.getArgs().get(0);
                 formatStr = "%d";
@@ -582,8 +583,8 @@ public class IRBuilder implements AstVisitor<Operand> {
 
         Operand container = getMutableOperand(node.getContainer());
         TypeSymbol containerType = node.getContainer().getType();
-        if (containerType instanceof NonArrayTypeSymbol) {
-            SymbolTable symbolTable = SymbolTable.getClassSymbolTable((NonArrayTypeSymbol) containerType);
+        if (containerType instanceof BaseTypeSymbol) {
+            SymbolTable symbolTable = SymbolTable.getClassSymbolTable((BaseTypeSymbol) containerType);
             SymbolInfo memberInfo = symbolTable.findIn(node.getMember().getInstance());
             if (memberInfo.isClassMember()) {
                 Register baseReg = Var.tmpBuilder("container_base");
@@ -747,7 +748,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private String prefix(String name) {
-        return currentBasicBlock.getParentFunction().getFunctionName() + "_" + name;
+        return currentBasicBlock.getParentFunction().name() + "_" + name;
     }
 
 

@@ -8,7 +8,7 @@ import mwcompiler.ast.nodes.declarations.VariableDeclNode;
 import mwcompiler.ast.nodes.expressions.*;
 import mwcompiler.ast.nodes.literals.*;
 import mwcompiler.symbols.Instance;
-import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.symbols.TypeSymbol;
 import mwcompiler.utility.CompileError;
 import mwcompiler.utility.ExprOps;
@@ -39,7 +39,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
     private void buildClassSymbol(MxParser.ProgramContext ctx) {
         for (ParseTree child : ctx.declarator()) {
             if (child.getChild(0) instanceof MxParser.ClassDeclFieldContext) {
-                NonArrayTypeSymbol.builder(
+                BaseTypeSymbol.builder(
                         ((MxParser.ClassDeclFieldContext) child.getChild(0)).classField().Identifier().getText());
             }
         }
@@ -112,7 +112,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         String name = identifier.getText();
         // Creator Function
         TypeSymbol search = TypeSymbol.searchSymbol(name);
-        if (search instanceof NonArrayTypeSymbol) {
+        if (search instanceof BaseTypeSymbol) {
             return new FunctionDeclNode(search, Instance.CONSTRUCTOR, params, body, null,
                     identifierLocation, paramLocation, functionBodyLocation);
         }
@@ -140,7 +140,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
 
     @Override
     public Node visitVoidFunction_(MxParser.VoidFunction_Context ctx) {
-        TypeSymbol returnType = NonArrayTypeSymbol.builder("void");
+        TypeSymbol returnType = BaseTypeSymbol.builder("void");
         FunctionDeclNode node = (FunctionDeclNode) visit(ctx.functionField());
         node.setReturnType(returnType, new Location(ctx.VOID()));
         return node;
@@ -220,7 +220,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         return new BlockNode(statements, new Location(ctx));
     }
 
-    // NonArrayTypeSymbol
+    // BaseTypeSymbol
     @Override
     public Node visitType(MxParser.TypeContext ctx) {
         String type = ctx.nonArrayType().getText();
@@ -402,8 +402,8 @@ public class AstBuilder extends MxBaseVisitor<Node> {
         // For constructor
         if (ctx.expr() instanceof MxParser.Identifier_Context) {
             TypeSymbol symbol = TypeSymbol.searchSymbol(((MxParser.Identifier_Context) ctx.expr()).Identifier().getText());
-            if (symbol instanceof NonArrayTypeSymbol) {
-                return new ConstructorCallNode((NonArrayTypeSymbol) symbol, args, new Location(ctx));
+            if (symbol instanceof BaseTypeSymbol) {
+                return new ConstructorCallNode((BaseTypeSymbol) symbol, args, new Location(ctx));
             }
         }
 

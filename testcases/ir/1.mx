@@ -1,12 +1,13 @@
 int[][] d = new int[5][];
 string s = "abc";
-
 int main() {
+
+
     d[0] = new int[3];
     int[][][] t;
     t = new int[5][4][];
     t[0][1] = new int[3];
-    t[1][2][2] = 3;
+    t[1][2][2] = t[1][2][1];
     //return t[1][2][2];
 
     int a;

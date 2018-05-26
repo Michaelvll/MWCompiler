@@ -32,4 +32,5 @@ public class StringLiteral extends Literal {
     public boolean equals(Object obj) {
         return obj instanceof StringLiteral && ((StringLiteral) obj).val.equals(val);
     }
+
 }

@@ -3,7 +3,11 @@ package mwcompiler.ir.nodes.jump;
 import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
+
+import java.util.*;
 
 public class CondJumpInst extends JumpInst {
     private Operand cond; // if cond != 0 -> ifTrue, else ->ifFalse
@@ -21,6 +25,11 @@ public class CondJumpInst extends JumpInst {
     @Override
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public List<Var> usedVar() {
+        return new ArrayList<>();
     }
 
     public BasicBlock getIfTrue() {

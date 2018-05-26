@@ -70,7 +70,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     public String visit(BasicBlock block) {
         addIndent();
-        iprintln("%" + block.getName() + ":");
+        iprintln("%" + block.name() + ":");
         for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
             visit(instruction);
         }
@@ -91,12 +91,12 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(Function inst) {
         if (inst.isLib()) return null; // output extern func is good for nasm
         println("");
-        iprint("func " + inst.getFunctionName() + " ");
+        iprint("func " + inst.name() + " ");
         StringJoiner params = new StringJoiner(" ");
         inst.getParamVReg().forEach(param -> params.add(visit(param)));
         print(params.toString());
         println(" {");
-        inst.getBlocks().forEach(this::visit);
+        inst.getBasicBlocks().forEach(this::visit);
         iprintln("}");
         //TODO
         return null;
@@ -105,7 +105,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(MoveInst inst) {
         addIndent();
-        iprintln(visit(inst.getDst()) + " = MOV " + visit(inst.getVal()));
+        iprintln(visit(inst.dst()) + " = MOV " + visit(inst.val()));
         subIndent();
         return null;
     }
@@ -114,8 +114,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(CondJumpInst inst) {
         visit(inst.getCmp());
         addIndent();
-//        iprintln( inst.getOp() + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
-        iprintln("br " + visit(inst.getCmp().getDst()) + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
+//        iprintln( inst.getOp() + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
+        iprintln("br " + visit(inst.getCmp().dst()) + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
         subIndent();
         return null;
     }
@@ -123,7 +123,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(DirectJumpInst inst) {
         addIndent();
-        iprintln("jmp %" + inst.getTarget().getName());
+        iprintln("jmp %" + inst.getTarget().name());
         subIndent();
         return null;
     }
@@ -132,7 +132,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(FunctionCallInst inst) {
         addIndent();
         iprint("");
-        if (inst.getDst() != null) print(visit(inst.getDst()) + " = ");
+        if (inst.dst() != null) print(visit(inst.dst()) + " = ");
         print("call " + inst.getFunctionName() + " ");
         StringJoiner args = new StringJoiner(" ");
         inst.getArgs().forEach(arg -> args.add(visit(arg)));
@@ -147,14 +147,14 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(Var register) {
-        return register.toString();
+    public String visit(Register reg) {
+        return reg.toString();
     }
 
     @Override
     public String visit(BinaryExprInst binaryExprInst) {
         addIndent();
-        iprintln(visit(binaryExprInst.getDst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
+        iprintln(visit(binaryExprInst.dst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
                 + " " + visit(binaryExprInst.getRight()));
         subIndent();
         return null;
@@ -169,9 +169,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(Memory memory) {
         addIndent();
         String s = "[";
-        if (memory.getBaseReg() != null) s += visit(memory.getBaseReg());
-        if (memory.getIndexReg() != null) s += " + " + visit(memory.getIndexReg()) + " * " + memory.getScale();
-        if (memory.getDisplacement() != 0) s += " + " + memory.getDisplacement();
+        if (memory.baseReg() != null) s += visit(memory.baseReg());
+        if (memory.indexReg() != null) s += " + " + visit(memory.indexReg()) + " * " + memory.scale();
+        if (memory.disp() != 0) s += " + " + memory.disp();
         s += "]";
         subIndent();
         return s;

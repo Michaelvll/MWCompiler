@@ -35,7 +35,7 @@ public class BasicBlock {
     public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable) {
         this.parentFunction = parentFunction;
         this.currentSymbolTable = currentSymbolTable;
-        this.name = NameBuilder.builder(parentFunction.getFunctionName());
+        this.name = NameBuilder.builder(parentFunction.name());
 
     }
 
@@ -46,12 +46,6 @@ public class BasicBlock {
     }
 
 
-    public void pushFront(Instruction instruction) {
-        if (end == null) end = instruction;
-        if (front != null) front.addPrev(instruction);
-        front = instruction;
-    }
-
     private void pushBack(Instruction instruction) {
         if (front == null) front = instruction;
         if (end != null) end.addNext(instruction);
@@ -59,19 +53,27 @@ public class BasicBlock {
     }
 
     public Operand pushBack(AssignInst assignInst, int valTag) {
-        pushBack(assignInst);
-        MutableOperand dst = assignInst.getDst();
+        MutableOperand dst = assignInst.dst();
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
             if (dst instanceof Var)
-                addKnownReg((Var) dst, moveInst.getVal(), valTag);
-        } else if (dst instanceof Var)
-            addKnownReg((Var) assignInst.getDst(), null, valTag);
-        else if (dst instanceof Memory) {
-            Var memDst = Var.tmpBuilder("mem_dst");
-            pushBack(new MoveInst(dst, memDst), valTag);
-            assignInst.setDst(memDst);
-            dst = memDst;
+                addKnownReg((Var) dst, moveInst.val(), valTag);
+            else if (moveInst.val() instanceof Memory) {
+                Var memDst = Var.tmpBuilder("mem_dst");
+                pushBack(new MoveInst(memDst, moveInst.val()));
+                moveInst.setVal(memDst);
+            }
+            pushBack(assignInst);
+        } else {
+            pushBack(assignInst);
+            if (dst instanceof Var)
+                addKnownReg((Var) assignInst.dst(), null, valTag);
+            else if (dst instanceof Memory) {
+                Var memDst = Var.tmpBuilder("mem_dst");
+                pushBack(new MoveInst(dst, memDst), valTag);
+                assignInst.setDst(memDst);
+                dst = memDst;
+            }
         }
         return dst;
     }
@@ -92,6 +94,7 @@ public class BasicBlock {
                 cmp = (BinaryExprInst) popBack();
             }
             condJumpInst.setCmp(cmp);
+//            pushBack(cmp);
         }
         pushBack((Instruction) jumpInst);
         assignTable.clear();
@@ -116,18 +119,18 @@ public class BasicBlock {
         for (Instruction inst = end; inst != null; inst = inst.prev) {
             if (inst instanceof AssignInst) {
                 AssignInst assignInst = (AssignInst) inst;
-//                if (assignInst instanceof MoveInst && assignInst.getDst() == ((MoveInst) assignInst).getVal())
+//                if (assignInst instanceof MoveInst && assignInst.dst() == ((MoveInst) assignInst).val())
 //                    delete(inst);
-                if (assignInst.getDst() instanceof Register) {
-                    Var dst = (Var) assignInst.getDst();
+                if (assignInst.dst() instanceof Register) {
+                    Var dst = (Var) assignInst.dst();
                     Boolean latterDef = defineTable.get(dst);
                     if (latterDef != null && latterDef) delete(inst);
                     else {
                         defineTable.put(dst, true);
-                        if (parentFunction != null) parentFunction.addTmpVar((Var) assignInst.getDst());
+                        if (parentFunction != null) parentFunction.addVar((Var) assignInst.dst());
                     }
                 }
-                for (Register reg : assignInst.usedRegister()) {
+                for (Register reg : assignInst.usedVar()) {
                     defineTable.put(reg, false);
                 }
             } else if (inst instanceof JumpInst) {
@@ -164,7 +167,7 @@ public class BasicBlock {
         return reg.getVal(valTag);
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 

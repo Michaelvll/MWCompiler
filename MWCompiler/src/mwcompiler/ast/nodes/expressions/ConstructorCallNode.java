@@ -1,8 +1,8 @@
 package mwcompiler.ast.nodes.expressions;
 
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.utility.Location;
-import mwcompiler.symbols.NonArrayTypeSymbol;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ import java.util.List;
  * @since 2018-04-17
  */
 public class ConstructorCallNode extends ExprNode {
-    private NonArrayTypeSymbol classTypeSymbol;
+    private BaseTypeSymbol classTypeSymbol;
     private List<ExprNode> args;
 
-    public ConstructorCallNode(NonArrayTypeSymbol classTypeSymbol, List<ExprNode> args, Location pos) {
+    public ConstructorCallNode(BaseTypeSymbol classTypeSymbol, List<ExprNode> args, Location pos) {
         super(pos);
         this.classTypeSymbol = classTypeSymbol;
         this.args = args;
@@ -28,7 +28,7 @@ public class ConstructorCallNode extends ExprNode {
         return visitor.visit(this);
     }
 
-    public NonArrayTypeSymbol getClassTypeSymbol() {
+    public BaseTypeSymbol getClassTypeSymbol() {
         return classTypeSymbol;
     }
 

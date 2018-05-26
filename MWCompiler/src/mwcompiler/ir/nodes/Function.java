@@ -4,15 +4,16 @@ import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.PhysicalRegister;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.symbols.FunctionSymbol;
-import mwcompiler.symbols.NonArrayTypeSymbol;
 import mwcompiler.symbols.SymbolTable;
 
 import java.util.*;
 
-import static mwcompiler.symbols.NonArrayTypeSymbol.*;
+import static mwcompiler.symbols.BaseTypeSymbol.*;
 
 public class Function {
     private FunctionSymbol functionSymbol;
@@ -23,12 +24,17 @@ public class Function {
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
-    private LinkedList<BasicBlock> blocks = new LinkedList<>();
+    private LinkedList<BasicBlock> basicBlocks = new LinkedList<>();
 
-    private Set<Var> tmpVars = new HashSet<>();
+    private Set<Var> vars = new HashSet<>();
+
+    private int varStackSize = 0;
 
     private boolean isInline = false;
     private static final int INLINE_BOUND = 10;
+
+    // For allocation
+    private List<PhysicalRegister> usedPhysicalRegs = new ArrayList<>();
 
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
@@ -51,14 +57,14 @@ public class Function {
 
 
     public boolean needReturn() {
-        return functionSymbol.getReturnType() != NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
+        return functionSymbol.getReturnType() != BaseTypeSymbol.VOID_TYPE_SYMBOL;
     }
 
     public FunctionSymbol getFunctionSymbol() {
         return functionSymbol;
     }
 
-    public String getFunctionName() {
+    public String name() {
         return functionSymbol.getName();
     }
 
@@ -72,15 +78,15 @@ public class Function {
 
 
     public void pushBack(BasicBlock block) {
-        blocks.addLast(block);
+        basicBlocks.addLast(block);
     }
 
     public void pushFront(BasicBlock block) {
-        blocks.addFirst(block);
+        basicBlocks.addFirst(block);
     }
 
-    public List<BasicBlock> getBlocks() {
-        return blocks;
+    public List<BasicBlock> getBasicBlocks() {
+        return basicBlocks;
     }
 
 
@@ -92,17 +98,17 @@ public class Function {
         return symbolTable;
     }
 
-    public void addTmpVar(Var var) {
+    public void addVar(Var var) {
 //        assert var.isTmp();
-        tmpVars.add(var);
+        vars.add(var);
     }
 
     public void cleanUp() {
         Map<BasicBlock, BasicBlock> jumpLabelChangeMap = new HashMap<>();
         LinkedList<BasicBlock> newBlocks = new LinkedList<>();
-        int size = blocks.size();
+        int size = basicBlocks.size();
         for (int i = size - 1; i >= 0; --i) {
-            BasicBlock block = blocks.get(i);
+            BasicBlock block = basicBlocks.get(i);
             if (block.front() == block.back() && block.back() instanceof DirectJumpInst) {
                 DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
                 jumpLabelChangeMap.put(block, directJumpInst.getTarget());
@@ -121,11 +127,19 @@ public class Function {
                 }
             }
         }
-        blocks = newBlocks;
+        basicBlocks = newBlocks;
     }
 
-    public Set<Var> getTmpVars() {
-        return tmpVars;
+    public Set<Var> getVars() {
+        return vars;
+    }
+
+    public void addUsedPReg(PhysicalRegister register) {
+        usedPhysicalRegs.add(register);
+    }
+
+    public List<PhysicalRegister> getUsedPhysicalRegs() {
+        return usedPhysicalRegs;
     }
 
     public void checkInlineable() {
@@ -134,8 +148,8 @@ public class Function {
         if (functionSymbol == FunctionSymbol.MAIN) isInline = false;
         else {
             int cnt = 0;
-            for (BasicBlock block : blocks) {
-                if (block.getName().contains("loop") || cnt > INLINE_BOUND) isInline = false;
+            for (BasicBlock block : basicBlocks) {
+                if (block.name().contains("loop") || cnt > INLINE_BOUND) isInline = false;
                 for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                     ++cnt;
                     if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).getFunction() == this) {
@@ -187,4 +201,15 @@ public class Function {
         return isLib;
     }
 
+    public int getVarStackSize() {
+        return varStackSize;
+    }
+
+    public void setVarStackSize(int varStackSize) {
+        this.varStackSize = varStackSize;
+    }
+
+    public boolean isMain() {
+        return functionSymbol == FunctionSymbol.MAIN;
+    }
 }

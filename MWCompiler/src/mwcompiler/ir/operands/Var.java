@@ -16,6 +16,10 @@ public class Var extends Register {
     private Integer size;
     // Stack allocate
     private Memory stackPos;
+    // Physical Register
+    private PhysicalRegister physicalRegister;
+    private int useTime = 0;
+
 
     private Var(String name, int id) {
         this.name = name;
@@ -47,12 +51,6 @@ public class Var extends Register {
         return var;
     }
 
-
-    @Override
-    public <T> T accept(IRVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
-
     @Override
     public String toString() {
         return "$" + name + "_" + (isTmp() ? id : symbolTable.hashCode());
@@ -79,11 +77,26 @@ public class Var extends Register {
         return size;
     }
 
-    public Memory getStackPos() {
+    public Memory stackPos() {
         return stackPos;
     }
 
     public void setStackPos(Memory stackPos) {
         this.stackPos = stackPos;
+    }
+
+    public void addUseTime() {++useTime;}
+    public int useTime() {return useTime;}
+
+    public PhysicalRegister getPhysicalRegister() {
+        return physicalRegister;
+    }
+
+    public void setPhysicalRegister(PhysicalRegister physicalRegister) {
+        this.physicalRegister = physicalRegister;
+    }
+
+    public PhysicalRegister physicalRegister() {
+        return physicalRegister;
     }
 }

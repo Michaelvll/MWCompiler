@@ -1,12 +1,12 @@
 package mwcompiler.symbols;
 
-public class NonArrayTypeSymbol extends TypeSymbol {
-    public final static NonArrayTypeSymbol INT_TYPE_SYMBOL = new NonArrayTypeSymbol("int");
-    public final static NonArrayTypeSymbol STRING_TYPE_SYMBOL = new NonArrayTypeSymbol("string");
-    public final static NonArrayTypeSymbol BOOL_TYPE_SYMBOL = new NonArrayTypeSymbol("bool");
-    public final static NonArrayTypeSymbol VOID_TYPE_SYMBOL = new NonArrayTypeSymbol("void");
-    public final static NonArrayTypeSymbol NULL_TYPE_SYMBOL = new NonArrayTypeSymbol("null");
-    public final static NonArrayTypeSymbol GLOBAL = new NonArrayTypeSymbol("__global");
+public class BaseTypeSymbol extends TypeSymbol {
+    public final static BaseTypeSymbol INT_TYPE_SYMBOL = new BaseTypeSymbol("int");
+    public final static BaseTypeSymbol STRING_TYPE_SYMBOL = new BaseTypeSymbol("string");
+    public final static BaseTypeSymbol BOOL_TYPE_SYMBOL = new BaseTypeSymbol("bool");
+    public final static BaseTypeSymbol VOID_TYPE_SYMBOL = new BaseTypeSymbol("void");
+    public final static BaseTypeSymbol NULL_TYPE_SYMBOL = new BaseTypeSymbol("null");
+    public final static BaseTypeSymbol GLOBAL = new BaseTypeSymbol("__global");
 
     static {
         typeSymbolMap.put("int", INT_TYPE_SYMBOL);
@@ -20,7 +20,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     private int size = 8;
 
 
-    private NonArrayTypeSymbol(String typename) {
+    private BaseTypeSymbol(String typename) {
         this.typename = typename.intern();
     }
 
@@ -29,17 +29,17 @@ public class NonArrayTypeSymbol extends TypeSymbol {
         return this.typename;
     }
 
-    public static NonArrayTypeSymbol builder(String typename) {
+    public static BaseTypeSymbol builder(String typename) {
         if (typename == null) {
-            throw new RuntimeException("Get null typename when building NonArrayTypeSymbol");
+            throw new RuntimeException("Get null typename when building BaseTypeSymbol");
         }
         TypeSymbol search = typeSymbolMap.get(typename);
         if (search == null) {
-            search = new NonArrayTypeSymbol(typename);
+            search = new BaseTypeSymbol(typename);
             typeSymbolMap.put(typename, search);
         }
 
-        return (NonArrayTypeSymbol) search;
+        return (BaseTypeSymbol) search;
     }
 
 
@@ -69,7 +69,7 @@ public class NonArrayTypeSymbol extends TypeSymbol {
     }
 
     public boolean isPrimitiveTypeBase() {
-        return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
-                || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
+        return this == BaseTypeSymbol.INT_TYPE_SYMBOL || this == BaseTypeSymbol.STRING_TYPE_SYMBOL
+                || this == BaseTypeSymbol.BOOL_TYPE_SYMBOL || this == BaseTypeSymbol.VOID_TYPE_SYMBOL;
     }
 }

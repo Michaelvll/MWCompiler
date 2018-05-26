@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
-    private static Map<NonArrayTypeSymbol, SymbolTable> classSymbolTableMap = new HashMap<>();
+    private static Map<BaseTypeSymbol, SymbolTable> classSymbolTableMap = new HashMap<>();
     public static final SymbolTable STRING_SYMBOL_TABLE = new SymbolTable(null);
     public static SymbolTable globalSymbolTable;
 
     static {
-        classSymbolTableMap.put(NonArrayTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
-        classSymbolTableMap.put(NonArrayTypeSymbol.STRING_TYPE_SYMBOL, STRING_SYMBOL_TABLE);
-        classSymbolTableMap.put(NonArrayTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
-        classSymbolTableMap.put(NonArrayTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(BaseTypeSymbol.INT_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(BaseTypeSymbol.STRING_TYPE_SYMBOL, STRING_SYMBOL_TABLE);
+        classSymbolTableMap.put(BaseTypeSymbol.BOOL_TYPE_SYMBOL, new SymbolTable(null));
+        classSymbolTableMap.put(BaseTypeSymbol.VOID_TYPE_SYMBOL, new SymbolTable(null));
     }
 
     private Map<Instance, SymbolInfo> currentMap = new HashMap<>();
@@ -52,13 +52,13 @@ public class SymbolTable {
         }
     }
 
-    public static void putNamedSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol, SymbolTable symbolTable) {
-        symbolTable.put(Instance.THIS, nonArrayTypeSymbol);
-        classSymbolTableMap.put(nonArrayTypeSymbol, symbolTable);
+    public static void putNamedSymbolTable(BaseTypeSymbol baseTypeSymbol, SymbolTable symbolTable) {
+        symbolTable.put(Instance.THIS, baseTypeSymbol);
+        classSymbolTableMap.put(baseTypeSymbol, symbolTable);
     }
 
-    public static SymbolTable getClassSymbolTable(NonArrayTypeSymbol nonArrayTypeSymbol) {
-        return classSymbolTableMap.get(nonArrayTypeSymbol);
+    public static SymbolTable getClassSymbolTable(BaseTypeSymbol baseTypeSymbol) {
+        return classSymbolTableMap.get(baseTypeSymbol);
     }
 
     public SymbolInfo findAll(Instance instance) {

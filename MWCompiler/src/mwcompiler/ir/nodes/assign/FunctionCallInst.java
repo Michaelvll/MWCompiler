@@ -3,10 +3,10 @@ package mwcompiler.ir.nodes.assign;
 import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
-import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.BaseTypeSymbol;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,16 +15,16 @@ public class FunctionCallInst extends AssignInst {
     private List<Operand> args;
 
     public FunctionCallInst(Function function, List<Operand> args, Register dst) {
-        super((function.getFunctionSymbol().getReturnType() != NonArrayTypeSymbol.VOID_TYPE_SYMBOL) ? dst : null);
+        super((function.getFunctionSymbol().getReturnType() != BaseTypeSymbol.VOID_TYPE_SYMBOL) ? dst : null);
         this.function = function;
         this.args = args;
     }
 
     @Override
-    public List<Register> usedRegister() {
-        LinkedList<Register> registers = new LinkedList<>();
+    public List<Var> usedVar() {
+        LinkedList<Var> registers = new LinkedList<>();
         for (Operand operand:args) {
-            appendUsedRegister(operand, registers);
+            appendUsedVar(operand, registers);
         }
         return registers;
     }
@@ -39,7 +39,7 @@ public class FunctionCallInst extends AssignInst {
     }
 
     public String getFunctionName() {
-        return function.getFunctionName();
+        return function.name();
     }
 
     public List<Operand> getArgs() {

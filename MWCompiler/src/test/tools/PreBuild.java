@@ -32,6 +32,6 @@ public class PreBuild {
     private void build_imp(String filename) {
         Mwcc mwcc = new Mwcc();
         mwcc.compile(new String[]{"-i", filename});
-        programIRRoot = mwcc.getProgramIRRoot();
+        programIRRoot = mwcc.getProgramIR();
     }
 }

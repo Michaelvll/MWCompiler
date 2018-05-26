@@ -8,14 +8,9 @@ import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
-import mwcompiler.ir.operands.Memory;
-import mwcompiler.ir.operands.IntLiteral;
-import mwcompiler.ir.operands.StringLiteral;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.operands.*;
 
 public interface IRVisitor<T> {
-    T visit(Var register);
-
     T visit(BinaryExprInst binaryExprInst);
 
     T visit(IntLiteral intLiteral);
@@ -38,4 +33,5 @@ public interface IRVisitor<T> {
 
     T visit(StringLiteral inst);
 
+    T visit(Register reg);
 }

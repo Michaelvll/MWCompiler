@@ -2,6 +2,8 @@ package mwcompiler;
 
 import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
+import mwcompiler.backend.CodeGenerator;
+import mwcompiler.backend.NaiveAllocator;
 import mwcompiler.frontend.*;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.tools.DumpIRVisitor;
@@ -26,8 +28,8 @@ import java.io.IOException;
  * @since 2018-04-05
  */
 public class Mwcc {
-    private ProgramNode programAstRoot;
-    private ProgramIR programIRRoot;
+    private ProgramNode programAst;
+    private ProgramIR programIR;
     private CompilerOptions options = new CompilerOptions();
 
 
@@ -44,16 +46,19 @@ public class Mwcc {
         buildAst();
         typeCheck();
         buildIR();
+
+//        allocate();
+//        codeGenerate();
     }
 
-    public ProgramIR getProgramIRRoot() {
+    public ProgramIR getProgramIR() {
         // For test
-        return programIRRoot;
+        return programIR;
     }
 
-    public ProgramNode getProgramAstRoot() {
+    public ProgramNode getProgramAst() {
         // For test
-        return programAstRoot;
+        return programAst;
     }
 
     private void buildAst() {
@@ -68,7 +73,7 @@ public class Mwcc {
             parser.addErrorListener(new ParserErrorListener());
             MxParser.ProgramContext programContext = parser.program();
             AstBuilder astBuilder = new AstBuilder();
-            programAstRoot = astBuilder.build(programContext);
+            programAst = astBuilder.build(programContext);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
@@ -79,7 +84,7 @@ public class Mwcc {
 
         if (options.dumpAst) {
             DumpAstVisitor astDumper = new DumpAstVisitor();
-            astDumper.apply(programAstRoot);
+            astDumper.apply(programAst);
 //            System.exit(0);
         }
     }
@@ -88,9 +93,9 @@ public class Mwcc {
     private void typeCheck() {
         try {
             ForwardRefPreprocessAstVisitor preprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
-            preprocessAstVisitor.apply(programAstRoot);
+            preprocessAstVisitor.apply(programAst);
             TypeCheckAstVisitor typeCheckAstVisitor = new TypeCheckAstVisitor();
-            typeCheckAstVisitor.apply(programAstRoot);
+            typeCheckAstVisitor.apply(programAst);
         } catch (CompileError e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -102,12 +107,22 @@ public class Mwcc {
 
     private void buildIR() {
         IRBuilder irBuilder = new IRBuilder(options);
-        programIRRoot = irBuilder.build(programAstRoot);
+        programIR = irBuilder.build(programAst);
 
         if (options.dumpIR) {
             DumpIRVisitor irDumper = new DumpIRVisitor();
-            irDumper.apply(programIRRoot);
+            irDumper.apply(programIR);
         }
+    }
+
+    private void allocate() {
+        NaiveAllocator allocator = new NaiveAllocator(options);
+        allocator.apply(programIR);
+    }
+
+    private void codeGenerate() {
+        CodeGenerator codeGenerator = new CodeGenerator(options);
+        codeGenerator.apply(programIR);
     }
 
 }

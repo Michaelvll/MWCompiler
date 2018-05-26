@@ -3,7 +3,7 @@ package mwcompiler.ast.nodes.expressions;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.utility.Location;
 import mwcompiler.symbols.ArrayTypeSymbol;
-import mwcompiler.symbols.NonArrayTypeSymbol;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.symbols.TypeSymbol;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class NewExprNode extends ExprNode {
     public NewExprNode(String createType, int dim, List<ExprNode> dimArgs, Location pos) {
         super(pos);
         if (dim == 0) {
-            this.createType = NonArrayTypeSymbol.builder(createType);
+            this.createType = BaseTypeSymbol.builder(createType);
         } else {
             this.createType = ArrayTypeSymbol.builder(createType, dim);
             this.emptyDim = dim - dimArgs.size();

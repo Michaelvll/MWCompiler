@@ -18,7 +18,7 @@ import mwcompiler.utility.*;
 
 import java.util.List;
 
-import static mwcompiler.symbols.NonArrayTypeSymbol.*;
+import static mwcompiler.symbols.BaseTypeSymbol.*;
 import static mwcompiler.symbols.tools.ExprType.ValType.LVAL;
 import static mwcompiler.symbols.tools.ExprType.ValType.RVAL;
 import static mwcompiler.utility.ExprOps.*;
@@ -372,7 +372,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
 
     @Override
     public ExprType visit(ConstructorCallNode node) {
-        NonArrayTypeSymbol classTypeSymbol = node.getClassTypeSymbol();
+        BaseTypeSymbol classTypeSymbol = node.getClassTypeSymbol();
         FunctionSymbol functionSymbol = (FunctionSymbol) classTypeSymbol
                 .findIn(Instance.CONSTRUCTOR).getSymbol();
         List<ExprNode> args = node.getArgs();
@@ -408,9 +408,9 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         }
         ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) container.symbol;
         if (arrayTypeSymbol.getDim() - 1 == 0) {
-            return setType(node, arrayTypeSymbol.getNonArrayTypeSymbol(), LVAL);
+            return setType(node, arrayTypeSymbol.getBaseTypeSymbol(), LVAL);
         }
-        return setType(node, ArrayTypeSymbol.builder(arrayTypeSymbol.getNonArrayTypeSymbol().getName(),
+        return setType(node, ArrayTypeSymbol.builder(arrayTypeSymbol.getBaseTypeSymbol().getName(),
                 arrayTypeSymbol.getDim() - 1), LVAL);
     }
 

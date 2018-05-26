@@ -54,7 +54,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else {
             FunctionSymbol mainSymbol = (FunctionSymbol) mainSymbolInfo.getSymbol();
-            if (mainSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
+            if (mainSymbol.getReturnType() != BaseTypeSymbol.INT_TYPE_SYMBOL
                     || mainSymbol.getParams().size() != 0) {
                 throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
             }
