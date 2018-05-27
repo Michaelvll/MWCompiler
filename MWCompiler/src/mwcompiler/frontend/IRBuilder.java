@@ -182,13 +182,13 @@ public class IRBuilder implements AstVisitor<Operand> {
         function.setSymbolTable(node.getBody().getCurrentSymbolTable());
         setCurrentEnv(function, node.getBody().getCurrentSymbolTable());
 
-        node.getParamList().forEach(param -> function.AddParam((Var) visit(param)));
+        node.getParamList().forEach(param -> function.addParam((Var) visit(param)));
         if (inClassFunc) {
             currentSymbolTable.put(Instance.THIS, classDeclSymbol);
             SymbolInfo thisInfo = currentSymbolTable.findIn(Instance.THIS);
             classDeclThisReg = Var.builder(Instance.THIS, currentSymbolTable, options.PTR_SIZE);
             thisInfo.setOperand(classDeclThisReg);
-            function.AddParam(classDeclThisReg);
+            function.addParam(classDeclThisReg);
         }
 
         visit(node.getBody());
@@ -453,10 +453,10 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand outputReg;
         if (lastInst instanceof FunctionCallInst) {
             FunctionCallInst lastFunctionCall = (FunctionCallInst) lastInst;
-            if (lastFunctionCall.getFunction() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
+            if (lastFunctionCall.function() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
                 currentBasicBlock.popBack();
-                outputReg = lastFunctionCall.getArgs().get(0);
-                formatStr = "%d";
+                outputReg = lastFunctionCall.args().get(0);
+                formatStr = "%ld";
             } else outputReg = args.get(0);
         } else {
             outputReg = args.get(0);

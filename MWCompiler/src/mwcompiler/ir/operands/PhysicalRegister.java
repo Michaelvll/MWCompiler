@@ -1,8 +1,6 @@
 package mwcompiler.ir.operands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class PhysicalRegister extends Register {
     private String name;
@@ -54,7 +52,7 @@ public class PhysicalRegister extends Register {
     public static final List<PhysicalRegister> paramRegs = new ArrayList<>(
             Arrays.asList(RDI, RSI, RDX, RCX, R8, R9));
 
-    public static final List<PhysicalRegister> calleeSaveRegs = new ArrayList<>(
+    public static final Set<PhysicalRegister> calleeSaveRegs = new HashSet<>(
             Arrays.asList(RBX, RBP, R12, R13, R14, R15));
 
     public static PhysicalRegister get(int i) {
@@ -76,5 +74,9 @@ public class PhysicalRegister extends Register {
 
     public PhysicalRegister physicalRegister() {
         return this;
+    }
+
+    public boolean isCalleeSave() {
+        return calleeSave;
     }
 }

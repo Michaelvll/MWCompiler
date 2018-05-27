@@ -1,5 +1,7 @@
 package mwcompiler.utility;
 
+import mwcompiler.ir.operands.Register;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +27,7 @@ public enum ExprOps {
     private static final Set<ExprOps> compOP = new HashSet<>(Arrays.asList(LT, GT, LTE, GTE, EQ, NEQ));
 
     private String nasmOp;
+
     private ExprOps(String nasmOp) {
         this.nasmOp = nasmOp;
     }
@@ -35,5 +38,17 @@ public enum ExprOps {
 
     public boolean isCompare() {
         return compOP.contains(this);
+    }
+
+    public ExprOps revert() {
+        switch (nasmOp) {
+            case "l": return GTE;
+            case "g": return LTE;
+            case "le": return GT;
+            case "ge": return LT;
+            case "e": return NEQ;
+            case "ne": return EQ;
+            default: throw new RuntimeException("???revert "+ nasmOp);
+        }
     }
 }

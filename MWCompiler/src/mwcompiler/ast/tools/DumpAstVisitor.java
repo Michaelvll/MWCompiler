@@ -12,6 +12,7 @@ import mwcompiler.ast.nodes.literals.StringLiteralNode;
 import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.TypeSymbol;
+import mwcompiler.utility.CompilerOptions;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
 public class DumpAstVisitor implements AstVisitor<Void> {
     private String indent;
     private PrintStream out;
+    private CompilerOptions options;
 
     public void apply(Node node) {
         visit(node);
@@ -29,14 +31,10 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         node.accept(this);
     }
 
-    public DumpAstVisitor() {
+    public DumpAstVisitor(CompilerOptions options) {
         indent = "";
-        this.out = new PrintStream(System.out);
-    }
-
-    public DumpAstVisitor(PrintStream out) {
-        indent = "";
-        this.out = out;
+        this.options = options;
+        this.out = options.astOut;
     }
 
     private void addIndent() {

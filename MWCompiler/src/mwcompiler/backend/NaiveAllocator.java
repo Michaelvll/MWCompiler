@@ -27,9 +27,9 @@ public class NaiveAllocator {
     }
 
     private void compileFunction(Function function) {
-        if (function.isLib()) return;
+        if (!function.isUserFunc()) return;
 
-        Set<Var> vars = new HashSet<>();
+        Set<Var> vars = function.getVars();
         for (BasicBlock block : function.getBasicBlocks()) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 for (Var var : inst.usedVar()) {
@@ -50,9 +50,9 @@ public class NaiveAllocator {
         usageRank.sort(Comparator.comparingInt(Var::useTime).reversed());
 
         List<PhysicalRegister> allocateRegs = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
-        int allocateIndex = 0;
-        for (int index = 0; index < usageRank.size() && allocateIndex < allocateRegs.size(); ++index) {
+        for (int index = 0, allocateIndex = 0; index < usageRank.size() && allocateIndex < allocateRegs.size(); ++index) {
             if (!usageRank.get(index).isGlobal() && !usageRank.get(index).isCompareTmp()) {
+//                System.err.println("Var: " + usageRank.get(index).toString() + " -> " + allocateRegs.get(allocateIndex));
                 usageRank.get(index).setPhysicalRegister(allocateRegs.get(allocateIndex));
                 function.addUsedPReg(allocateRegs.get(allocateIndex));
                 ++allocateIndex;
@@ -62,12 +62,11 @@ public class NaiveAllocator {
 
 
         // locate params
-        int paramStackTop = PARAM_START;
-        List<Var> params = function.getParamVReg();
+        int paramStackTop = function.usedPRegs().size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save(including rbp) + return address
+        List<Var> params = function.paramVars();
         for (int index = 0; index < params.size(); ++index) {
             if (index >= PhysicalRegister.paramRegs.size()) {
                 params.get(index).setStackPos(new Memory(RBP, null, 0, paramStackTop));
-                paramStackTop += options.PTR_SIZE;
             }
         }
 
@@ -79,7 +78,7 @@ public class NaiveAllocator {
         int tmpVarStackTop = localVarStackTop;
         for (Var var : function.getVars()) {
             if (var.isTmp()) {
-                var.setStackPos(new Memory(RBP, null, 0, tmpVarStackTop));
+                var.setStackPos(new Memory(RBP, null, 0, -tmpVarStackTop));
                 tmpVarStackTop += options.PTR_SIZE;
             }
         }

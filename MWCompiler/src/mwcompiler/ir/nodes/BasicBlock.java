@@ -83,7 +83,7 @@ public class BasicBlock {
         //TODO for function call
         isEnded = true;
         if (jumpInst instanceof ReturnInst)
-            parentFunction.AddReturn((ReturnInst) jumpInst);
+            parentFunction.addReturn((ReturnInst) jumpInst);
         if (jumpInst instanceof CondJumpInst) {
             CondJumpInst condJumpInst = (CondJumpInst) jumpInst;
             assert condJumpInst.getCond() instanceof MutableOperand;

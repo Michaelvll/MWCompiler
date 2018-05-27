@@ -4,7 +4,8 @@ int main() {
     c = 5;
     a = c + -8;
     c = function(a);
-    return c;
+    print(toString(c));
+    return 0;
 }
 
 
@@ -13,8 +14,9 @@ int function(int a) {
     int b = 2;
     int c = 12;
     string s = "abcl;";
-    int[] m = new int[2];
+    int[][] m = new int[2][3];
     bool t = a > b;
+    int d = a / b % c;
     c = b++ - c;
     b = ++b + a;
     b = a + b * c + c*a;

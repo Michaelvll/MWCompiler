@@ -59,16 +59,4 @@ public class CondJumpInst extends JumpInst {
         this.ifFalse = ifFalse;
     }
 
-    public String cmdName() {
-        switch (cmp.op()) {
-            case EQ: return "je";
-            case NEQ: return "jne";
-            case GT: return "jg";
-            case GTE: return "jge";
-            case LT: return "jl";
-            case LTE: return "jle";
-            default: throw new RuntimeException("Compiler Bug: Unknown ExprOp for condition jump");
-        }
-    }
-
 }

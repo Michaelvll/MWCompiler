@@ -30,7 +30,7 @@ public class TestDumpIRVisitor {
     public void testDumpIRVisitor() {
         IRBuilder irBuilder = new IRBuilder(new CompilerOptions());
         ProgramIR programIR = irBuilder.build(program);
-        DumpIRVisitor dumpIRVisitor = new DumpIRVisitor();
+        DumpIRVisitor dumpIRVisitor = new DumpIRVisitor(new CompilerOptions());
         dumpIRVisitor.apply(programIR);
 
     }

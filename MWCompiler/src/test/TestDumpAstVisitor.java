@@ -4,6 +4,7 @@ import mwcompiler.ast.nodes.Node;
 import mwcompiler.ast.tools.AstVisitor;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.frontend.AstBuilder;
+import mwcompiler.utility.CompilerOptions;
 import org.junit.Before;
 import org.junit.Test;
 import test.tools.PreBuild;
@@ -32,7 +33,7 @@ public class TestDumpAstVisitor {
 
     @Test
     public void testDumpAst() {
-        AstVisitor<Void> dump = new DumpAstVisitor();
+        AstVisitor<Void> dump = new DumpAstVisitor(new CompilerOptions());
         program.accept(dump);
 
     }

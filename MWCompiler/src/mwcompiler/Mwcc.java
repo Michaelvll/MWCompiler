@@ -83,7 +83,7 @@ public class Mwcc {
         }
 
         if (options.dumpAst) {
-            DumpAstVisitor astDumper = new DumpAstVisitor();
+            DumpAstVisitor astDumper = new DumpAstVisitor(options);
             astDumper.apply(programAst);
 //            System.exit(0);
         }
@@ -110,7 +110,7 @@ public class Mwcc {
         programIR = irBuilder.build(programAst);
 
         if (options.dumpIR) {
-            DumpIRVisitor irDumper = new DumpIRVisitor();
+            DumpIRVisitor irDumper = new DumpIRVisitor(options);
             irDumper.apply(programIR);
         }
     }

@@ -17,41 +17,42 @@ import static mwcompiler.symbols.BaseTypeSymbol.*;
 
 public class Function {
     private FunctionSymbol functionSymbol;
-    private List<Var> paramVReg = new ArrayList<>();
+    private List<Var> paramVars = new ArrayList<>();
     private SymbolTable symbolTable;
 
-    private final boolean isLib;
+    public enum FuncType {
+        USER, EXTERN, LIB, TEMP
+    }
+    private final FuncType funcType;
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
     private LinkedList<BasicBlock> basicBlocks = new LinkedList<>();
 
-    private Set<Var> vars = new HashSet<>();
-
-    private int varStackSize = 0;
-
     private boolean isInline = false;
     private static final int INLINE_BOUND = 10;
 
     // For allocation
-    private List<PhysicalRegister> usedPhysicalRegs = new ArrayList<>();
+    private Set<Var> vars = new HashSet<>();
+    private List<PhysicalRegister> usedCalleeSaveRegs = new ArrayList<>();
+    private int varStackSize = 0;
 
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
-        this.isLib = false;
+        this.funcType = FuncType.USER;
     }
 
-    private Function(FunctionSymbol functionSymbol, boolean isLib) {
+    private Function(FunctionSymbol functionSymbol, FuncType funcType) {
         this.functionSymbol = functionSymbol;
-        this.isLib = isLib;
+        this.funcType = funcType;
     }
 
 
-    public void AddParam(Var reg) {
-        paramVReg.add(reg);
+    public void addParam(Var reg) {
+        paramVars.add(reg);
     }
 
-    public void AddReturn(ReturnInst ret) {
+    public void addReturn(ReturnInst ret) {
         returnInsts.add(ret);
     }
 
@@ -68,8 +69,14 @@ public class Function {
         return functionSymbol.getName();
     }
 
-    public List<Var> getParamVReg() {
-        return paramVReg;
+    public String nasmName() {
+        String name = functionSymbol.getName();
+        if (funcType == FuncType.USER && !isMain()) return "user_" + name;
+        return name;
+    }
+
+    public List<Var> paramVars() {
+        return paramVars;
     }
 
     public <T> T accept(IRVisitor<T> visitor) {
@@ -137,11 +144,11 @@ public class Function {
     }
 
     public void addUsedPReg(PhysicalRegister register) {
-        usedPhysicalRegs.add(register);
+        usedCalleeSaveRegs.add(register);
     }
 
-    public List<PhysicalRegister> getUsedPhysicalRegs() {
-        return usedPhysicalRegs;
+    public List<PhysicalRegister> usedPRegs() {
+        return usedCalleeSaveRegs;
     }
 
     public void checkInlineable() {
@@ -154,7 +161,7 @@ public class Function {
                 if (block.name().contains("loop") || cnt > INLINE_BOUND) isInline = false;
                 for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                     ++cnt;
-                    if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).getFunction() == this) {
+                    if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).function() == this) {
                         isInline = false;
                         return;
                     }
@@ -169,38 +176,40 @@ public class Function {
     }
 
 
-
-
     // Language BuiltIn Function
-    public static final Function PRINT_INT = new Function(FunctionSymbol.PRINT_INT, true);
-    public static final Function PRINT_STR = new Function(FunctionSymbol.PRINT_STR, true);
-    public static final Function PRINT = new Function(FunctionSymbol.PRINT, true);
-    public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, true);
-    public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, true);
-    public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, true);
-    public static final Function TO_STRING = new Function(FunctionSymbol.TO_STRING, true);
-    public static final Function SIZE = new Function(FunctionSymbol.SIZE, true);
-    public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, true);
-    public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, true);
-    public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, true);
-    public static final Function ORD = new Function(FunctionSymbol.ORD, true);
+    public static final Function PRINT_INT = new Function(FunctionSymbol.PRINT_INT, FuncType.EXTERN);
+    public static final Function PRINT_STR = new Function(FunctionSymbol.PRINT_STR, FuncType.EXTERN);
+    public static final Function PRINT = new Function(FunctionSymbol.PRINT, FuncType.TEMP);
+    public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, FuncType.TEMP);
+    public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, FuncType.LIB);
+    public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, FuncType.LIB);
+    public static final Function TO_STRING = new Function(FunctionSymbol.TO_STRING, FuncType.LIB);
+    public static final Function SIZE = new Function(FunctionSymbol.SIZE, FuncType.TEMP);
+    public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, FuncType.LIB);
+    public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, FuncType.LIB);
+    public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, FuncType.LIB);
+    public static final Function ORD = new Function(FunctionSymbol.ORD, FuncType.LIB);
 
     // BuiltIn Function for string Operation
-    public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "__string_add_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_GT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_LT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_GTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_LTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
-    public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), true);
+    public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "__string_add_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_GT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_LT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_GTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_LTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
 
-    public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), true);
+    public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), FuncType.EXTERN);
 
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
             TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));
 
-    public boolean isLib() {
-        return isLib;
+    public FuncType funcType() {
+        return funcType;
+    }
+
+    public boolean isUserFunc() {
+        return funcType == FuncType.USER;
     }
 
     public int getVarStackSize() {

@@ -11,6 +11,7 @@ import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.*;
+import mwcompiler.utility.CompilerOptions;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -19,10 +20,12 @@ import java.util.StringJoiner;
 public class DumpIRVisitor implements IRVisitor<String> {
     private String indent;
     private PrintStream out;
+    private CompilerOptions options;
 
-    public DumpIRVisitor() {
+    public DumpIRVisitor(CompilerOptions options) {
         indent = "";
-        this.out = new PrintStream(System.out);
+        this.options = options;
+        this.out = options.irOut;
     }
 
     public DumpIRVisitor(OutputStream out) {
@@ -89,11 +92,11 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(Function inst) {
-        if (inst.isLib()) return null; // output extern func is good for nasm
+        if (!inst.isUserFunc()) return null; // output extern func is good for nasm
         println("");
         iprint("func " + inst.name() + " ");
         StringJoiner params = new StringJoiner(" ");
-        inst.getParamVReg().forEach(param -> params.add(visit(param)));
+        inst.paramVars().forEach(param -> params.add(visit(param)));
         print(params.toString());
         println(" {");
         inst.getBasicBlocks().forEach(this::visit);
@@ -133,9 +136,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
         addIndent();
         iprint("");
         if (inst.dst() != null) print(visit(inst.dst()) + " = ");
-        print("call " + inst.getFunctionName() + " ");
+        print("call " + inst.functionName() + " ");
         StringJoiner args = new StringJoiner(" ");
-        inst.getArgs().forEach(arg -> args.add(visit(arg)));
+        inst.args().forEach(arg -> args.add(visit(arg)));
         println(args.toString());
         subIndent();
         return null;

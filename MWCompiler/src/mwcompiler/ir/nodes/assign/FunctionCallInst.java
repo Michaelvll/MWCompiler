@@ -34,15 +34,15 @@ public class FunctionCallInst extends AssignInst {
         return visitor.visit(this);
     }
 
-    public Function getFunction() {
+    public Function function() {
         return function;
     }
 
-    public String getFunctionName() {
+    public String functionName() {
         return function.name();
     }
 
-    public List<Operand> getArgs() {
+    public List<Operand> args() {
         return args;
     }
 }
