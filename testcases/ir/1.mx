@@ -1,12 +1,13 @@
 int[][] d = new int[5][];
 string s = "abc";
-
 int main() {
+
+
     d[0] = new int[3];
     int[][][] t;
     t = new int[5][4][];
     t[0][1] = new int[3];
-    t[1][2][2] = 3;
+    t[1][2][2] = t[1][2][1];
     //return t[1][2][2];
 
     int a;
@@ -25,10 +26,12 @@ int function(int a) {
     //c = b++ - c;
     //b = ++b + a;
     //b = a + b * c + c*a;
-
+    bool x = a != b && (c == a || a >b);
 
     if (a != b && (c == 3 || a >b)) {
+        if (a > 3)
             b = 3;
+        else c = 5;
     } else {
         return b;
     }

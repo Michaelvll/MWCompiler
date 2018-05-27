@@ -47,7 +47,6 @@ public class FunctionDeclNode extends DeclarationNode {
         this.functionSymbol.setReturnType(returnTypeSymbol);
     }
 
-
     @Override
     public <T> T accept(AstVisitor<T> visitor) {
         return visitor.visit(this);
@@ -76,6 +75,7 @@ public class FunctionDeclNode extends DeclarationNode {
     public Instance getInstance() {
         return instance;
     }
+
 
 
     @Override

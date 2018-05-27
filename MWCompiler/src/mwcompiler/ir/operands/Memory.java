@@ -8,10 +8,10 @@ import java.util.List;
 public class Memory extends MutableOperand {
     private Register baseReg;
     private Register indexReg;
-    private Integer scale;
-    private Integer displacement;
+    private int scale;
+    private int displacement;
 
-    public Memory(Register baseReg, Operand indexReg, Integer scale, Integer displacement) {
+    public Memory(Register baseReg, Operand indexReg, int scale, int displacement) {
         this.baseReg = baseReg;
         if (indexReg instanceof IntLiteral) {
             this.indexReg = null;
@@ -29,7 +29,12 @@ public class Memory extends MutableOperand {
         return visitor.visit(this);
     }
 
-    public Register getBaseReg() {
+    @Override
+    public PhysicalRegister physicalRegister() {
+        return null;
+    }
+
+    public Register baseReg() {
         return baseReg;
     }
 
@@ -37,7 +42,7 @@ public class Memory extends MutableOperand {
         this.baseReg = baseReg;
     }
 
-    public Register getIndexReg() {
+    public Register indexReg() {
         return indexReg;
     }
 
@@ -45,26 +50,40 @@ public class Memory extends MutableOperand {
         this.indexReg = indexReg;
     }
 
-    public Integer getScale() {
+    public int scale() {
         return scale;
     }
 
-    public void setScale(Integer scale) {
+    public void setScale(int scale) {
         this.scale = scale;
     }
 
-    public Integer getDisplacement() {
+    public int disp() {
         return displacement;
     }
 
-    public void setDisplacement(Integer displacement) {
+    public void setDisplacement(int displacement) {
         this.displacement = displacement;
     }
 
-    public List<Register> usedRegister() {
-        List<Register> registers = new ArrayList<>();
-        if (baseReg != null) registers.add(baseReg);
-        if (indexReg != null) registers.add(baseReg);
+    public List<Var> usedVar() {
+        List<Var> registers = new ArrayList<>();
+        if (baseReg instanceof Var) registers.add((Var) baseReg);
+        if (indexReg instanceof Var) registers.add((Var) baseReg);
         return registers;
+    }
+
+    public String toString(){
+        StringBuilder s =new StringBuilder("[");
+        if (baseReg != null) s.append(baseReg.toString());
+        if (indexReg != null) s.append(" + ").append(indexReg.toString()).append(" * ").append(scale);
+        if (displacement != 0) s.append(displacement > 0? " + ":" - ").append(Math.abs(displacement));
+        s.append("]");
+        return s.toString();
+    }
+
+    @Override
+    public boolean isTmp() {
+        return false;
     }
 }

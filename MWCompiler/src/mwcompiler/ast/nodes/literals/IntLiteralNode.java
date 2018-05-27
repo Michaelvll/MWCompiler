@@ -11,14 +11,14 @@ import mwcompiler.utility.Location;
  * @since 2018-04-13
  */
 public class IntLiteralNode extends LiteralExprNode {
-    private Integer val;
+    private int val;
 
     public IntLiteralNode(String val, Location pos) {
         super(pos);
         this.val = Integer.decode(val);
     }
 
-    public Integer getVal() {
+    public int getVal() {
         return val;
     }
 

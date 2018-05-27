@@ -558,7 +558,7 @@ public class LLIRInterpreter {
         apply(System.in, ssa);
     }
 
-    public static void apply(InputStream in, Boolean ssa) throws IOException {
+    public static void apply(InputStream in, boolean ssa) throws IOException {
         LLIRInterpreter vm = new LLIRInterpreter(in, ssa);
         if (ssa)
             System.out.println("running with SSA mode");

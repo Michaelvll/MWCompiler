@@ -20,9 +20,10 @@ import static mwcompiler.symbols.SymbolTable.STRING_SYMBOL_TABLE;
  */
 public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     private SymbolTable currentSymbolTable;
-    private Boolean inClass = false;
+    private boolean inClass = false;
     private String stage = "Symbol Table Pre-building";
     private String funcPrefix = "";
+
 
     public void apply(Node node) {
         visit(node);
@@ -53,7 +54,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             throw new CompileError(stage, "Main function is needed.", mainLocation);
         } else {
             FunctionSymbol mainSymbol = (FunctionSymbol) mainSymbolInfo.getSymbol();
-            if (mainSymbol.getReturnType() != NonArrayTypeSymbol.INT_TYPE_SYMBOL
+            if (mainSymbol.getReturnType() != BaseTypeSymbol.INT_TYPE_SYMBOL
                     || mainSymbol.getParams().size() != 0) {
                 throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
             }
@@ -63,7 +64,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
 
     @Override
     public Void visit(ProgramNode node) {
-        currentSymbolTable = new SymbolTable(null);
+        currentSymbolTable = SymbolTable.builder(null);
         node.getBlock().setCurrentSymbolTable(currentSymbolTable);
         SymbolTable.globalSymbolTable = currentSymbolTable;
         initBuiltinFunction();
@@ -73,11 +74,12 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         return null;
     }
 
+
     @Override
     public Void visit(ClassDeclNode node) {
         inClass = true;
         funcPrefix = "__" + node.getClassSymbol().getName() + "_";
-        node.getBody().setCurrentSymbolTable(new SymbolTable(currentSymbolTable));
+        node.getBody().setCurrentSymbolTable(SymbolTable.builder(currentSymbolTable));
         if (SymbolTable.getClassSymbolTable(node.getClassSymbol()) != null) {
             throw new CompileError(stage,
                     "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName()),
@@ -95,11 +97,11 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     @Override
     public Void visit(BlockNode node) {
         if (node.getCurrentSymbolTable() == null) {
-            currentSymbolTable = new SymbolTable(currentSymbolTable);
+            currentSymbolTable = SymbolTable.builder(currentSymbolTable);
             node.setCurrentSymbolTable(currentSymbolTable);
         }
         node.getStatements().forEach(this::visit);
-        currentSymbolTable = currentSymbolTable.getOuterSymbolTable();
+        currentSymbolTable = currentSymbolTable.getParentSymbolTable();
         return null;
     }
 

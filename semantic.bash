@@ -9,4 +9,4 @@
 set -e
 cd "$(dirname "$0")"
 cat > program.in
-java -cp ./lib/*:./bin mwcompiler.Mwcc -i program.in -o program.out -Wall
+java -cp ./lib/*:./bin mwcompiler.Mwcc -i program.in -o program.out -Wall --dump-ir

@@ -1,0 +1,35 @@
+int main() {
+    int c;
+    int a;
+    c = 5;
+    a = c + -8;
+    c = function(a);
+    print(toString(c));
+    return 0;
+}
+
+
+
+int function(int a) {
+    int b = 2;
+    int c = 12;
+    string s = "abcl;";
+    int[][] m = new int[2][3];
+    bool t = a > b;
+    int d = a / b % c;
+    c = b++ - c;
+    b = ++b + a;
+    b = a + b * c + c*a;
+    bool y = a > 1;
+    bool x = a != b && c == a || a >b;
+
+    if (a != b && (c == 3 || a >b)) {
+        if (a > 3)
+            b = 3;
+        else c = 5;
+    } else {
+        return b;
+    }
+
+    return b;
+}

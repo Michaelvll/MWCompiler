@@ -2,13 +2,15 @@ package mwcompiler;
 
 import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
-import mwcompiler.frontend.AstBuilder;
-import mwcompiler.frontend.ForwardRefPreprocessAstVisitor;
-import mwcompiler.frontend.IRBuilder;
-import mwcompiler.frontend.TypeCheckAstVisitor;
+import mwcompiler.backend.CodeGenerator;
+import mwcompiler.backend.NaiveAllocator;
+import mwcompiler.frontend.*;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.tools.DumpIRVisitor;
-import mwcompiler.utility.*;
+import mwcompiler.utility.CompileError;
+import mwcompiler.utility.CompileWarining;
+import mwcompiler.utility.CompilerOptions;
+import mwcompiler.utility.StringProcess;
 import mx_gram.tools.MxLexer;
 import mx_gram.tools.MxParser;
 import org.antlr.v4.runtime.CharStream;
@@ -26,33 +28,42 @@ import java.io.IOException;
  * @since 2018-04-05
  */
 public class Mwcc {
-    private static ProgramNode programAstRoot;
-    private static ProgramIR programIRRoot;
+    private ProgramNode programAst;
+    private ProgramIR programIR;
+    private CompilerOptions options = new CompilerOptions();
 
 
     /**
      * @param args The entry of Mwcc
      */
     public static void main(String[] args) {
-        CompilerOptions.compilerArgSolve(args);
+        Mwcc mwwcc = new Mwcc();
+        mwwcc.compile(args);
+    }
+
+    public void compile(String[] args) {
+        options.compilerArgSolve(args);
         buildAst();
         typeCheck();
         buildIR();
+
+        allocate();
+        codeGenerate();
     }
 
-    public static ProgramIR getProgramIRRoot(){
+    public ProgramIR getProgramIR() {
         // For test
-        return programIRRoot;
+        return programIR;
     }
 
-    public static ProgramNode getProgramAstRoot() {
+    public ProgramNode getProgramAst() {
         // For test
-        return programAstRoot;
+        return programAst;
     }
 
-    private static void buildAst() {
+    private void buildAst() {
         try {
-            CharStream input = CharStreams.fromStream(CompilerOptions.in);
+            CharStream input = CharStreams.fromStream(options.in);
             MxLexer lexer = new MxLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             MxParser parser = new MxParser(tokens);
@@ -62,7 +73,7 @@ public class Mwcc {
             parser.addErrorListener(new ParserErrorListener());
             MxParser.ProgramContext programContext = parser.program();
             AstBuilder astBuilder = new AstBuilder();
-            programAstRoot = astBuilder.build(programContext);
+            programAst = astBuilder.build(programContext);
         } catch (IOException e) {
             System.err.println("Can't read from the input file: " + e.getMessage());
             System.exit(1);
@@ -71,37 +82,47 @@ public class Mwcc {
             System.exit(1);
         }
 
-        if (CompilerOptions.dumpAst) {
-            DumpAstVisitor astDumper = new DumpAstVisitor();
-            astDumper.apply(programAstRoot);
+        if (options.dumpAst) {
+            DumpAstVisitor astDumper = new DumpAstVisitor(options);
+            astDumper.apply(programAst);
 //            System.exit(0);
         }
     }
 
 
-    private static void typeCheck() {
+    private void typeCheck() {
         try {
             ForwardRefPreprocessAstVisitor preprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
-            preprocessAstVisitor.apply(programAstRoot);
+            preprocessAstVisitor.apply(programAst);
             TypeCheckAstVisitor typeCheckAstVisitor = new TypeCheckAstVisitor();
-            typeCheckAstVisitor.apply(programAstRoot);
+            typeCheckAstVisitor.apply(programAst);
         } catch (CompileError e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        if (CompilerOptions.warningLevel > 0) {
+        if (options.warningLevel > 0) {
             CompileWarining.printWarings();
         }
     }
 
-    private static void buildIR() {
-        IRBuilder irBuilder = new IRBuilder();
-        programIRRoot = irBuilder.build(programAstRoot);
+    private void buildIR() {
+        IRBuilder irBuilder = new IRBuilder(options);
+        programIR = irBuilder.build(programAst);
 
-        if (CompilerOptions.dumpIR) {
-            DumpIRVisitor irDumper = new DumpIRVisitor();
-            irDumper.apply(programIRRoot);
+        if (options.dumpIR) {
+            DumpIRVisitor irDumper = new DumpIRVisitor(options);
+            irDumper.apply(programIR);
         }
+    }
+
+    private void allocate() {
+        NaiveAllocator allocator = new NaiveAllocator(options);
+        allocator.apply(programIR);
+    }
+
+    private void codeGenerate() {
+        CodeGenerator codeGenerator = new CodeGenerator(options);
+        codeGenerator.apply(programIR);
     }
 
 }

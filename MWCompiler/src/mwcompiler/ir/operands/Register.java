@@ -18,5 +18,11 @@ public abstract class Register extends MutableOperand {
             this.valTag = valTag;
     }
 
-    public abstract <T> T accept(IRVisitor<T> visitor);
+    public <T> T accept(IRVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    public abstract String toString();
+
+
 }

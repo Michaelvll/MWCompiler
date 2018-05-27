@@ -1,6 +1,10 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
+
+import java.util.List;
 
 public abstract class Instruction {
     public Instruction prev;
@@ -8,6 +12,8 @@ public abstract class Instruction {
 
 
     public abstract <T> T accept(IRVisitor<T> visitor);
+    public abstract List<Var> usedVar();
+    public abstract List<Var> dstVar();
 
 
     void addPrev(Instruction prevInst) {

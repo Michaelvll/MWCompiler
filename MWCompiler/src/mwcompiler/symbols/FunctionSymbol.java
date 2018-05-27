@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static mwcompiler.symbols.NonArrayTypeSymbol.*;
+import static mwcompiler.symbols.BaseTypeSymbol.*;
 
 // Each function has exactly one FunctionSymbol
 public class FunctionSymbol extends Symbol {
@@ -37,7 +37,7 @@ public class FunctionSymbol extends Symbol {
     }
 
 
-//    public static FunctionSymbol builder(TypeSymbol returnType, List<TypeSymbol> params) {
+//    public static FunctionSymbol tmpBuilder(TypeSymbol returnType, List<TypeSymbol> params) {
 //        return new FunctionSymbol(returnType, params);
 //    }
 

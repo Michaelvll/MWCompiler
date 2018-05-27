@@ -2,33 +2,33 @@ package mwcompiler.symbols;
 
 
 public class ArrayTypeSymbol extends TypeSymbol {
-    private NonArrayTypeSymbol nonArrayTypeSymbol;
-    private Integer dim;
+    private BaseTypeSymbol baseTypeSymbol;
+    private int dim;
 
-    private static String combineName(String name, Integer dim) {
+    private static String combineName(String name, int dim) {
         return name + "~" + String.valueOf(dim);
     }
 
-    public static ArrayTypeSymbol builder(String name, Integer dim) {
-        NonArrayTypeSymbol nonArrayTypeSymbol = NonArrayTypeSymbol.builder(name);
+    public static ArrayTypeSymbol builder(String name, int dim) {
+        BaseTypeSymbol baseTypeSymbol = BaseTypeSymbol.builder(name);
         TypeSymbol search = typeSymbolMap.get(combineName(name, dim));
         if (search == null) {
-            search = new ArrayTypeSymbol(nonArrayTypeSymbol, dim);
+            search = new ArrayTypeSymbol(baseTypeSymbol, dim);
             typeSymbolMap.put(combineName(name, dim), search);
         }
         return (ArrayTypeSymbol) search;
     }
 
-    private ArrayTypeSymbol(NonArrayTypeSymbol nonArrayTypeSymbol, Integer dim) {
-        this.nonArrayTypeSymbol = nonArrayTypeSymbol;
+    private ArrayTypeSymbol(BaseTypeSymbol baseTypeSymbol, int dim) {
+        this.baseTypeSymbol = baseTypeSymbol;
         this.dim = dim;
     }
 
-    public NonArrayTypeSymbol getNonArrayTypeSymbol() {
-        return nonArrayTypeSymbol;
+    public BaseTypeSymbol getBaseTypeSymbol() {
+        return baseTypeSymbol;
     }
 
-    public Integer getDim() {
+    public int getDim() {
         return dim;
     }
 
@@ -43,19 +43,19 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     @Override
     public String getName() {
-        return combineName(this.nonArrayTypeSymbol.getName(), dim);
+        return combineName(this.baseTypeSymbol.getName(), dim);
     }
 
     @Override
     public void checkLegal() {
-        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this.nonArrayTypeSymbol);
+        SymbolTable namedSymbolTable = SymbolTable.getClassSymbolTable(this.baseTypeSymbol);
         if (namedSymbolTable == null) {
             throw new RuntimeException(this.getName());
         }
     }
 
     @Override
-    public Boolean isPrimitiveTypeBase(){
-        return nonArrayTypeSymbol.isPrimitiveType();
+    public boolean isPrimitiveTypeBase(){
+        return baseTypeSymbol.isPrimitiveType();
     }
 }

@@ -15,4 +15,6 @@ public abstract class Operand {
     }
 
     public abstract <T>T accept(IRVisitor<T> visitor);
+
+    public abstract PhysicalRegister physicalRegister();
 }

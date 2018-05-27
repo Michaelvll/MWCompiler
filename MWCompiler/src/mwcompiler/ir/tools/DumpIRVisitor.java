@@ -11,6 +11,7 @@ import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.*;
+import mwcompiler.utility.CompilerOptions;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -19,10 +20,12 @@ import java.util.StringJoiner;
 public class DumpIRVisitor implements IRVisitor<String> {
     private String indent;
     private PrintStream out;
+    private CompilerOptions options;
 
-    public DumpIRVisitor() {
+    public DumpIRVisitor(CompilerOptions options) {
         indent = "";
-        this.out = new PrintStream(System.out);
+        this.options = options;
+        this.out = options.irOut;
     }
 
     public DumpIRVisitor(OutputStream out) {
@@ -70,7 +73,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     public String visit(BasicBlock block) {
         addIndent();
-        iprintln("%" + block.getName() + ":");
+        iprintln("%" + block.name() + ":");
         for (Instruction instruction = block.front(); instruction != null; instruction = instruction.next) {
             visit(instruction);
         }
@@ -89,14 +92,14 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(Function inst) {
-        if (inst.isLib()) return null; // output extern func is good for nasm
+        if (!inst.isUserFunc()) return null; // output extern func is good for nasm
         println("");
-        iprint("func " + inst.getFunctionName() + " ");
+        iprint("func " + inst.name() + " ");
         StringJoiner params = new StringJoiner(" ");
-        inst.getParamVReg().forEach(param -> params.add(visit(param)));
+        inst.paramVars().forEach(param -> params.add(visit(param)));
         print(params.toString());
         println(" {");
-        inst.getBlocks().forEach(this::visit);
+        inst.getBasicBlocks().forEach(this::visit);
         iprintln("}");
         //TODO
         return null;
@@ -105,15 +108,17 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(MoveInst inst) {
         addIndent();
-        iprintln(visit(inst.getDst()) + " = MOV " + visit(inst.getVal()));
+        iprintln(visit(inst.dst()) + " = MOV " + visit(inst.val()));
         subIndent();
         return null;
     }
 
     @Override
     public String visit(CondJumpInst inst) {
+        visit(inst.getCmp());
         addIndent();
-        iprintln("br " + visit(inst.getCond()) + " %" + inst.getIfTrue().getName() + " %" + inst.getIfFalse().getName());
+//        iprintln( inst.op() + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
+        iprintln("br " + visit(inst.getCmp().dst()) + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
         subIndent();
         return null;
     }
@@ -121,7 +126,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(DirectJumpInst inst) {
         addIndent();
-        iprintln("jmp %" + inst.getTarget().getName());
+        iprintln("jmp %" + inst.target().name());
         subIndent();
         return null;
     }
@@ -130,10 +135,10 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(FunctionCallInst inst) {
         addIndent();
         iprint("");
-        if (inst.getDst() != null) print(visit(inst.getDst()) + " = ");
-        print("call " + inst.getFunctionName() + " ");
+        if (inst.dst() != null) print(visit(inst.dst()) + " = ");
+        print("call " + inst.functionName() + " ");
         StringJoiner args = new StringJoiner(" ");
-        inst.getArgs().forEach(arg -> args.add(visit(arg)));
+        inst.args().forEach(arg -> args.add(visit(arg)));
         println(args.toString());
         subIndent();
         return null;
@@ -145,19 +150,15 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     @Override
-    public String visit(VirtualRegister register) {
-        String name = "$" + register.getName();
-        if (register.getSymbolTable() !=null) {
-            name += "_" + register.getSymbolTable().hashCode();
-        }
-        return name;
+    public String visit(Register reg) {
+        return reg.toString();
     }
 
     @Override
     public String visit(BinaryExprInst binaryExprInst) {
         addIndent();
-        iprintln(visit(binaryExprInst.getDst()) + " = " + binaryExprInst.getOp().toString() + " " + visit(binaryExprInst.getLeft())
-                + " " + visit(binaryExprInst.getRight()));
+        iprintln(visit(binaryExprInst.dst()) + " = " + binaryExprInst.op().toString() + " " + visit(binaryExprInst.left())
+                + " " + visit(binaryExprInst.right()));
         subIndent();
         return null;
     }
@@ -171,9 +172,9 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(Memory memory) {
         addIndent();
         String s = "[";
-        if (memory.getBaseReg() != null) s += visit(memory.getBaseReg());
-        if (memory.getIndexReg() != null) s += " + " + visit(memory.getIndexReg()) + " * " + memory.getScale();
-        if (memory.getDisplacement() != 0) s += " + " + memory.getDisplacement();
+        if (memory.baseReg() != null) s += visit(memory.baseReg());
+        if (memory.indexReg() != null) s += " + " + visit(memory.indexReg()) + " * " + memory.scale();
+        if (memory.disp() != 0) s += " + " + memory.disp();
         s += "]";
         subIndent();
         return s;

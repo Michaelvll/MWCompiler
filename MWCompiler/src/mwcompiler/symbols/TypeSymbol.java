@@ -10,14 +10,14 @@ public abstract class TypeSymbol extends Symbol {
         return typeSymbolMap.get(name);
     }
 
-    public NonArrayTypeSymbol getBaseType() {
-        return this instanceof NonArrayTypeSymbol ? (NonArrayTypeSymbol) this : ((ArrayTypeSymbol) this).getNonArrayTypeSymbol();
+    public BaseTypeSymbol getBaseType() {
+        return this instanceof BaseTypeSymbol ? (BaseTypeSymbol) this : ((ArrayTypeSymbol) this).getBaseTypeSymbol();
     }
 
-    public abstract Boolean isPrimitiveTypeBase();
+    public abstract boolean isPrimitiveTypeBase();
 
-    public Boolean isPrimitiveType() {
-        return this == NonArrayTypeSymbol.INT_TYPE_SYMBOL || this == NonArrayTypeSymbol.STRING_TYPE_SYMBOL
-                || this == NonArrayTypeSymbol.BOOL_TYPE_SYMBOL || this == NonArrayTypeSymbol.VOID_TYPE_SYMBOL;
+    public boolean isPrimitiveType() {
+        return this == BaseTypeSymbol.INT_TYPE_SYMBOL || this == BaseTypeSymbol.STRING_TYPE_SYMBOL
+                || this == BaseTypeSymbol.BOOL_TYPE_SYMBOL || this == BaseTypeSymbol.VOID_TYPE_SYMBOL;
     }
 }

@@ -45,8 +45,9 @@ public class TestErrorPrintTest {
 
     @Test
     public void test() throws Exception {
-        PreBuild.build(filename);
-        program = PreBuild.program;
+        PreBuild preBuild = new PreBuild();
+        preBuild.build(filename);
+        program = preBuild.program;
         try {
             ForwardRefPreprocessAstVisitor forwardRefPreprocessAstVisitor = new ForwardRefPreprocessAstVisitor();
             forwardRefPreprocessAstVisitor.apply(program);

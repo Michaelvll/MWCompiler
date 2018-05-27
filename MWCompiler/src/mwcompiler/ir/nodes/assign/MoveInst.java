@@ -1,8 +1,9 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.LinkedList;
@@ -21,14 +22,19 @@ public class MoveInst extends AssignInst {
         return visitor.visit(this);
     }
 
-    public Operand getVal() {
+    public Operand val() {
         return val;
     }
 
+    public void setVal(Operand val) {
+        this.val = val;
+    }
+
     @Override
-    public List<Register> usedRegister() {
-        LinkedList<Register> registers = new LinkedList<>();
-        appendUsedRegister(val, registers);
+    public List<Var> usedVar() {
+        LinkedList<Var> registers = new LinkedList<>();
+        appendUsedVar(val, registers);
+        if (super.dst() instanceof Memory) registers.addAll(((Memory) super.dst()).usedVar());
         return registers;
     }
 }

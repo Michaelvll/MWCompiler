@@ -8,34 +8,43 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 public class CompilerOptions {
-    public static Boolean dumpAst = false;
-    public static Boolean dumpIR = false;
-    public static InputStream in = System.in;
-    public static PrintStream out = System.out;
-    public static Integer warningLevel = 0;
+    // Machine settings
+    public int PTR_SIZE = 8;
+    public int LENGTH_SIZE = 8;
+    public int STACK_ALIGN_SIZE = 8;
 
 
-    public static void compilerArgSolve(String[] args) {
+    // Compiling Options
+    public boolean dumpAst = false;
+    public boolean dumpIR = false;
+    public InputStream in = System.in;
+    public PrintStream out = System.out;
+    public PrintStream astOut = System.err;
+    public PrintStream irOut = System.err;
+    public int warningLevel = 0;
+
+
+    public void compilerArgSolve(String[] args) {
         Options options = new Options();
-        Option input = Option.builder("i").longOpt("input").desc("Path to the input file").hasArg().type(String.class)
-                .argName("Input File").build();
-        options.addOption(input);
+        options.addOption(Option.builder("i").longOpt("input").desc("Path to the input file").hasArg().type(String.class)
+                .argName("Input File").build());
 
-        Option output = Option.builder("o").longOpt("output").desc("Path to the output file").hasArg()
-                .type(String.class).argName("Output File").build();
-        options.addOption(output);
+        options.addOption(Option.builder("o").longOpt("output").desc("Path to the output file").hasArg()
+                .type(String.class).argName("Output File").build());
 
-        Option warning = Option.builder("Wall").desc("Print warnings to stderr").hasArg(false).build();
-        options.addOption(warning);
+        options.addOption(Option.builder("astOutput").desc("Path to the output file for ast").hasArg()
+                .type(String.class).argName("Ast Output File").build());
 
-        Option help = Option.builder("h").longOpt("help").hasArg(false).desc("Print help message (this message)").build();
-        options.addOption(help);
+        options.addOption(Option.builder("irOutput").desc("Path to the output file for ir").hasArg()
+                .type(String.class).argName("IR Output File").build());
 
-        Option dumpAst = Option.builder().longOpt("dump_ast").desc("Dump dumpAst for source code").hasArg(false).build();
-        options.addOption(dumpAst);
+        options.addOption(Option.builder("Wall").desc("Print warnings to stderr").hasArg(false).build());
 
-        Option dumpIR = Option.builder().longOpt("dump_ir").desc("Dump dumpIR for source code").hasArg(false).build();
-        options.addOption(dumpIR);
+        options.addOption(Option.builder("h").longOpt("help").hasArg(false).desc("Print help message (this message)").build());
+
+        options.addOption(Option.builder().longOpt("dump-ast").desc("Dump dumpAst for source code").hasArg(false).build());
+
+        options.addOption(Option.builder().longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -43,6 +52,8 @@ public class CompilerOptions {
         String inputFile = null;
         String outputFile = null;
         String[] restArgs;
+        String astOutFile = null;
+        String irOutFile = null;
         try {
             System.err.print(StringProcess.BLACK);
             cmd = parser.parse(options, args);
@@ -62,29 +73,23 @@ public class CompilerOptions {
                 System.err.println("Arguments with no options not match (expect exactly 1 as the path of input file)");
                 System.exit(1);
                 return;
-            } else if (restArgs.length == 0) {
-                System.err.println("No input file specified, input redirected to std-in");
-            } else {
-                inputFile = restArgs[0];
-            }
+            } else if (restArgs.length == 0) System.err.println("No input file specified, input redirected to std-in");
+            else inputFile = restArgs[0];
 
-            if (cmd.hasOption("o")) {
-                outputFile = cmd.getOptionValue("o");
-            } else {
-                System.err.println("No output file specified, output redirected to std-out");
-            }
+            if (cmd.hasOption("o")) outputFile = cmd.getOptionValue("o");
+            else System.err.println("No output file specified, output redirected to std-out");
 
-            if (cmd.hasOption("Wall")) {
-                warningLevel = 1;
-            }
+            if (cmd.hasOption("Wall")) warningLevel = 1;
 
-            if (cmd.hasOption("dump_ast")) {
-                CompilerOptions.dumpAst = true;
-            }
+            if (cmd.hasOption("dump-ast")) this.dumpAst = true;
 
-            if (cmd.hasOption("dump_ir")) {
-                CompilerOptions.dumpIR = true;
-            }
+            if (cmd.hasOption("dump-ir")) this.dumpIR = true;
+
+            if (cmd.hasOption("astOutput")) astOutFile = cmd.getOptionValue("astOutput");
+            else if (this.dumpAst) System.err.println("No AST output file specified, output redirected to std-err");
+
+            if (cmd.hasOption("irOutput")) irOutFile = cmd.getOptionValue("irOutput");
+            else if (this.dumpIR) System.err.println("No IR output file specified, output redirected to std-err");
 
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());
@@ -99,6 +104,10 @@ public class CompilerOptions {
                 in = new FileInputStream(inputFile);
             if (outputFile != null)
                 out = new PrintStream(new FileOutputStream(outputFile));
+            if (astOutFile != null)
+                astOut = new PrintStream(new FileOutputStream(astOutFile));
+            if (irOutFile != null)
+                irOut = new PrintStream(new FileOutputStream(irOutFile));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);

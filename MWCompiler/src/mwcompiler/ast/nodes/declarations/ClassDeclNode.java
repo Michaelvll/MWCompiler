@@ -2,8 +2,8 @@ package mwcompiler.ast.nodes.declarations;
 
 import mwcompiler.ast.nodes.BlockNode;
 import mwcompiler.ast.tools.AstVisitor;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.utility.Location;
-import mwcompiler.symbols.NonArrayTypeSymbol;
 
 /**
  * ClassDeclNode.java
@@ -13,12 +13,12 @@ import mwcompiler.symbols.NonArrayTypeSymbol;
  * @since 2018-04-11
  */
 public class ClassDeclNode extends DeclarationNode {
-    private NonArrayTypeSymbol classSymbol;
+    private BaseTypeSymbol classSymbol;
     private BlockNode body;
     private Location declClassPos;
 
     public ClassDeclNode(String className, BlockNode body, Location declClassPos) {
-        this.classSymbol = NonArrayTypeSymbol.builder(className); // Throw an already declared runtime error
+        this.classSymbol = BaseTypeSymbol.builder(className); // Throw an already declared runtime error
         this.body = body;
         this.declClassPos = declClassPos;
     }
@@ -34,7 +34,7 @@ public class ClassDeclNode extends DeclarationNode {
         return body;
     }
 
-    public NonArrayTypeSymbol getClassSymbol() {
+    public BaseTypeSymbol getClassSymbol() {
         return classSymbol;
     }
 

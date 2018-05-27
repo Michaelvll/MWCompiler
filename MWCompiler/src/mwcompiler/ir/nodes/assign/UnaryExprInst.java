@@ -1,13 +1,11 @@
 package mwcompiler.ir.nodes.assign;
 
-import mwcompiler.ir.nodes.assign.AssignInst;
-import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
+import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.ExprOps;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,9 +25,9 @@ public class UnaryExprInst extends AssignInst {
     }
 
     @Override
-    public List<Register> usedRegister() {
-        LinkedList<Register> registers = new LinkedList<>();
-        appendUsedRegister(src, registers);
+    public List<Var> usedVar() {
+        LinkedList<Var> registers = new LinkedList<>();
+        appendUsedVar(src, registers);
         return registers;
     }
 }
