@@ -168,22 +168,27 @@ public class CodeGenerator implements IRVisitor<String> {
         int argSize = args.size();
         int paramRegSize = paramRegs.size();
         int argStackSize = 0;
-        for (int index = 0; index < argSize; ++index) {
+        for (int index = 0; index < Math.min(paramRegSize, argSize); ++index) {
             Operand arg = args.get(index);
-            if (index < paramRegSize) {
-                if (arg instanceof StringLiteral) {
-                    String label = ((StringLiteral) arg).getLabel();
-                    append("lea", paramRegs.get(index).toString(), "[rel " + label + "]");
-                } else append("mov", paramRegs.get(index), arg);
-            } else {
-                append("push", arg);
-                argStackSize += options.PTR_SIZE; // TODO: Need to be improved when not every arg is size of 8
-            }
+            if (arg instanceof StringLiteral) {
+                String label = ((StringLiteral) arg).getLabel();
+                append("lea", paramRegs.get(index).toString(), "[rel " + label + "]");
+            } else append("mov", paramRegs.get(index), arg);
         }
-        append("call", inst.function().nasmName());
+        for (int index = argSize - 1; index >= paramRegSize; --index) {
+            Operand arg = args.get(index);
+            append("push", arg);
+            argStackSize += options.PTR_SIZE; // TODO: Need to be improved when not every arg is size of 8
+        }
+
+        //        if (inst.function() == Function.PRINT_INT || inst.function() == Function.PRINT_STR) append("xor", RAX, RAX);
+        append("call", inst.function().
+
+                nasmName());
         if (inst.dst() != null)
+
             append("mov", inst.dst(), RAX); // dst must be register which is guaranteed by the basic block push back
-        if (argSize > paramRegSize) append("add", RSP, argStackSize);
+        if (argStackSize > 0) append("add", RSP, argStackSize);
         return null;
     }
 
@@ -197,8 +202,10 @@ public class CodeGenerator implements IRVisitor<String> {
         if (!currentFunction.isMain()) {
             assembly.append("\n");
             append("mov", RSP, RBP);
-            for (PhysicalRegister reg : currentFunction.usedPRegs()) {
-                append("pop", reg);
+            List<PhysicalRegister> usedRegs = currentFunction.usedPRegs();
+            for (int index = usedRegs.size() - 1; index >= 0; --index) {
+                PhysicalRegister reg = usedRegs.get(index);
+                if (calleeSaveRegs.contains(reg)) append("pop", reg);
             }
         } else {
             append("leave");
