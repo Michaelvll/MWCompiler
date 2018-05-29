@@ -71,7 +71,7 @@ public class LoopNode extends Node {
     }
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return forPos;
     }
 }

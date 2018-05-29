@@ -31,11 +31,11 @@ public class CondJumpInst extends JumpInst {
         return new ArrayList<>();
     }
 
-    public BasicBlock getIfTrue() {
+    public BasicBlock ifTrue() {
         return ifTrue;
     }
 
-    public BasicBlock getIfFalse() {
+    public BasicBlock ifFalse() {
         return ifFalse;
     }
 

@@ -7,6 +7,7 @@ import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.assign.UnaryExprInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
@@ -99,7 +100,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
         inst.paramVars().forEach(param -> params.add(visit(param)));
         print(params.toString());
         println(" {");
-        inst.getBasicBlocks().forEach(this::visit);
+        inst.basicBlocks().forEach(this::visit);
         iprintln("}");
         //TODO
         return null;
@@ -117,8 +118,8 @@ public class DumpIRVisitor implements IRVisitor<String> {
     public String visit(CondJumpInst inst) {
         visit(inst.getCmp());
         addIndent();
-//        iprintln( inst.op() + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
-        iprintln("br " + visit(inst.getCmp().dst()) + " %" + inst.getIfTrue().name() + " %" + inst.getIfFalse().name());
+//        iprintln( inst.op() + " %" + inst.ifTrue().name() + " %" + inst.ifFalse().name());
+        iprintln("br " + visit(inst.getCmp().dst()) + " %" + inst.ifTrue().name() + " %" + inst.ifFalse().name());
         subIndent();
         return null;
     }
@@ -152,6 +153,14 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(Register reg) {
         return reg.irName();
+    }
+
+    @Override
+    public String visit(UnaryExprInst unaryExprInst) {
+        addIndent();
+        iprintln(visit(unaryExprInst.dst()) + " = " + unaryExprInst.op().toString() + visit(unaryExprInst.src()));
+        subIndent();
+        return null;
     }
 
     @Override

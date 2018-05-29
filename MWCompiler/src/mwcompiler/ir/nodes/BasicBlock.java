@@ -171,7 +171,7 @@ public class BasicBlock {
         return name;
     }
 
-    public Function getParentFunction() {
+    public Function parentFunction() {
         return parentFunction;
     }
 

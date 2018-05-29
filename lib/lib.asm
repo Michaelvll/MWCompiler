@@ -15,6 +15,8 @@ extern strlen
 extern __sprintf_chk
 extern scanf
 extern malloc
+extern strncpy
+
 
 SECTION .text
 
@@ -94,6 +96,27 @@ __lib_string_add:
         pop     r14
         ret
 
+ALIGN   16
+
+__lib_str_substring:
+        push    r12
+        push    rbp
+        mov     r12, rdi
+        push    rbx
+        mov     rbx, rsi
+        mov     rbp, rdx
+        sub     rbx, rdi
+        lea     rdi, [rbx+2H]
+        call    malloc
+        lea     rsi, [rbp+r12]
+        lea     rdx, [rbx+1H]
+        mov     rdi, rax
+        call    strncpy
+        mov     byte [rax+rbx+1H], 0
+        pop     rbx
+        pop     rbp
+        pop     r12
+        ret
 
 SECTION .rodata
 

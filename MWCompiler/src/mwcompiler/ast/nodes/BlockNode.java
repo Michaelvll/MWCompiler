@@ -25,7 +25,7 @@ public class BlockNode extends Node {
     }
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return location;
     }
 

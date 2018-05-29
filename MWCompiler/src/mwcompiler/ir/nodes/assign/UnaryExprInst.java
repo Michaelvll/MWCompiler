@@ -19,9 +19,17 @@ public class UnaryExprInst extends AssignInst {
         this.src = src;
     }
 
+    public Operand src() {
+        return src;
+    }
+
+    public ExprOps op() {
+        return op;
+    }
+
     @Override
     public <T> T accept(IRVisitor<T> visitor) {
-        return null;
+        return visitor.visit(this);
     }
 
     @Override

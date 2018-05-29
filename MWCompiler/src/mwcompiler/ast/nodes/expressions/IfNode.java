@@ -26,7 +26,7 @@ public class IfNode extends Node {
 
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return location;
     }
 

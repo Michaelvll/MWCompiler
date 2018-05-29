@@ -1,4 +1,8 @@
 int func(int a) {
+    string s = getString();
+    string t = getString();
+    if (s < t) println("good");
+    else println("bad");
     return a;
 }
 

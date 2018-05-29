@@ -29,7 +29,7 @@ public class NaiveAllocator {
         if (!function.isUserFunc()) return;
 
         Set<Var> vars = function.getVars();
-        for (BasicBlock block : function.getBasicBlocks()) {
+        for (BasicBlock block : function.basicBlocks()) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 for (Var var : inst.usedVar()) {
                     if (!var.isCompareTmp()) {
@@ -49,6 +49,7 @@ public class NaiveAllocator {
         usageRank.sort(Comparator.comparingInt(Var::useTime).reversed());
 
         List<PhysicalRegister> allocateRegs = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
+        function.addUsedPReg(RBP);
         for (int index = 0, allocateIndex = 0; index < usageRank.size() && allocateIndex < allocateRegs.size(); ++index) {
             if (!usageRank.get(index).isGlobal() && !usageRank.get(index).isCompareTmp()) {
 //                System.err.println("Var: " + usageRank.get(index).irName() + " -> " + allocateRegs.get(allocateIndex));
@@ -57,11 +58,10 @@ public class NaiveAllocator {
                 ++allocateIndex;
             }
         }
-//        function.addUsedPReg(RBP);
 
 
         // locate params
-        int paramStackTop = options.PTR_SIZE * 2; // rbp + return address
+        int paramStackTop =  function.usedPRegs().size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save + return address
         List<Var> params = function.paramVars();
         for (int index = 0; index < params.size(); ++index) {
             if (index >= PhysicalRegister.paramRegs.size()) {
@@ -71,7 +71,7 @@ public class NaiveAllocator {
         }
 
         // locate local variables
-        int localVarStackTop = function.usedPRegs().size() * options.PTR_SIZE; // callee-save(excluding rbp)
+        int localVarStackTop = options.PTR_SIZE;
         localVarStackTop = locateLocalVariables(function.getSymbolTable(), localVarStackTop);
 
         // locate tmp variables

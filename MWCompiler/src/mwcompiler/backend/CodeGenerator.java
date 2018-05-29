@@ -7,6 +7,7 @@ import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.assign.UnaryExprInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
@@ -34,7 +35,7 @@ public class CodeGenerator implements IRVisitor<String> {
     public void apply(ProgramIR programIR) {
         assembly = new StringBuilder();
 
-//        assembly.append("%include \"lib/lib.asm\"\n");
+        if (options.nasmLibIncludeCMD) assembly.append("%include \"lib/lib.asm\"\n");
         assembly.append("global main\n");
         assembly.append("extern printf, scanf, malloc, strlen, strcmp, sscanf\n");
 
@@ -76,25 +77,24 @@ public class CodeGenerator implements IRVisitor<String> {
         /* stack frame
          * ---------
          * function stack
-         * callee-save regs
          * --------- rbp
          * origin rbp
+         * callee-save regs
          * return address
          * param n
          * param n-1
          * ... param 7
          * former function stack
          */
-        append("push", RBP);
-        append("mov", RBP, RSP);
         if (!function.isMain()) {
             // Save used callee-save registers
             for (PhysicalRegister reg : function.usedPRegs()) {
-                if (calleeSaveRegs.contains(reg) && reg != RBP) {
+                if (calleeSaveRegs.contains(reg)) {
                     append("push", reg);
                 }
             }
-        }
+        } else append("push", RBP);
+        append("mov", RBP, RSP);
         append("sub", RSP, function.getVarStackSize() + options.PTR_SIZE);
         append("and", RSP.nasmName(), "-0x10");
         // Get params
@@ -106,7 +106,7 @@ public class CodeGenerator implements IRVisitor<String> {
             }
         }
 
-        List<BasicBlock> basicBlocks = function.getBasicBlocks();
+        List<BasicBlock> basicBlocks = function.basicBlocks();
         int blockSize = basicBlocks.size();
         for (int index = 0; index < blockSize; ++index) {
             BasicBlock block = basicBlocks.get(index);
@@ -191,11 +191,15 @@ public class CodeGenerator implements IRVisitor<String> {
                 append("lea", paramRegs.get(index).irName(), "[rel " + label + "]");
             } else append("mov", paramRegs.get(index), arg);
         }
+        if (argSize > paramRegSize) argStackSize = (argSize - paramRegSize) * options.PTR_SIZE;
+        if (argStackSize % 16 != 0) {
+            append("sub", RSP, options.PTR_SIZE);
+            argStackSize += options.PTR_SIZE;
+        }
         for (int index = argSize - 1; index >= paramRegSize; --index) {
             Operand arg = args.get(index);
             arg = visitMemory(arg, RAX, RCX);
             append("push", arg);
-            argStackSize += options.PTR_SIZE; // We rule that each arg must be size of 8
         }
         if (inst.function() == Function.SCANF_INT) {
             visitScanfInt(inst, RSI);
@@ -203,6 +207,13 @@ public class CodeGenerator implements IRVisitor<String> {
         }
         if (inst.function() == Function.STR_PARSE_INT) {
             visitScanfInt(inst, RDX);
+            return null;
+        }
+        if (inst.function() == Function.STR_ORD) {
+            Operand dst = inst.dst();
+            if (isMem(dst)) dst = RAX;
+            append("movsx", visit(dst), "byte [" + RSI.nasmName() + " + " + RDI.nasmName() + "]");
+            if (isMem(inst.dst())) append("mov", inst.dst(), RAX);
             return null;
         }
 
@@ -226,14 +237,12 @@ public class CodeGenerator implements IRVisitor<String> {
         if (!currentFunction.isMain()) {
             assembly.append("\n");
             append("mov", RSP, RBP);
-            append("sub", RSP, currentFunction.usedPRegs().size() * options.PTR_SIZE);
             List<PhysicalRegister> usedRegs = currentFunction.usedPRegs();
             for (int index = usedRegs.size() - 1; index >= 0; --index) {
                 PhysicalRegister reg = usedRegs.get(index);
-                if (calleeSaveRegs.contains(reg) && reg != RBP) append("pop", reg);
+                if (calleeSaveRegs.contains(reg)) append("pop", reg);
             }
-        }
-        append("leave");
+        } else append("leave");
         append("ret");
         return null;
     }
@@ -242,8 +251,8 @@ public class CodeGenerator implements IRVisitor<String> {
     public String visit(CondJumpInst inst) {
         BinaryExprInst cmp = inst.getCmp();
         String nasmOp = visitCmp(cmp.left(), cmp.right(), cmp.op());
-        append("j" + nasmOp, inst.getIfTrue().name());
-        if (inst.getIfFalse() != nextBlock) append("jmp", inst.getIfFalse().name());
+        append("j" + nasmOp, inst.ifTrue().name());
+        if (inst.ifFalse() != nextBlock) append("jmp", inst.ifFalse().name());
         return null;
     }
 
@@ -277,6 +286,20 @@ public class CodeGenerator implements IRVisitor<String> {
         if (reg.isGlobal()) return "qword [rel " + reg.nasmName() + "]";
         else if (reg.physicalRegister() == null) return visit(((Var) reg).stackPos());
         return reg.physicalRegister().irName();
+    }
+
+    @Override
+    public String visit(UnaryExprInst unaryExprInst) {
+        MutableOperand dst = unaryExprInst.dst();
+        Operand src = visitMemory(unaryExprInst.src(), RAX, RSI);
+        ExprOps op = unaryExprInst.op();
+        if (src == dst) append(op.nasmOp(), src);
+        else {
+            append("mov", RAX, src);
+            append(op.nasmOp(), RAX);
+            append("mov", dst, RAX);
+        }
+        return null;
     }
 
     private String visit(Instruction inst) {
@@ -393,7 +416,7 @@ public class CodeGenerator implements IRVisitor<String> {
                 return;
             preMovOp = new Pair<>(dstVal[0], dstVal[1]);
         } else preMovOp = null;
-        if (s.equals("lea")) target = target.replaceAll("qword ","");
+        if (s.equals("lea")) target = target.replaceAll("qword ", "");
 
         String delimiter = "\t\t";
         if (s.length() >= 4) delimiter = "\t";

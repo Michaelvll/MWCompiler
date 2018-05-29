@@ -102,7 +102,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 if (index < statementNum - 1) {
                     CompileWarining.add(stage,
                             "Statements after " + StringProcess.getRefString("return") + "will never be executed",
-                            statement.getStartLocation());
+                            statement.location());
                 }
                 node.clearStatement(index + 1);
                 break;
@@ -111,7 +111,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 if (index < statementNum - 1) {
                     CompileWarining.add(stage,
                             "Statements after " + StringProcess.getRefString("break") + "will never be executed",
-                            statement.getStartLocation());
+                            statement.location());
                 }
                 for (int removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
                 break;
@@ -120,7 +120,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 if (index < statementNum - 1) {
                     CompileWarining.add(stage,
                             "Statements after " + StringProcess.getRefString("continue") + "will never be executed",
-                            statement.getStartLocation());
+                            statement.location());
                 }
                 for (int removeInt = statementNum - 1; removeInt > index; --removeInt) statements.remove(removeInt);
                 break;
@@ -155,14 +155,14 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             } else {
                 if (declType.isPrimitiveTypeBase()) {
                     throw new CompileError(stage, "Assigning null to primitive type is not allowed ",
-                            node.getStartLocation());
+                            node.location());
                 }
             }
 
         }
         if (currentSymbolTable.findIn(node.getVarSymbol()) != null && !inClass) {
             throw new CompileError(stage, "Redeclare a variable " + StringProcess.getRefString(node.getVarSymbol().getName()) + "in the same scope",
-                    node.getStartLocation());
+                    node.location());
         }
         currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
 
@@ -177,7 +177,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         try {
             functionSymbol.checkLegal();
         } catch (RuntimeException e) {
-            throwNoSuchType(e.getMessage(), node.getStartLocation());
+            throwNoSuchType(e.getMessage(), node.location());
         }
         getCurrentSymbolTable(node.getBody());
         node.getParamList().forEach(this::visit);
@@ -186,7 +186,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             if (node.getFunctionSymbol().getReturnType() != VOID_TYPE_SYMBOL
                     && node.getInstance() != Instance.CONSTRUCTOR) {
                 CompileWarining.add(stage, "Function " + StringProcess.getRefString(node.getInstance().getName())
-                        + "has no return statement ", node.getStartLocation());
+                        + "has no return statement ", node.location());
             }
         }
         expectedReturnType = null;
@@ -206,55 +206,55 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     // Expressions
     @Override
     public ExprType visit(BinaryExprNode node) {
-        ExprType lhsType = visit(node.getLeft());
-        ExprType rhsType = visit(node.getRight());
+        ExprType lhsType = visit(node.left());
+        ExprType rhsType = visit(node.right());
         TypeSymbol lhsTypeSymbol = (TypeSymbol) lhsType.symbol;
         TypeSymbol rhsTypeSymbol = (TypeSymbol) rhsType.symbol;
 
-        if (node.getOp() != ASSIGN && node.getOp() != EQ && node.getOp() != NEQ
+        if (node.op() != ASSIGN && node.op() != EQ && node.op() != NEQ
                 && lhsTypeSymbol != rhsTypeSymbol) {
-            throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.getStartLocation());
+            throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.location());
         }
 
 
-        switch (node.getOp()) {
+        switch (node.op()) {
             case ASSIGN:
-                if (lhsType.valType == RVAL || node.getLeft() instanceof FunctionCallNode) {
-                    throw new CompileError(stage, "Can not assign to a Rvalue ", node.getStartLocation());
+                if (lhsType.valType == RVAL || node.left() instanceof FunctionCallNode) {
+                    throw new CompileError(stage, "Can not assign to a Rvalue ", node.location());
                 }
-                if (node.getLeft() instanceof IdentifierExprNode) {
-                    if (((IdentifierExprNode) node.getLeft()).getInstance() == Instance.THIS)
+                if (node.left() instanceof IdentifierExprNode) {
+                    if (((IdentifierExprNode) node.left()).getInstance() == Instance.THIS)
                         throw new CompileError(stage, "Can not assign to "
-                                + StringProcess.getRefString("this"), node.getStartLocation());
+                                + StringProcess.getRefString("this"), node.location());
                 }
                 if (((!lhsTypeSymbol.isPrimitiveType()) && rhsTypeSymbol == NULL_TYPE_SYMBOL) || lhsTypeSymbol == rhsTypeSymbol) {
                     return setType(node, VOID_TYPE_SYMBOL, RVAL);
                 }
-                throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.getStartLocation());
+                throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.location());
             case ADD:
                 if (lhsTypeSymbol != INT_TYPE_SYMBOL && lhsTypeSymbol != STRING_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), lhsTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.op(), lhsTypeSymbol, node.location());
                 return setType(node, lhsTypeSymbol, RVAL);
             case SUB: case DIV: case MOD: case MUL: case LSFT: case RSFT: case BITOR: case BITAND:
             case BITXOR:
                 if (lhsTypeSymbol != INT_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), lhsTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.op(), lhsTypeSymbol, node.location());
                 return setType(node, INT_TYPE_SYMBOL, RVAL);
             case LT: case GT: case LTE:
             case GTE:
                 if (lhsTypeSymbol != STRING_TYPE_SYMBOL && lhsTypeSymbol != INT_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), lhsTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.op(), lhsTypeSymbol, node.location());
                 return setType(node, BOOL_TYPE_SYMBOL, RVAL);
             case AND: case OR:
                 if (lhsTypeSymbol != BOOL_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), lhsTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.op(), lhsTypeSymbol, node.location());
                 return setType(node, BOOL_TYPE_SYMBOL, RVAL);
             case EQ: case NEQ:
                 if (rhsTypeSymbol != NULL_TYPE_SYMBOL && lhsTypeSymbol != rhsTypeSymbol) {
-                    throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.getStartLocation());
+                    throwTypeMismatchErr(lhsTypeSymbol, rhsTypeSymbol, node.location());
                 }
                 if (lhsTypeSymbol == VOID_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), lhsTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.op(), lhsTypeSymbol, node.location());
                 return setType(node, BOOL_TYPE_SYMBOL, RVAL);
             default:
                 throw new RuntimeException("Compiler Bug: Undefined binary op");
@@ -268,22 +268,22 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         switch (node.getOp()) {
             case INC: case DEC: case INC_SUFF: case DEC_SUFF:
                 if (exprTypeSymbol != INT_TYPE_SYMBOL) {
-                    throwNotSupport(node.getOp(), exprTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.getOp(), exprTypeSymbol, node.location());
                 }
                 if (exprType.valType != LVAL) {
                     throw new CompileError(stage, "ERROR (Type Checking) Operator "
                             + StringProcess.getRefString(node.getOp().toString()) + "not support for rvalue",
-                            node.getStartLocation());
+                            node.location());
                 }
                 return setType(node, INT_TYPE_SYMBOL, RVAL);
             case NOT:
                 if (exprTypeSymbol != BOOL_TYPE_SYMBOL) {
-                    throwNotSupport(node.getOp(), exprTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.getOp(), exprTypeSymbol, node.location());
                 }
                 return setType(node, BOOL_TYPE_SYMBOL, RVAL);
             case ADD: case SUB: case BITNOT:
                 if (exprTypeSymbol != INT_TYPE_SYMBOL)
-                    throwNotSupport(node.getOp(), exprTypeSymbol, node.getStartLocation());
+                    throwNotSupport(node.getOp(), exprTypeSymbol, node.location());
                 return setType(node, INT_TYPE_SYMBOL, RVAL);
             default:
                 throw new RuntimeException("Compiler Bug: Undefined unary op");
@@ -295,7 +295,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         Instance instance = node.getInstance();
         SymbolInfo symbolInfo = currentSymbolTable.findAll(instance);
         if (symbolInfo == null) {
-            throwUndefined(instance.getName(), node.getStartLocation());
+            throwUndefined(instance.getName(), node.location());
         }
         return setType(node, symbolInfo.getSymbol(), LVAL);
     }
@@ -357,13 +357,13 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         if (!(callerType.symbol instanceof FunctionSymbol)) {
             throw new CompileError(stage, "A non function name "
                     + StringProcess.getRefString(callerType.symbol.getName()) + "is not callable ",
-                    node.getStartLocation());
+                    node.location());
         }
         FunctionSymbol functionSymbol = (FunctionSymbol) callerType.symbol;
 
         List<ExprNode> args = node.getArgs();
         List<TypeSymbol> params = functionSymbol.getParams();
-        checkArgs(args, params, node.getStartLocation());
+        checkArgs(args, params, node.location());
         if (functionSymbol.getReturnType() instanceof ArrayTypeSymbol)
             return setType(node, functionSymbol.getReturnType(), LVAL);
         return setType(node, functionSymbol.getReturnType(), RVAL);
@@ -377,7 +377,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                 .findIn(Instance.CONSTRUCTOR).getSymbol();
         List<ExprNode> args = node.getArgs();
         List<TypeSymbol> params = functionSymbol.getParams();
-        checkArgs(args, params, node.getStartLocation());
+        checkArgs(args, params, node.location());
         return setType(node, classTypeSymbol, LVAL);
     }
 
@@ -390,7 +390,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         try {
             memberType = containerTypeSymbol.findIn(node.getMember().getInstance()).getSymbol();
         } catch (RuntimeException e) {
-            throw new CompileError(stage, e.getMessage(), node.getStartLocation());
+            throw new CompileError(stage, e.getMessage(), node.location());
         }
         return setType(node, memberType, LVAL);
     }
@@ -401,10 +401,10 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
         ExprType subscript = visit(node.getSubscript());
         if (!(container.symbol instanceof ArrayTypeSymbol)) {
             throw new CompileError(stage, "Non array type can not get member using subscript, "
-                    + StringProcess.getRefString(container.symbol.getName()), node.getStartLocation());
+                    + StringProcess.getRefString(container.symbol.getName()), node.location());
         }
         if (subscript.symbol != INT_TYPE_SYMBOL) {
-            throw new CompileError(stage, "The subscript must have int type ", node.getSubscript().getStartLocation());
+            throw new CompileError(stage, "The subscript must have int type ", node.getSubscript().location());
         }
         ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) container.symbol;
         if (arrayTypeSymbol.getDim() - 1 == 0) {
@@ -421,7 +421,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
             ExprType cond = visit(node.getCondition());
             if (cond.symbol != BOOL_TYPE_SYMBOL) {
                 throw new CompileError(stage, "If condition must be a bool type, not " + cond.symbol.getName(),
-                        node.getStartLocation());
+                        node.location());
             }
         }
         visit(node.getBody());
@@ -455,7 +455,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(BreakNode node) {
         if (inLoop == 0) {
             throw new CompileError(stage, "Break statement should not appear out of loop scope ",
-                    node.getStartLocation());
+                    node.location());
         }
         return null;
     }
@@ -463,25 +463,25 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     @Override
     public ExprType visit(ReturnNode node) {
         if (expectedReturnType == null) {
-            throw new CompileError(stage, "ReturnInst statement is unexpected in this scope", node.getStartLocation());
+            throw new CompileError(stage, "ReturnInst statement is unexpected in this scope", node.location());
         }
         if (node.getReturnVal() != null) {
             TypeSymbol returnType = (TypeSymbol) visit(node.getReturnVal()).symbol;
             if (returnType != NULL_TYPE_SYMBOL && expectedReturnType != returnType) {
                 throw new CompileError(stage, "ReturnInst type " + StringProcess.getRefString(expectedReturnType.getName())
                         + "expected, but " + StringProcess.getRefString(returnType.getName())
-                        + "returned.", node.getStartLocation());
+                        + "returned.", node.location());
             }
             if (returnType == VOID_TYPE_SYMBOL) {
                 throw new CompileError(stage, "Cannot return type " + StringProcess.getRefString("void"),
-                        node.getStartLocation());
+                        node.location());
             }
             return setType(node, visit(node.getReturnVal()).symbol, RVAL);
         }
         if (expectedReturnType != VOID_TYPE_SYMBOL) {
             throw new CompileError(stage, "ReturnInst type " + StringProcess.getRefString(expectedReturnType.getName())
                     + "expected, but " + StringProcess.getRefString("void")
-                    + "returned.", node.getStartLocation());
+                    + "returned.", node.location());
         }
         return setType(node, VOID_TYPE_SYMBOL, RVAL);
     }
@@ -490,7 +490,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(ContinueNode node) {
         if (inLoop == 0) {
             throw new CompileError(stage, "Continue statement should not appear out of loop scope ",
-                    node.getStartLocation());
+                    node.location());
         }
         return null;
     }

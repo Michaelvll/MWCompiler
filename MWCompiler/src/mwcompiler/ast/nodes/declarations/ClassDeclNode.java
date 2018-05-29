@@ -40,7 +40,7 @@ public class ClassDeclNode extends DeclarationNode {
 
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return declClassPos;
     }
 

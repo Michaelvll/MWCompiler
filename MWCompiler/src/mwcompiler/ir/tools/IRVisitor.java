@@ -5,6 +5,7 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.nodes.assign.UnaryExprInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
@@ -34,4 +35,6 @@ public interface IRVisitor<T> {
     T visit(StringLiteral inst);
 
     T visit(Register reg);
+
+    T visit(UnaryExprInst unaryExprInst);
 }

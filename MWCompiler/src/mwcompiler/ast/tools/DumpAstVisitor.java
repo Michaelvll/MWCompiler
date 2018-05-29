@@ -281,11 +281,11 @@ public class DumpAstVisitor implements AstVisitor<Void> {
     public Void visit(BinaryExprNode node) {
         addIndent();
         println("<BinaryExprNode>");
-        println("op: " + node.getOp().toString());
+        println("op: " + node.op().toString());
         println("left: ");
-        visit(node.getLeft());
+        visit(node.left());
         println("right: ");
-        visit(node.getRight());
+        visit(node.right());
         subIndent();
         return null;
     }

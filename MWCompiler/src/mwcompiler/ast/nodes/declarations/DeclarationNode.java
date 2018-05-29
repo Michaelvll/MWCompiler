@@ -12,5 +12,5 @@ import mwcompiler.utility.Location;
  */
 
 public abstract class DeclarationNode extends Node {
-    public abstract Location getStartLocation();
+    public abstract Location location();
 }

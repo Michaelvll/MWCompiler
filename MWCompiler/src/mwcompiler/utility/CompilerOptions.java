@@ -1,5 +1,6 @@
 package mwcompiler.utility;
 
+import mwcompiler.ir.operands.Operand;
 import org.apache.commons.cli.*;
 
 import java.io.FileInputStream;
@@ -17,6 +18,7 @@ public class CompilerOptions {
     // Compiling Options
     public boolean dumpAst = false;
     public boolean dumpIR = false;
+    public boolean nasmLibIncludeCMD = false;
     public InputStream in = System.in;
     public PrintStream out = System.out;
     public PrintStream astOut = System.err;
@@ -45,6 +47,8 @@ public class CompilerOptions {
         options.addOption(Option.builder().longOpt("dump-ast").desc("Dump dumpAst for source code").hasArg(false).build());
 
         options.addOption(Option.builder().longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build());
+
+        options.addOption(Option.builder().longOpt("nasm-lib-include-cmd").desc("Add include command at the top of nasm output file").hasArg(false).build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -84,6 +88,8 @@ public class CompilerOptions {
             if (cmd.hasOption("dump-ast")) this.dumpAst = true;
 
             if (cmd.hasOption("dump-ir")) this.dumpIR = true;
+
+            if (cmd.hasOption("nasm-lib-include-cmd")) this.nasmLibIncludeCMD = true;
 
             if (cmd.hasOption("astOutput")) astOutFile = cmd.getOptionValue("astOutput");
             else if (this.dumpAst) System.err.println("No AST output file specified, output redirected to std-err");

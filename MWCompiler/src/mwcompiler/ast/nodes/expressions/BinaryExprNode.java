@@ -29,15 +29,15 @@ public class BinaryExprNode extends ExprNode {
         return visitor.visit(this);
     }
 
-    public ExprOps getOp() {
+    public ExprOps op() {
         return op;
     }
 
-    public ExprNode getLeft() {
+    public ExprNode left() {
         return left;
     }
 
-    public ExprNode getRight() {
+    public ExprNode right() {
         return right;
     }
 

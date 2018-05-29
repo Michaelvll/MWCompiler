@@ -61,7 +61,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
                     if (search != null) {
                         throw new CompileError(stage, "Can not use the same name <" + StringProcess.GREEN
                                 + variableDeclNode.getVarSymbol().getName() + "> for class and " +
-                                "variable in same scope", variableDeclNode.getStartLocation());
+                                "variable in same scope", variableDeclNode.location());
                     }
                 }
             } else

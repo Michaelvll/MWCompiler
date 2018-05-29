@@ -23,12 +23,12 @@ public abstract class ExprNode extends Node {
         this.type = type;
     }
 
-    public TypeSymbol getType() {
+    public TypeSymbol type() {
         return type;
     }
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return location;
     }
 

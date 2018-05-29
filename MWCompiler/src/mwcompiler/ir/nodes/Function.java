@@ -9,7 +9,6 @@ import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.symbols.FunctionSymbol;
-import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.SymbolTable;
 
 import java.util.*;
@@ -24,6 +23,7 @@ public class Function {
     public enum FuncType {
         USER, EXTERN, LIB, TEMP
     }
+
     private final FuncType funcType;
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
@@ -94,7 +94,7 @@ public class Function {
         basicBlocks.addFirst(block);
     }
 
-    public List<BasicBlock> getBasicBlocks() {
+    public LinkedList<BasicBlock> basicBlocks() {
         return basicBlocks;
     }
 
@@ -123,23 +123,33 @@ public class Function {
             if (block.front() == block.back() && block.back() instanceof DirectJumpInst) {
                 DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
                 jumpLabelChangeMap.put(block, directJumpInst.target());
-            } else {
-                if (block.back() instanceof DirectJumpInst) {
-                    DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
-                    BasicBlock search = jumpLabelChangeMap.get(directJumpInst.target());
-                    if (search != null) directJumpInst.setTarget(search);
-                } else if (block.back() instanceof CondJumpInst) {
-                    CondJumpInst condJumpInst = (CondJumpInst) block.back();
-                    if (condJumpInst.getIfTrue() == newBlocks.getFirst()) condJumpInst.not();
-                    BasicBlock search = jumpLabelChangeMap.get(condJumpInst.getIfTrue());
-                    if (search != null) condJumpInst.setIfTrue(search);
-                    search = jumpLabelChangeMap.get(condJumpInst.getIfFalse());
-                    if (search != null) condJumpInst.setIfFalse(search);
-                }
-                newBlocks.addFirst(block);
             }
         }
+
+        for (int i = size - 1; i >= 0; --i) {
+            BasicBlock block = basicBlocks.get(i);
+            if (block.back() instanceof DirectJumpInst) {
+                DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
+                directJumpInst.setTarget(searchForNewTarget(jumpLabelChangeMap, directJumpInst.target()));
+            } else if (block.back() instanceof CondJumpInst) {
+                CondJumpInst condJumpInst = (CondJumpInst) block.back();
+                condJumpInst.setIfTrue(searchForNewTarget(jumpLabelChangeMap, condJumpInst.ifTrue()));
+                condJumpInst.setIfFalse(searchForNewTarget(jumpLabelChangeMap, condJumpInst.ifFalse()));
+                if (condJumpInst.ifTrue() == newBlocks.getFirst()) condJumpInst.not();
+            }
+            if (block.front() != block.back() || !(block.back() instanceof DirectJumpInst)) newBlocks.addFirst(block);
+        }
         basicBlocks = newBlocks;
+    }
+
+    private BasicBlock searchForNewTarget(Map<BasicBlock, BasicBlock> map, BasicBlock block) {
+        BasicBlock preSearch = block;
+        BasicBlock search = map.get(block);
+        while (search != null) {
+            preSearch = search;
+            search = map.get(search);
+        }
+        return preSearch;
     }
 
     public Set<Var> getVars() {
@@ -191,7 +201,7 @@ public class Function {
     public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, FuncType.EXTERN);
     public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, FuncType.LIB);
     public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, FuncType.TEMP);
-    public static final Function ORD = new Function(FunctionSymbol.ORD, FuncType.LIB);
+    public static final Function STR_ORD = new Function(FunctionSymbol.ORD, FuncType.LIB);
 
     public static final Function SCANF_INT = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "scanf", STRING_TYPE_SYMBOL), FuncType.EXTERN);
     // BuiltIn Function for string Operation
@@ -202,7 +212,7 @@ public class Function {
     public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), FuncType.EXTERN);
 
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
-            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_CMP));
+            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, STR_ORD, STR_ADD, STR_CMP));
 
     public FuncType funcType() {
         return funcType;

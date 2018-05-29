@@ -17,9 +17,9 @@ public class Instance {
     public static final Instance TO_STRING = new Instance("toString");
     public static final Instance SIZE = new Instance("size");
     public static final Instance LENGTH = new Instance("strlen");
-    public static final Instance SUBSTRING = new Instance("_str_substring");
-    public static final Instance PARSE_INT = new Instance("_str_parseInt");
-    public static final Instance ORD = new Instance("_str_ord");
+    public static final Instance SUBSTRING = new Instance("str_substring");
+    public static final Instance PARSE_INT = new Instance("str_parseInt");
+    public static final Instance ORD = new Instance("str_ord");
 
     public static final Set<Instance> builtinSet = new HashSet<>();
 

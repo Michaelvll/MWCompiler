@@ -83,7 +83,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         if (SymbolTable.getClassSymbolTable(node.getClassSymbol()) != null) {
             throw new CompileError(stage,
                     "Redeclare class " + StringProcess.getRefString(node.getClassSymbol().getName()),
-                    node.getStartLocation());
+                    node.location());
         }
         SymbolTable.putNamedSymbolTable(node.getClassSymbol(), node.getBody().getCurrentSymbolTable());
         currentSymbolTable = node.getBody().getCurrentSymbolTable();
@@ -112,7 +112,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
             if (search != null) {
                 throw new CompileError(stage, "Redeclare a variable "
                         + StringProcess.getRefString(node.getVarSymbol().getName()) + "in the same scope",
-                        node.getStartLocation());
+                        node.location());
             }
             currentSymbolTable.put(node.getVarSymbol(), node.getTypeSymbol());
         }
@@ -124,10 +124,10 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         if (currentSymbolTable.findIn(node.getInstance()) != null) {
             throw new CompileError(stage, "Redeclare function "
                     + StringProcess.getRefString(node.getInstance().getName()) + "in the same scope ",
-                    node.getStartLocation());
+                    node.location());
         }
         if (node.getInstance().getName().equals("main"))
-            mainLocation = node.getStartLocation();
+            mainLocation = node.location();
         currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());
         if (inClass)
             currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());

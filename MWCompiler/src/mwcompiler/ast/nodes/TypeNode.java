@@ -30,7 +30,7 @@ public class TypeNode extends Node {
     }
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return location;
     }
 

@@ -79,7 +79,7 @@ public class FunctionDeclNode extends DeclarationNode {
 
 
     @Override
-    public Location getStartLocation() {
+    public Location location() {
         return returnTypePos;
     }
 
