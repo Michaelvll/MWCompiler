@@ -82,6 +82,8 @@ public class FunctionSymbol extends Symbol {
     public static final FunctionSymbol PRINT = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINT, STRING_TYPE_SYMBOL);
     public static final FunctionSymbol PRINTLN = new FunctionSymbol(VOID_TYPE_SYMBOL, Instance.PRINTLN, STRING_TYPE_SYMBOL);
     public static final FunctionSymbol GET_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.GET_STRING);
+    // This will be solved in code gen
+    public static final FunctionSymbol SCANF_INT = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.SCANF_INT, STRING_TYPE_SYMBOL);
     public static final FunctionSymbol GET_INT = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.GET_INT);
     public static final FunctionSymbol TO_STRING = new FunctionSymbol(STRING_TYPE_SYMBOL, Instance.TO_STRING, INT_TYPE_SYMBOL);
     public static final FunctionSymbol SIZE = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.SIZE);

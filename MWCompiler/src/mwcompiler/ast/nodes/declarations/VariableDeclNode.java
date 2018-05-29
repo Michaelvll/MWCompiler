@@ -44,7 +44,7 @@ public class VariableDeclNode extends DeclarationNode {
         return var;
     }
 
-    public ExprNode getInit() {
+    public ExprNode init() {
         return init;
     }
 

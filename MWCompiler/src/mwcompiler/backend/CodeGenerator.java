@@ -17,6 +17,7 @@ import mwcompiler.utility.ExprOps;
 import mwcompiler.utility.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 import static mwcompiler.ir.operands.PhysicalRegister.*;
 
@@ -33,18 +34,29 @@ public class CodeGenerator implements IRVisitor<String> {
     public void apply(ProgramIR programIR) {
         assembly = new StringBuilder();
 
-        programIR.getFunctionMap().values().forEach(func -> {
-            if (func.isUserFunc()) append("global", func.name());
-        });
+        assembly.append("global main\n");
         assembly.append("extern printf, scanf, malloc\n");
 
         assembly.append("\nSECTION .text\n");
         indent = "\t\t";
         programIR.getFunctionMap().values().forEach(this::visit);
 
-        assembly.append("\nSECTION .data\n");
+        assembly.append("\nSECTION .data\talign=8\n");
         for (StringLiteral s : programIR.getStringPool().values()) {
-            assembly.append(s.getLabel()).append(":\n\t\t").append(" db ").append(s.getVal()).append(", 0\n");
+            assembly.append(s.getLabel()).append(":\n\t\t").append("db ").append(s.getVal()).append("\n");
+        }
+        for (Map.Entry<Var, IntLiteral> entry : programIR.getGlobalPool().entrySet()) {
+            IntLiteral val = entry.getValue();
+            if (val != null)
+                assembly.append(entry.getKey().nasmName()).append(":\n\t\t").append("dq ")
+                        .append(val.getVal()).append("\n");
+        }
+        assembly.append("\nSECTION .bss\talign=8\n");
+        for (Map.Entry<Var, IntLiteral> entry : programIR.getGlobalPool().entrySet()) {
+            IntLiteral val = entry.getValue();
+            if (val == null)
+                assembly.append(entry.getKey().nasmName()).append(":\n\t\t").append("resq ")
+                        .append(1).append("\n");
         }
         options.out.print(assembly.toString());
     }
@@ -63,25 +75,27 @@ public class CodeGenerator implements IRVisitor<String> {
         /* stack frame
          * ---------
          * function stack
+         * callee-save regs
          * --------- rbp
          * origin rbp
-         * callee-save
          * return address
          * param n
          * param n-1
-         * ... param 1
+         * ... param 7
          * former function stack
          */
+        append("push", RBP);
+        append("mov", RBP, RSP);
         if (!function.isMain()) {
             // Save used callee-save registers
             for (PhysicalRegister reg : function.usedPRegs()) {
-                if (calleeSaveRegs.contains(reg)) {
+                if (calleeSaveRegs.contains(reg) && reg != RBP) {
                     append("push", reg);
                 }
             }
-        } else append("push", RBP);
-        append("mov", RBP, RSP);
-        append("sub", RSP, function.getVarStackSize());
+        }
+        append("sub", RSP, function.getVarStackSize() + options.PTR_SIZE);
+        append("and", RSP.nasmName(), "-0x10");
         // Get params
         List<Var> params = function.paramVars();
         for (int index = 0; index < params.size(); ++index) {
@@ -115,7 +129,7 @@ public class CodeGenerator implements IRVisitor<String> {
         if (op.isCompare()) {
             String nasmOp = visitCmp(left, right, op);
             append("set" + nasmOp, RAX.lowByte());
-            append("movzx", RAX.toString(), RAX.lowByte());
+            append("movzx", RAX.irName(), RAX.lowByte());
         } else {
             Operand dst = binaryExprInst.dst();
             Pair<Operand, Operand> newOperand = varToReg(left, right, dst == left);
@@ -170,46 +184,51 @@ public class CodeGenerator implements IRVisitor<String> {
         int argStackSize = 0;
         for (int index = 0; index < Math.min(paramRegSize, argSize); ++index) {
             Operand arg = args.get(index);
+            arg = visitMemory(arg, RAX, RCX);
             if (arg instanceof StringLiteral) {
                 String label = ((StringLiteral) arg).getLabel();
-                append("lea", paramRegs.get(index).toString(), "[rel " + label + "]");
+                append("lea", paramRegs.get(index).irName(), "[rel " + label + "]");
             } else append("mov", paramRegs.get(index), arg);
         }
         for (int index = argSize - 1; index >= paramRegSize; --index) {
             Operand arg = args.get(index);
+            arg = visitMemory(arg, RAX, RCX);
             append("push", arg);
-            argStackSize += options.PTR_SIZE; // TODO: Need to be improved when not every arg is size of 8
+            argStackSize += options.PTR_SIZE; // We rule that each arg must be size of 8
+        }
+        if (inst.function() == Function.SCANF_INT) {
+            visitScanfInt(inst);
+            return null;
         }
 
         //        if (inst.function() == Function.PRINT_INT || inst.function() == Function.PRINT_STR) append("xor", RAX, RAX);
-        append("call", inst.function().
-
-                nasmName());
+        // TODO: Align stack to 16
+        append("call", inst.function().nasmName());
         if (inst.dst() != null)
-
-            append("mov", inst.dst(), RAX); // dst must be register which is guaranteed by the basic block push back
+            append("mov", inst.dst(), RAX); // dst must be register(Var) which is guaranteed by the basic block push back
         if (argStackSize > 0) append("add", RSP, argStackSize);
         return null;
     }
 
+
     @Override
     public String visit(ReturnInst inst) {
         Operand val = inst.getRetVal();
-        if (val instanceof Memory) val = visitMemory((Memory) val, RAX, RSI);
+        val = visitMemory(val, RAX, RSI);
         if (val != null) append("mov", RAX, val);
 
         // ====== epilogue ==========
         if (!currentFunction.isMain()) {
             assembly.append("\n");
             append("mov", RSP, RBP);
+            append("sub", RSP, currentFunction.usedPRegs().size() * options.PTR_SIZE);
             List<PhysicalRegister> usedRegs = currentFunction.usedPRegs();
             for (int index = usedRegs.size() - 1; index >= 0; --index) {
                 PhysicalRegister reg = usedRegs.get(index);
-                if (calleeSaveRegs.contains(reg)) append("pop", reg);
+                if (calleeSaveRegs.contains(reg) && reg != RBP) append("pop", reg);
             }
-        } else {
-            append("leave");
         }
+        append("leave");
         append("ret");
         return null;
     }
@@ -219,7 +238,7 @@ public class CodeGenerator implements IRVisitor<String> {
         BinaryExprInst cmp = inst.getCmp();
         String nasmOp = visitCmp(cmp.left(), cmp.right(), cmp.op());
         append("j" + nasmOp, inst.getIfTrue().name());
-        assert inst.getIfFalse() == nextBlock;
+        if (inst.getIfFalse() != nextBlock) append("jmp", inst.getIfFalse().name());
         return null;
     }
 
@@ -233,7 +252,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
     @Override
     public String visit(Memory memory) {
-        return "qword " + memory.toString();
+        return "qword " + memory.nasmName();
     }
 
 
@@ -250,8 +269,9 @@ public class CodeGenerator implements IRVisitor<String> {
 
     @Override
     public String visit(Register reg) {
-        if (reg.physicalRegister() == null) return visit(((Var) reg).stackPos());
-        return reg.physicalRegister().toString();
+        if (reg.isGlobal()) return "qword [rel " + reg.nasmName() + "]";
+        else if (reg.physicalRegister() == null) return visit(((Var) reg).stackPos());
+        return reg.physicalRegister().irName();
     }
 
     private String visit(Instruction inst) {
@@ -263,17 +283,23 @@ public class CodeGenerator implements IRVisitor<String> {
         return operand.accept(this);
     }
 
-    private Memory visitMemory(Memory memory, PhysicalRegister reg1, PhysicalRegister reg2) {
+    private Operand visitMemory(Operand operand, PhysicalRegister reg1, PhysicalRegister reg2) {
+        if (!(operand instanceof Memory)) return operand;
+        Memory memory = (Memory) operand;
         Register baseReg = memory.baseReg();
         Register indexReg = memory.indexReg();
 
         Var baseVar = (Var) baseReg;
-        append("mov", reg1, baseVar);
-        baseReg = reg1;
+        if (isMem(baseVar)) {
+            append("mov", reg1, baseVar);
+            baseReg = reg1;
+        } else baseReg = baseVar.physicalRegister();
         if (indexReg != null) {
             Var indexVar = (Var) indexReg;
-            append("mov", reg2, indexVar);
-            indexReg = reg2;
+            if (isMem(indexVar)) {
+                append("mov", reg2, indexVar);
+                indexReg = reg2;
+            } else indexReg = indexVar.physicalRegister();
         }
 
         return new Memory(baseReg, indexReg, memory.scale(), memory.disp());
@@ -289,39 +315,59 @@ public class CodeGenerator implements IRVisitor<String> {
 
     private Pair<Operand, Operand> varToReg(Operand left, Operand right, boolean rightTmp) {
         if (isMem(left) && isMem(right)) {
-            if (left instanceof Memory) left = visitMemory((Memory) left, RAX, RSI);
+            left = visitMemory(left, RAX, RSI);
             if (!rightTmp) {
                 append("mov", RSI, left);
                 if (left == right) right = RSI;
                 left = RSI;
             }
-            if (right instanceof Memory) right = visitMemory((Memory) right, RAX, RDI);
+            right = visitMemory(right, RAX, RDI);
             if (rightTmp) {
                 append("mov", RDI, right);
                 if (left == right) left = RDI;
                 right = RDI;
             }
         } else {
-            if (left instanceof Memory) left = visitMemory((Memory) left, RAX, RSI);
-            if (right instanceof Memory) right = visitMemory((Memory) right, RAX, RSI);
+            left = visitMemory(left, RAX, RSI);
+            right = visitMemory(right, RAX, RSI);
         }
         return new Pair<>(left, right);
     }
 
     private String visitCmp(Operand left, Operand right, ExprOps op) {
         if (left instanceof IntLiteral) {
+            op = op.exchange();
             Operand tmp = left;
             left = right;
             right = tmp;
-            op = op.revert();
         }
         append("cmp", varToReg(left, right));
         return op.nasmOp();
     }
 
+    private void visitScanfInt(FunctionCallInst inst) {
+        append("");
+        if (isMem(inst.dst())) append("lea", RSI, visitMemory(inst.dst(), RAX, RCX));
+        else {
+            append("sub", RSP, options.FUNC_CALL_STACK_ALIGN_SIZE);
+            append("mov", RSI, RSP);
+        }
+        append("call", "scanf");
+        if (!isMem(inst.dst())) {
+            Operand src = new Memory(RSP, null, 0, 0);
+            append("mov", RAX, src);
+            src = RAX;
+            append("mov", inst.dst(), src);
+            append("add", RSP, options.FUNC_CALL_STACK_ALIGN_SIZE);
+        }
+        append("");
+    }
+
     private void append(String s, String dst, String val) {
         append(s, dst + ", " + val);
     }
+
+    private Pair<String, String> preMovOp = null;
 
     private void append(String s, Operand dst, Operand val) {
         append(s, visit(dst), visit(val));
@@ -336,19 +382,26 @@ public class CodeGenerator implements IRVisitor<String> {
     }
 
     private void append(String s, String target) {
+        if (s.equals("mov")) {
+            String[] dstVal = target.split(", ");
+            if (preMovOp != null && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
+                return;
+            preMovOp = new Pair<>(dstVal[0], dstVal[1]);
+        } else preMovOp = null;
+        if (s.equals("lea")) target = target.replaceAll("qword ","");
+
         String delimiter = "\t\t";
         if (s.length() >= 4) delimiter = "\t";
         assembly.append(indent).append(s).append(delimiter).append(target).append("\n");
     }
 
     private void append(String s, Operand target) {
-        String delimiter = "\t\t";
-        if (s.length() >= 4) delimiter = "\t";
-        assembly.append(indent).append(s).append(delimiter).append(visit(target)).append("\n");
+        append(s, visit(target));
     }
 
 
     private void append(String s) {
+        preMovOp = null;
         assembly.append(indent).append(s).append("\n");
     }
 

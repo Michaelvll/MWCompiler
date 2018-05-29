@@ -38,6 +38,10 @@ public class BinaryExprInst extends AssignInst {
         return op;
     }
 
+    public void notOp() {
+        this.op = op.not();
+    }
+
     public boolean isCompare() {
         return op.isCompare();
     }

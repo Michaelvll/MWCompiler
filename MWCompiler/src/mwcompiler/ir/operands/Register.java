@@ -22,7 +22,10 @@ public abstract class Register extends MutableOperand {
         return visitor.visit(this);
     }
 
-    public abstract String toString();
+    public abstract String nasmName();
+
+    public abstract String irName();
 
 
+    public abstract boolean isGlobal();
 }

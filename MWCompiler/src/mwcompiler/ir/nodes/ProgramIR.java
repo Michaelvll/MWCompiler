@@ -1,6 +1,6 @@
 package mwcompiler.ir.nodes;
 
-import mwcompiler.ir.operands.StringLiteral;
+import mwcompiler.ir.operands.*;
 import mwcompiler.symbols.FunctionSymbol;
 
 import java.util.HashMap;
@@ -9,7 +9,16 @@ import java.util.Map;
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
     private Map<String, StringLiteral> stringPool = new HashMap<>();
+    private Map<Var, IntLiteral> globalPool = new HashMap<>();
 
+    public void addGlobal(Var var, Operand init) {
+        if (init instanceof IntLiteral) globalPool.put(var, (IntLiteral) init);
+        else globalPool.put(var, null);
+    }
+
+    public Map<Var, IntLiteral> getGlobalPool() {
+        return globalPool;
+    }
 
     public void putFunction(Function function) {
         functionMap.put(function.getFunctionSymbol(), function);
@@ -34,4 +43,5 @@ public class ProgramIR {
     public Map<String, StringLiteral> getStringPool() {
         return stringPool;
     }
+
 }

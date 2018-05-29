@@ -145,8 +145,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
                     "Can not declare a variable as type " + StringProcess.getRefString(declType.getName()),
                     node.getTypePos());
         }
-        if (node.getInit() != null) {
-            ExprType rhsType = visit(node.getInit());
+        if (node.init() != null) {
+            ExprType rhsType = visit(node.init());
             if (rhsType.symbol != NULL_TYPE_SYMBOL) {
                 if (declType != rhsType.symbol) {
                     throwTypeMismatchErr(node.getTypeSymbol(), rhsType.symbol, node.getInitPos());

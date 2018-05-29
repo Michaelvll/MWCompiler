@@ -59,4 +59,10 @@ public class CondJumpInst extends JumpInst {
         this.ifFalse = ifFalse;
     }
 
+    public void not() {
+        cmp.notOp();
+        BasicBlock tmp = ifTrue;
+        ifTrue = ifFalse;
+        ifFalse = tmp;
+    }
 }

@@ -73,10 +73,19 @@ public class Memory extends MutableOperand {
         return registers;
     }
 
-    public String toString(){
+    public String irName(){
         StringBuilder s =new StringBuilder("[");
-        if (baseReg != null) s.append(baseReg.toString());
-        if (indexReg != null) s.append(" + ").append(indexReg.toString()).append(" * ").append(scale);
+        if (baseReg != null) s.append(baseReg.irName());
+        if (indexReg != null) s.append(" + ").append(indexReg.irName()).append(" * ").append(scale);
+        if (displacement != 0) s.append(displacement > 0? " + ":" - ").append(Math.abs(displacement));
+        s.append("]");
+        return s.toString();
+    }
+
+    public String nasmName(){
+        StringBuilder s =new StringBuilder("[");
+        if (baseReg != null) s.append(baseReg.nasmName());
+        if (indexReg != null) s.append(" + ").append(indexReg.nasmName()).append(" * ").append(scale);
         if (displacement != 0) s.append(displacement > 0? " + ":" - ").append(Math.abs(displacement));
         s.append("]");
         return s.toString();

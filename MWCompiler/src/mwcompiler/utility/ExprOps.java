@@ -40,7 +40,19 @@ public enum ExprOps {
         return compOP.contains(this);
     }
 
-    public ExprOps revert() {
+    public ExprOps exchange() {
+        switch (nasmOp) {
+            case "l": return GT;
+            case "g" :return LT;
+            case "le":return GTE;
+            case "ge": return LTE;
+            case "e": return EQ;
+            case "ne": return NEQ;
+            default: throw new RuntimeException("???not "+ nasmOp);
+        }
+    }
+
+    public ExprOps not() {
         switch (nasmOp) {
             case "l": return GTE;
             case "g": return LTE;
@@ -48,7 +60,7 @@ public enum ExprOps {
             case "ge": return LT;
             case "e": return NEQ;
             case "ne": return EQ;
-            default: throw new RuntimeException("???revert "+ nasmOp);
+            default: throw new RuntimeException("???not "+ nasmOp);
         }
     }
 }

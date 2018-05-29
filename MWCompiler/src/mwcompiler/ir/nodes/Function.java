@@ -122,18 +122,19 @@ public class Function {
                 DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
                 jumpLabelChangeMap.put(block, directJumpInst.target());
             } else {
-                newBlocks.addFirst(block);
                 if (block.back() instanceof DirectJumpInst) {
                     DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
                     BasicBlock search = jumpLabelChangeMap.get(directJumpInst.target());
                     if (search != null) directJumpInst.setTarget(search);
                 } else if (block.back() instanceof CondJumpInst) {
                     CondJumpInst condJumpInst = (CondJumpInst) block.back();
+                    if (condJumpInst.getIfTrue() == newBlocks.getFirst()) condJumpInst.not();
                     BasicBlock search = jumpLabelChangeMap.get(condJumpInst.getIfTrue());
                     if (search != null) condJumpInst.setIfTrue(search);
                     search = jumpLabelChangeMap.get(condJumpInst.getIfFalse());
                     if (search != null) condJumpInst.setIfFalse(search);
                 }
+                newBlocks.addFirst(block);
             }
         }
         basicBlocks = newBlocks;
@@ -182,7 +183,8 @@ public class Function {
     public static final Function PRINT = new Function(FunctionSymbol.PRINT, FuncType.TEMP);
     public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, FuncType.TEMP);
     public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, FuncType.LIB);
-    public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, FuncType.LIB);
+    public static final Function SCANF_INT = new Function(FunctionSymbol.SCANF_INT, FuncType.EXTERN);
+    public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, FuncType.TEMP);
     public static final Function TO_STRING = new Function(FunctionSymbol.TO_STRING, FuncType.LIB);
     public static final Function SIZE = new Function(FunctionSymbol.SIZE, FuncType.TEMP);
     public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, FuncType.LIB);

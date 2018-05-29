@@ -61,11 +61,22 @@ public class PhysicalRegister extends Register {
 
 
     @Override
-    public String toString() {
+    public String irName() {
         return name;
     }
 
-    public String lowByte() {return lowByteName;}
+    public String nasmName() {
+        return name;
+    }
+
+    @Override
+    public boolean isGlobal() {
+        return false;
+    }
+
+    public String lowByte() {
+        return lowByteName;
+    }
 
     @Override
     public boolean isTmp() {

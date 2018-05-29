@@ -206,9 +206,9 @@ public class DumpAstVisitor implements AstVisitor<Void> {
         println("<VariableDeclNode>");
         println("type: <" + node.getTypeSymbol() + ", " + node.getTypeSymbol().getName() + ">");
         println("var: <" + node.getVarSymbol() + ", " + node.getVarSymbol().getName() + ">");
-        if (node.getInit() != null) {
+        if (node.init() != null) {
             println("init:");
-            visit(node.getInit());
+            visit(node.init());
         }
         subIndent();
         return null;

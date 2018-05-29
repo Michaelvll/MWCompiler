@@ -151,7 +151,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(Register reg) {
-        return reg.toString();
+        return reg.irName();
     }
 
     @Override

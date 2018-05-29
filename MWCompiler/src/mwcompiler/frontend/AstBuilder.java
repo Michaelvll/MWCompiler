@@ -482,7 +482,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             VariableDeclNode variableDeclNode = (VariableDeclNode) visit(ctx.variableField());
             vardecl = new BinaryExprNode(
                     new IdentifierExprNode(variableDeclNode.getVarSymbol(), new Location(ctx)),
-                    ExprOps.ASSIGN, variableDeclNode.getInit(), new Location(ctx));
+                    ExprOps.ASSIGN, variableDeclNode.init(), new Location(ctx));
         }
 
         if (ctx.cond != null) {

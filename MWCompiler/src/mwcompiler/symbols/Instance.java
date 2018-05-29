@@ -13,6 +13,7 @@ public class Instance {
     public static final Instance PRINT = new Instance("printf");
     public static final Instance PRINTLN = new Instance("printf");
     public static final Instance GET_STRING = new Instance("getString");
+    public static final Instance SCANF_INT = new Instance("scanf");
     public static final Instance GET_INT = new Instance("getInt");
     public static final Instance TO_STRING = new Instance("toString");
     public static final Instance SIZE = new Instance("size");

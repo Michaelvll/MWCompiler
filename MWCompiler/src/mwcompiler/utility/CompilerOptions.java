@@ -11,7 +11,7 @@ public class CompilerOptions {
     // Machine settings
     public int PTR_SIZE = 8;
     public int LENGTH_SIZE = 8;
-    public int STACK_ALIGN_SIZE = 8;
+    public int FUNC_CALL_STACK_ALIGN_SIZE = 16;
 
 
     // Compiling Options
