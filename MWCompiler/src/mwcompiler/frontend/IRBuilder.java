@@ -265,17 +265,21 @@ public class IRBuilder implements AstVisitor<Operand> {
             return currentBasicBlock.pushBack(new BinaryExprInst(dst, leftVal, op, rightVal), valTag);
         }
         List<Operand> args = new ArrayList<>(Arrays.asList(leftVal, rightVal));
+        if (op == ADD) {
+            if (left.equals(EMPTY_STRING)) return right;
+            else if (right.equals(EMPTY_STRING)) return left;
+            return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_ADD, args, dst), valTag);
+        }
+        // String Compare
+        currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_CMP, args, dst), valTag);
+        Var cmp = Var.tmpBuilder("str_"+op.toString(), true);
         switch (op) {
-            case ADD:
-                if (left.equals(EMPTY_STRING)) return right;
-                else if (right.equals(EMPTY_STRING)) return left;
-                return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_ADD, args, dst), valTag);
-            case GT: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_GT, args, dst), valTag);
-            case LT: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_LT, args, dst), valTag);
-            case GTE: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_GTE, args, dst), valTag);
-            case LTE: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_LTE, args, dst), valTag);
-            case EQ: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_EQ, args, dst), valTag);
-            case NEQ: return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_NEQ, args, dst), valTag);
+            case GT: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, GT, ZERO_LITERAL), valTag);
+            case LT: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, LT, ZERO_LITERAL), valTag);
+            case GTE: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, GTE, ZERO_LITERAL), valTag);
+            case LTE: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, LTE, ZERO_LITERAL), valTag);
+            case EQ: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, EQ, ZERO_LITERAL), valTag);
+            case NEQ: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, NEQ, ZERO_LITERAL), valTag);
             default: throw new RuntimeException("Compiler Bug: (IR building) Unsupported operation for string");
         }
     }
@@ -482,6 +486,10 @@ public class IRBuilder implements AstVisitor<Operand> {
         }
         if (function == Function.SIZE) {
             Var dst = Var.tmpBuilder("array_size");
+            if (container instanceof Memory) {
+                Var ptr = Var.tmpBuilder("array_ptr");
+                container = currentBasicBlock.pushBack(new MoveInst(ptr, container), valTag);
+            }
             Memory size = new Memory((Register) container, null, 0, 0);
             currentBasicBlock.pushBack(new MoveInst(dst, size), valTag);
             return dst;
@@ -498,6 +506,11 @@ public class IRBuilder implements AstVisitor<Operand> {
             args.add(stringLiteralBuilder("%ld"));
             Var dst = Var.tmpBuilder("get_int");
             return currentBasicBlock.pushBack(new FunctionCallInst(Function.SCANF_INT, args, dst), valTag);
+        }
+        if (function == Function.PARSE_INT) {
+            args.add(stringLiteralBuilder("%ld"));
+            Var dst = Var.tmpBuilder("parse_int");
+            return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_PARSE_INT, args, dst), valTag);
         }
         Var dst = Var.tmpBuilder("call_ret");
         return currentBasicBlock.pushBack(new FunctionCallInst(function, args, dst), valTag);

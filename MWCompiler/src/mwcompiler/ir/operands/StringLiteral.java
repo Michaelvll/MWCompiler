@@ -25,7 +25,7 @@ public class StringLiteral extends Literal {
     }
 
     public String getVal() {
-        return "`" + val + "\\0`";
+        return val;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class Var extends Register {
     private int useTime = 0;
     private boolean compareTmp = false;
 
-    private static final String GLOBAL_PREFIX = "user_global_";
+    private static final String GLOBAL_PREFIX = "_user_global_";
 
 
     private Var(String name, int id) {

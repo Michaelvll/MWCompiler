@@ -34,8 +34,9 @@ public class CodeGenerator implements IRVisitor<String> {
     public void apply(ProgramIR programIR) {
         assembly = new StringBuilder();
 
+//        assembly.append("%include \"lib/lib.asm\"\n");
         assembly.append("global main\n");
-        assembly.append("extern printf, scanf, malloc\n");
+        assembly.append("extern printf, scanf, malloc, strlen, strcmp, sscanf\n");
 
         assembly.append("\nSECTION .text\n");
         indent = "\t\t";
@@ -43,7 +44,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
         assembly.append("\nSECTION .data\talign=8\n");
         for (StringLiteral s : programIR.getStringPool().values()) {
-            assembly.append(s.getLabel()).append(":\n\t\t").append("db ").append(s.getVal()).append("\n");
+            assembly.append(s.getLabel()).append(":\n\t\t").append("db ").append("`").append(s.getVal()).append("\\0`").append("\n");
         }
         for (Map.Entry<Var, IntLiteral> entry : programIR.getGlobalPool().entrySet()) {
             IntLiteral val = entry.getValue();
@@ -197,7 +198,11 @@ public class CodeGenerator implements IRVisitor<String> {
             argStackSize += options.PTR_SIZE; // We rule that each arg must be size of 8
         }
         if (inst.function() == Function.SCANF_INT) {
-            visitScanfInt(inst);
+            visitScanfInt(inst, RSI);
+            return null;
+        }
+        if (inst.function() == Function.STR_PARSE_INT) {
+            visitScanfInt(inst, RDX);
             return null;
         }
 
@@ -345,23 +350,23 @@ public class CodeGenerator implements IRVisitor<String> {
         return op.nasmOp();
     }
 
-    private void visitScanfInt(FunctionCallInst inst) {
+    private void visitScanfInt(FunctionCallInst inst, PhysicalRegister paramReg) {
         append("");
-        if (isMem(inst.dst())) append("lea", RSI, visitMemory(inst.dst(), RAX, RCX));
+        if (isMem(inst.dst())) append("lea", paramReg, visitMemory(inst.dst(), RAX, RCX));
         else {
             append("sub", RSP, options.FUNC_CALL_STACK_ALIGN_SIZE);
-            append("mov", RSI, RSP);
+            append("mov", paramReg, RSP);
         }
-        append("call", "scanf");
+        append("call", inst.functionName());
         if (!isMem(inst.dst())) {
             Operand src = new Memory(RSP, null, 0, 0);
             append("mov", RAX, src);
-            src = RAX;
-            append("mov", inst.dst(), src);
+            append("mov", inst.dst(), RAX);
             append("add", RSP, options.FUNC_CALL_STACK_ALIGN_SIZE);
         }
         append("");
     }
+
 
     private void append(String s, String dst, String val) {
         append(s, dst + ", " + val);

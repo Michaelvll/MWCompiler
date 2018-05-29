@@ -9,6 +9,7 @@ import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.symbols.FunctionSymbol;
+import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.SymbolTable;
 
 import java.util.*;
@@ -71,7 +72,8 @@ public class Function {
 
     public String nasmName() {
         String name = functionSymbol.getName();
-        if (funcType == FuncType.USER && !isMain()) return "user_" + name;
+        if (funcType == FuncType.USER && !isMain()) return "__user_" + name;
+        if (funcType == FuncType.LIB) return "__lib_" + name;
         return name;
     }
 
@@ -183,28 +185,24 @@ public class Function {
     public static final Function PRINT = new Function(FunctionSymbol.PRINT, FuncType.TEMP);
     public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, FuncType.TEMP);
     public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, FuncType.LIB);
-    public static final Function SCANF_INT = new Function(FunctionSymbol.SCANF_INT, FuncType.EXTERN);
     public static final Function GET_INT = new Function(FunctionSymbol.GET_INT, FuncType.TEMP);
     public static final Function TO_STRING = new Function(FunctionSymbol.TO_STRING, FuncType.LIB);
     public static final Function SIZE = new Function(FunctionSymbol.SIZE, FuncType.TEMP);
-    public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, FuncType.LIB);
+    public static final Function LENGTH = new Function(FunctionSymbol.LENGTH, FuncType.EXTERN);
     public static final Function SUBSTRING = new Function(FunctionSymbol.SUBSTRING, FuncType.LIB);
-    public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, FuncType.LIB);
+    public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, FuncType.TEMP);
     public static final Function ORD = new Function(FunctionSymbol.ORD, FuncType.LIB);
 
+    public static final Function SCANF_INT = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "scanf", STRING_TYPE_SYMBOL), FuncType.EXTERN);
     // BuiltIn Function for string Operation
-    public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "__string_add_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_GT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_LT = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lt_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_GTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_gte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_LTE = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_lte_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_EQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_eq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
-    public static final Function STR_NEQ = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "__string_neq_", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "string_add", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
+    public static final Function STR_CMP = new Function(new FunctionSymbol(BOOL_TYPE_SYMBOL, "strcmp", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.EXTERN);
+    public static final Function STR_PARSE_INT = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "sscanf", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.EXTERN);
 
     public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), FuncType.EXTERN);
 
     public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
-            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_GT, STR_LT, STR_GTE, STR_LTE, STR_EQ, STR_NEQ));
+            TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, ORD, STR_ADD, STR_CMP));
 
     public FuncType funcType() {
         return funcType;

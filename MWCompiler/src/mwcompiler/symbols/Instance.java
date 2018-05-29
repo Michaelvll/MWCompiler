@@ -10,17 +10,16 @@ public class Instance {
     public static final Instance THIS = new Instance("this");
     public static final Instance CONSTRUCTOR = new Instance("_constructor");
     public static final Instance PRINTF = new Instance("printf");
-    public static final Instance PRINT = new Instance("printf");
-    public static final Instance PRINTLN = new Instance("printf");
+    public static final Instance PRINT = new Instance("print");
+    public static final Instance PRINTLN = new Instance("println");
     public static final Instance GET_STRING = new Instance("getString");
-    public static final Instance SCANF_INT = new Instance("scanf");
     public static final Instance GET_INT = new Instance("getInt");
     public static final Instance TO_STRING = new Instance("toString");
     public static final Instance SIZE = new Instance("size");
-    public static final Instance LENGTH = new Instance("__str_length");
-    public static final Instance SUBSTRING = new Instance("__str_substring");
-    public static final Instance PARSE_INT = new Instance("__str_parseInt");
-    public static final Instance ORD = new Instance("__str_ord");
+    public static final Instance LENGTH = new Instance("strlen");
+    public static final Instance SUBSTRING = new Instance("_str_substring");
+    public static final Instance PARSE_INT = new Instance("_str_parseInt");
+    public static final Instance ORD = new Instance("_str_ord");
 
     public static final Set<Instance> builtinSet = new HashSet<>();
 
