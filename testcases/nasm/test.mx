@@ -14,8 +14,6 @@ int main() {
     return c;
 }
 
-
-
 /*!! metadata:
 === comment ===
 simple2.mx
@@ -33,4 +31,3 @@ True
 30
 
 !!*/
-
