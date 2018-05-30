@@ -86,6 +86,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                 visitFunction(block);
                 inClassFunc = false;
                 classDeclSymbol = null;
+                classDeclThisReg = null;
             } else if (decl instanceof VariableDeclNode) {
                 setCurrentEnv(globalInitBlocks.getLast());
                 isGlobal = true;
@@ -490,7 +491,10 @@ public class IRBuilder implements AstVisitor<Operand> {
         }
         if (container != null) {
             args.add(container);
+        } else if (inClassFunc && currentFunctionSymbol.getClassSymbolTable() != null) {
+            args.add(classDeclThisReg);
         }
+
         if (function == Function.SIZE) {
             Var dst = Var.tmpBuilder("array_size");
             if (container instanceof Memory) {

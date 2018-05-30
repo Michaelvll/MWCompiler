@@ -1,8 +1,6 @@
 int func(int a) {
-    string s = getString();
-    string t = getString();
-    if (s < t) println("good");
-    else println("bad");
+    int[] b = new int[10];
+    int[] c = new int[b.size()];
     return a;
 }
 

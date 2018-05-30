@@ -129,8 +129,10 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         if (node.getInstance().getName().equals("main"))
             mainLocation = node.location();
         currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());
-        if (inClass)
+        if (inClass) {
             currentSymbolTable.put(node.getInstance(), node.getFunctionSymbol());
+            node.getFunctionSymbol().setClassSymbolTable(currentSymbolTable);
+        }
         node.getFunctionSymbol().addNamePrefix(funcPrefix);
         return null;
     }

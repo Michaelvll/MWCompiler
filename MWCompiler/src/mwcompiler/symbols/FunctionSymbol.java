@@ -11,6 +11,9 @@ public class FunctionSymbol extends Symbol {
     private String funcName;
     private TypeSymbol returnType;
     private List<TypeSymbol> params;
+    private SymbolTable classSymbolTable;
+
+
 
     public FunctionSymbol(TypeSymbol returnType, Instance instance, List<TypeSymbol> params) {
         this.returnType = returnType;
@@ -92,4 +95,11 @@ public class FunctionSymbol extends Symbol {
     public static final FunctionSymbol ORD = new FunctionSymbol(INT_TYPE_SYMBOL, Instance.ORD, INT_TYPE_SYMBOL);
 
 
+    public SymbolTable getClassSymbolTable() {
+        return classSymbolTable;
+    }
+
+    public void setClassSymbolTable(SymbolTable classSymbolTable) {
+        this.classSymbolTable = classSymbolTable;
+    }
 }

@@ -302,6 +302,11 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
 
     @Override
     public ExprType visit(NewExprNode node) {
+        for (ExprNode dimArg : node.getDimArgs()) {
+            ExprType dimArgType = visit(dimArg);
+            if (dimArgType.symbol != BaseTypeSymbol.INT_TYPE_SYMBOL)
+                throw new CompileError(stage, "New Array dim should be int type but " + StringProcess.getRefString(dimArgType.symbol.getName()), node.location());
+        }
         return setType(node, node.getCreateType(), LVAL);
     }
 
@@ -384,6 +389,8 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     // Member access
     @Override
     public ExprType visit(DotMemberNode node) {
+//        System.err.println(node.location());
+        
         ExprType container = visit(node.getContainer());
         TypeSymbol containerTypeSymbol = (TypeSymbol) container.symbol;
         Symbol memberType;

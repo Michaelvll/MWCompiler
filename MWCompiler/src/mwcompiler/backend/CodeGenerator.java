@@ -161,6 +161,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
     @Override
     public String visit(BasicBlock block) {
+        preMovOp = null;
         for (Instruction inst = block.front(); inst != null; inst = inst.next) {
             visit(inst);
         }
@@ -285,7 +286,7 @@ public class CodeGenerator implements IRVisitor<String> {
     public String visit(Register reg) {
         if (reg.isGlobal()) return "qword [rel " + reg.nasmName() + "]";
         else if (reg.physicalRegister() == null) return visit(((Var) reg).stackPos());
-        return reg.physicalRegister().irName();
+        return reg.physicalRegister().nasmName();
     }
 
     @Override
@@ -343,21 +344,21 @@ public class CodeGenerator implements IRVisitor<String> {
 
     private Pair<Operand, Operand> varToReg(Operand left, Operand right, boolean rightTmp) {
         if (isMem(left) && isMem(right)) {
-            left = visitMemory(left, RAX, RSI);
+            left = visitMemory(left, RCX, RSI);
             if (!rightTmp) {
                 append("mov", RSI, left);
                 if (left == right) right = RSI;
                 left = RSI;
             }
-            right = visitMemory(right, RAX, RDI);
+            right = visitMemory(right, RCX, RDI);
             if (rightTmp) {
                 append("mov", RDI, right);
                 if (left == right) left = RDI;
                 right = RDI;
             }
         } else {
-            left = visitMemory(left, RAX, RSI);
-            right = visitMemory(right, RAX, RSI);
+            left = visitMemory(left, RCX, RSI);
+            right = visitMemory(right, RCX, RSI);
         }
         return new Pair<>(left, right);
     }
