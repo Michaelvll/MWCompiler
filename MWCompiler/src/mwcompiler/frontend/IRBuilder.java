@@ -249,6 +249,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         }
     }
 
+
     private Operand visitAssign(BinaryExprNode node) {
         MutableOperand left = getMutableOperand(node.left());
         Operand right = visit(node.right());
@@ -261,7 +262,11 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand leftVal = getVal(left);
         Operand rightVal = getVal(right);
         if (leftVal instanceof Literal && rightVal instanceof Literal) {
-            return literalCalc(leftVal, op, rightVal);
+            try {
+                return literalCalc(leftVal, op, rightVal);
+            } catch (ArithmeticException e) {
+                System.err.println("IR Building: get arithmetic exception: " + e.getMessage());
+            }
         }
         Var dst = Var.tmpBuilder(op.toString(), op.isCompare());
         if (type != BaseTypeSymbol.STRING_TYPE_SYMBOL) {
@@ -292,68 +297,54 @@ public class IRBuilder implements AstVisitor<Operand> {
         return visit(node.right());
     }
 
-    private Var cmpRes = null;
     private Stack<BasicBlock> successStack = new Stack<>();
     private Stack<BasicBlock> failStack = new Stack<>();
 
     private Operand visitLogic(BinaryExprNode node) {
-        Var dst = Var.tmpBuilder("cmp_res");
-        boolean outMost = successStack.empty() && failStack.empty();
+        ExprOps op = node.op();
+        switch (op) {
+            case AND: return processLogic(node, successStack, failStack);
+            case OR: return processLogic(node, failStack, successStack);
+            default: throw new RuntimeException("Unknown logic op " + node.op());
+        }
+    }
+
+    private Operand processLogic(BinaryExprNode node, Stack<BasicBlock> testMoreStack, Stack<BasicBlock> skipNextStack) {
+        boolean outMost = testMoreStack.empty() && skipNextStack.empty();
         Function function = currentBasicBlock.parentFunction();
         ExprOps op = node.op();
-        BasicBlock success;
-        BasicBlock fail;
-        switch (op) {
-            case AND:
-                if (outMost) {
-                    currentBasicBlock.pushBack(new MoveInst(dst, ZERO_LITERAL), valTag);
-                    successStack.add(new BasicBlock(function, currentSymbolTable, "and_set_val"));
-                    failStack.add(new BasicBlock(function, currentSymbolTable, "next"));
-                }
-                success = new BasicBlock(function, currentSymbolTable, "val_true");
-                fail = failStack.peek();
-                successStack.add(success);
-                Operand andLeft = visit(node.left());
-                if (andLeft != null) currentBasicBlock.pushBack(new CondJumpInst(andLeft, success, fail));
-                successStack.pop();
-                setCurrentEnv(success);
-                Operand andRight = visit(node.right());
-                if (andRight != null)
-                    currentBasicBlock.pushBack(new CondJumpInst(andRight, successStack.peek(), failStack.peek()));
-
-                if (outMost) {
-                    setCurrentEnv(successStack.pop());
-                    currentBasicBlock.pushBack(new MoveInst(dst, ONE_LITERAL), valTag);
-                    currentBasicBlock.pushBack(new DirectJumpInst(failStack.peek()));
-                    setCurrentEnv(failStack.pop());
-                    return dst;
-                }
-                break;
-            case OR:
-                if (outMost) {
-                    currentBasicBlock.pushBack(new MoveInst(dst, ONE_LITERAL), valTag);
-                    successStack.add(new BasicBlock(function, currentSymbolTable, "next"));
-                    failStack.add(new BasicBlock(function, currentSymbolTable, "set_val"));
-
-                }
-                success = successStack.peek();
-                fail = new BasicBlock(function, currentSymbolTable, "val_false");
-                failStack.add(fail);
-                Operand orLeft = visit(node.left());
-                if (orLeft != null) currentBasicBlock.pushBack(new CondJumpInst(orLeft, success, fail));
-                failStack.pop();
-                setCurrentEnv(fail);
-                Operand orRight = visit(node.right());
-                if (orRight != null)
-                    currentBasicBlock.pushBack(new CondJumpInst(orRight, successStack.peek(), failStack.peek()));
-                if (outMost) {
-                    setCurrentEnv(failStack.pop());
-                    currentBasicBlock.pushBack(new MoveInst(dst, ZERO_LITERAL), valTag);
-                    currentBasicBlock.pushBack(new DirectJumpInst(successStack.peek()));
-                    setCurrentEnv(successStack.pop());
-                    return dst;
-                }
-                break;
+        Var dst = null;
+        if (outMost) dst = Var.tmpBuilder("cmp_res");
+        IntLiteral initLiteral = op == AND ? ZERO_LITERAL : ONE_LITERAL;
+        IntLiteral setLiteral = op == AND ? ONE_LITERAL : ZERO_LITERAL;
+        if (outMost) {
+            currentBasicBlock.pushBack(new MoveInst(dst, initLiteral), valTag);
+            testMoreStack.add(new BasicBlock(function, currentSymbolTable, op.name() + "_set_val"));
+            skipNextStack.add(new BasicBlock(function, currentSymbolTable, "next"));
+        }
+        BasicBlock testMore = new BasicBlock(function, currentSymbolTable, op.name() + "_test_more");
+        BasicBlock skipNext = skipNextStack.peek();
+        testMoreStack.add(testMore);
+        Operand left = visit(node.left());
+        if (left != null) {
+            if (node.op() == AND) currentBasicBlock.pushBack(new CondJumpInst(left, testMore, skipNext));
+            else currentBasicBlock.pushBack(new CondJumpInst(left, skipNext, testMore));
+        }
+        testMoreStack.pop();
+        setCurrentEnv(testMore);
+        Operand right = visit(node.right());
+        if (right != null) {
+            if (node.op() == AND)
+                currentBasicBlock.pushBack(new CondJumpInst(right, testMoreStack.peek(), skipNextStack.peek()));
+            else currentBasicBlock.pushBack(new CondJumpInst(right, skipNextStack.peek(), testMoreStack.peek()));
+        }
+        if (outMost) {
+            setCurrentEnv(testMoreStack.pop());
+            currentBasicBlock.pushBack(new MoveInst(dst, setLiteral), valTag);
+            currentBasicBlock.pushBack(new DirectJumpInst(skipNextStack.peek()));
+            setCurrentEnv(skipNextStack.pop());
+            assert testMoreStack.empty() && skipNextStack.empty();
+            return dst;
         }
         return null;
     }

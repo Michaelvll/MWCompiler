@@ -5,6 +5,7 @@ import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
+import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.JumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.*;
@@ -86,15 +87,18 @@ public class BasicBlock {
             parentFunction.addReturn((ReturnInst) jumpInst);
         if (jumpInst instanceof CondJumpInst) {
             CondJumpInst condJumpInst = (CondJumpInst) jumpInst;
-            assert condJumpInst.getCond() instanceof MutableOperand;
-            MutableOperand cond = (MutableOperand) condJumpInst.getCond();
-            Var dst = Var.tmpBuilder("cmp");
-            BinaryExprInst cmp = new BinaryExprInst(dst, cond, ExprOps.NEQ, ZERO_LITERAL);
-            if (cond.isTmp() && end instanceof BinaryExprInst) {
-                cmp = (BinaryExprInst) popBack();
+            if (condJumpInst.getCond() instanceof IntLiteral) {
+                if (((IntLiteral) condJumpInst.getCond()).getVal() == 0)
+                    jumpInst = new DirectJumpInst(condJumpInst.ifFalse());
+                else jumpInst = new DirectJumpInst(condJumpInst.ifTrue());
+            } else {
+                assert condJumpInst.getCond() instanceof MutableOperand;
+                MutableOperand cond = (MutableOperand) condJumpInst.getCond();
+                Var dst = Var.tmpBuilder("cmp");
+                BinaryExprInst cmp = new BinaryExprInst(dst, cond, ExprOps.NEQ, ZERO_LITERAL);
+                if (cond.isTmp() && end instanceof BinaryExprInst) cmp = (BinaryExprInst) popBack();
+                condJumpInst.setCmp(cmp);
             }
-            condJumpInst.setCmp(cmp);
-//            pushBack(cmp);
         }
         pushBack((Instruction) jumpInst);
         assignTable.clear();
