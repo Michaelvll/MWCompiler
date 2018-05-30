@@ -37,7 +37,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
         if (options.nasmLibIncludeCMD) assembly.append("%include \"lib/lib.asm\"\n");
         assembly.append("global main\n");
-        assembly.append("extern printf, scanf, malloc, strlen, strcmp, sscanf\n");
+        assembly.append("extern printf, scanf, malloc, strlen, strcmp, sscanf, puts\n");
 
         assembly.append("\nSECTION .text\n");
         indent = "\t\t";
@@ -103,6 +103,8 @@ public class CodeGenerator implements IRVisitor<String> {
             if (index < paramRegs.size()) {
                 if (params.get(index).physicalRegister() != paramRegs.get(index))
                     append("mov", params.get(index), paramRegs.get(index));
+            } else if (!isMem(params.get(index))) {
+                append("mov", params.get(index), params.get(index).stackPos());
             }
         }
 
@@ -226,7 +228,7 @@ public class CodeGenerator implements IRVisitor<String> {
             return null;
         }
 
-        //        if (inst.function() == Function.PRINT_INT || inst.function() == Function.PRINT_STR) append("xor", RAX, RAX);
+        //        if (inst.function() == Function.PRINTF || inst.function() == Function.PRINT_STR) append("xor", RAX, RAX);
         // TODO: Align stack to 16
         append("call", inst.function().nasmName());
         if (inst.dst() != null)
