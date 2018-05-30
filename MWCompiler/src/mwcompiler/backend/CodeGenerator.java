@@ -95,7 +95,7 @@ public class CodeGenerator implements IRVisitor<String> {
             }
         } else append("push", RBP);
         append("mov", RBP, RSP);
-        append("sub", RSP, function.getVarStackSize() + options.PTR_SIZE);
+        append("sub", RSP, function.getVarStackSize() + options.FUNC_CALL_STACK_ALIGN_SIZE);
         append("and", RSP.nasmName(), "-0x10");
         // Get params
         List<Var> params = function.paramVars();
@@ -140,7 +140,6 @@ public class CodeGenerator implements IRVisitor<String> {
             if (op == ExprOps.LSFT || op == ExprOps.RSFT) {
                 if (left != RAX) {
                     append("mov", RAX, left);
-                    left = RAX;
                 }
                 append("mov", RCX, right);
                 append(op.nasmOp(), RAX.nasmName(), RCX.lowByte());
@@ -154,13 +153,15 @@ public class CodeGenerator implements IRVisitor<String> {
                 append("cqo");
                 append("idiv", right);
                 append("mov", dst, (op == ExprOps.DIV) ? RAX : RDX);
-            } else if (isMem(dst) && left != dst) {
+            } else if (isMem(dst) && left != dst || dst == right) {
                 append("mov", RAX, left);
                 append(op.nasmOp(), RAX, right);
                 append("mov", dst, RAX);
             } else {
                 if (dst != left) append("mov", dst, left);
                 append(op.nasmOp(), dst, right);
+
+
             }
         }
         return null;
@@ -423,7 +424,7 @@ public class CodeGenerator implements IRVisitor<String> {
     private void append(String s, String target) {
         if (s.equals("mov")) {
             String[] dstVal = target.split(", ");
-            if (preMovOp != null && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
+            if (preMovOp != null && !dstVal[0].contains("[") && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
                 return;
             preMovOp = new Pair<>(dstVal[0], dstVal[1]);
         } else preMovOp = null;

@@ -1,36 +1,69 @@
+int worka(int x, int y) {
+	return x + x - y;
+}
+
+int workb(int x, int y) {
+	return -x + y + y;
+}
+
+int workc(int x, int y) {
+	return x + x + x - y - y;
+}
+
 int main() {
-    int a = 5;
-    int b = 0;
-    int c;
-    if (b != 0 && a/b != 1) {
-        c = 10;
-    } else {
-        c = 20;
-    }
-
-    if (!(c == 10 && a/b == 0 && a == 5))
-        c = 30;
-
-    return c;
+	int a = getInt();
+	int b = 0;
+	int c = 1;
+	int d = 0;
+	int e = 1;
+	int f = 0;
+	int g = 1;
+	int i = 0;
+	for(i = 1; i <= 10; i++) {
+		println(toString(i) + " " + toString(g));
+        a = worka(a, b);
+		b = workb(a, b);
+		c = workc(a, b);
+        println(toString(a)+" "+toString(b)+" "+toString(c));
+		d = -a + b - c + d + e - f + g;
+		e = a + b + c - d - e - f + g;
+		f = a + b - c + d - e + f - g;
+		g = a - b - c - d + e + f + g;
+        println(toString(d)+" "+toString(e)+" "+toString(f) +" " + toString(g)); 
+        // a = a >> 0;       
+		if(a + b + c + d + e + f + g > 100000000) {
+			a = 123;
+			b = 456;
+			c = 789;
+			d = 155;
+			e = 123;
+			f = 55;
+			g = 32;
+		}
+	}
+	println(toString(g));
+	return 0;
 }
 
 
 
 /*!! metadata:
 === comment ===
-simple2.mx
-=== assert ===
-exitcode
-=== timeout ===
-0.1
-=== input ===
-
-=== phase ===
-codegen pretest
+optim-515030910645-suyufeng.txt
 === is_public ===
 True
+=== assert ===
+output
+=== timeout ===
+3.0
+=== input ===
+1
+=== phase ===
+optim pretest
+=== output ===
+36151
 === exitcode ===
-30
+
 
 !!*/
 

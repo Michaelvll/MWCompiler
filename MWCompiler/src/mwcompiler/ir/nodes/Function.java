@@ -123,7 +123,7 @@ public class Function {
             if (block.front() == block.back() && block.back() instanceof DirectJumpInst) {
                 DirectJumpInst directJumpInst = (DirectJumpInst) block.back();
                 jumpLabelChangeMap.put(block, directJumpInst.target());
-            }
+            } else if (block.front() == null) jumpLabelChangeMap.put(block, basicBlocks.get(i + 1));
         }
 
         for (int i = size - 1; i >= 0; --i) {
@@ -136,8 +136,13 @@ public class Function {
                 condJumpInst.setIfTrue(searchForNewTarget(jumpLabelChangeMap, condJumpInst.ifTrue()));
                 condJumpInst.setIfFalse(searchForNewTarget(jumpLabelChangeMap, condJumpInst.ifFalse()));
                 if (condJumpInst.ifTrue() == newBlocks.getFirst()) condJumpInst.not();
+                if (condJumpInst.ifTrue() == condJumpInst.ifFalse()) {
+                    block.popBack();
+                    block.pushBack(new DirectJumpInst(condJumpInst.ifTrue()));
+                }
             }
-            if (block.front() != block.back() || !(block.back() instanceof DirectJumpInst)) newBlocks.addFirst(block);
+            if (block.front() != null && (block.front() != block.back() || !(block.back() instanceof DirectJumpInst)))
+                newBlocks.addFirst(block);
         }
         basicBlocks = newBlocks;
     }

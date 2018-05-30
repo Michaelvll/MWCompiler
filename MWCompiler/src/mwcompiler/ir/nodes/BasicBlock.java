@@ -96,7 +96,9 @@ public class BasicBlock {
                 MutableOperand cond = (MutableOperand) condJumpInst.getCond();
                 Var dst = Var.tmpBuilder("cmp");
                 BinaryExprInst cmp = new BinaryExprInst(dst, cond, ExprOps.NEQ, ZERO_LITERAL);
-                if (cond.isTmp() && end instanceof BinaryExprInst) cmp = (BinaryExprInst) popBack();
+                if (cond.isTmp() && end instanceof BinaryExprInst) {
+                    cmp = (BinaryExprInst) popBack();
+                }
                 condJumpInst.setCmp(cmp);
             }
         }
