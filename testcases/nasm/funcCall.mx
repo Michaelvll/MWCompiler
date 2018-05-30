@@ -1,9 +1,11 @@
-int func(int a) {
-    int[] b = new int[10];
-    int[] c = new int[b.size()];
-    return a;
+bool func(int a, int b, int c, int d, int e, int f, int g) {
+    if (((a == b) && c > 0) || (d == e && f > 0 && g > 0) || (a == g) ||
+        (d > 0 && f > 0))
+        return true;
+    else
+        return false;
 }
 
 int main() {
-    return func(1);
+    func(1,2,3,4,5,6,7);
 }

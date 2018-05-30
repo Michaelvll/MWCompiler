@@ -36,7 +36,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     public void apply(ProgramIR programIR) {
         programIR.getFunctionMap().values().forEach(this::visit);
-        programIR.getStringPool().values().forEach(s -> println(s.getLabel() + " db " + s.getVal()));
+        programIR.getStringPool().values().forEach(s -> println(s.getLabel() + " db " + s.stringVal()));
         //TODO
     }
 

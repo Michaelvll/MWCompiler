@@ -10,7 +10,7 @@ public enum ExprOps {
     // Binary
     ADD("add"), SUB("sub"),// int string
     MUL("imul"), DIV("div"), MOD("div"),//int
-    LSFT("shl"), RSFT("shr"),// int
+    LSFT("sal"), RSFT("sar"),// int
     LT("l"), GT("g"), LTE("le"), GTE("ge"),// int string
     EQ("e"), NEQ("ne"),// class int string bool
     BITAND("and"), BITXOR("xor"), BITOR("or"), // int

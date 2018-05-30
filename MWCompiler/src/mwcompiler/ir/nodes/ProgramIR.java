@@ -8,7 +8,12 @@ import java.util.Map;
 
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
-    private Map<String, StringLiteral> stringPool = new HashMap<>();
+    private Map<String, StringLiteral> stringPool = new HashMap<String, StringLiteral>() {{
+        put("%ld", StringLiteral.intFormat);
+        put("%ld\n", StringLiteral.intlnFormat);
+        put("%s", StringLiteral.stringFormat);
+        put("%s\n", StringLiteral.stringlnFormat);
+    }};
     private Map<Var, IntLiteral> globalPool = new HashMap<>();
 
     public void addGlobal(Var var, Operand init) {

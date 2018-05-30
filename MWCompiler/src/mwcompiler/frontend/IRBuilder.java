@@ -234,8 +234,8 @@ public class IRBuilder implements AstVisitor<Operand> {
                 default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for IntLiteral");
             }
         } else {
-            String x = ((StringLiteral) left).getVal();
-            String y = ((StringLiteral) right).getVal();
+            String x = ((StringLiteral) left).stringVal();
+            String y = ((StringLiteral) right).stringVal();
             switch (op) {
                 case ADD: return stringLiteralBuilder(x + y);
                 case EQ: return x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
@@ -287,59 +287,75 @@ public class IRBuilder implements AstVisitor<Operand> {
         }
     }
 
+    private Operand visitLeftLiteralLogicRes(BinaryExprNode node, IntLiteral literal, int val) {
+        if (literal.getVal() == val) return literal;
+        return visit(node.right());
+    }
+
     private Var cmpRes = null;
-    private BasicBlock outMostNext;
+    private Stack<BasicBlock> successStack = new Stack<>();
+    private Stack<BasicBlock> failStack = new Stack<>();
 
     private Operand visitLogic(BinaryExprNode node) {
+        Var dst = Var.tmpBuilder("cmp_res");
+        boolean outMost = successStack.empty() && failStack.empty();
         Function function = currentBasicBlock.parentFunction();
         ExprOps op = node.op();
-        boolean outMost = cmpRes == null;
-        if (outMost) {
-            cmpRes = Var.tmpBuilder("cmp_res");
-            outMostNext = new BasicBlock(function, currentSymbolTable, "next");
-        }
-        Var dst = cmpRes;
-        Operand left = visit(node.left());
-        BasicBlock next = outMostNext;
-        BasicBlock set = new BasicBlock(function, currentSymbolTable, "set_val");
+        BasicBlock success;
+        BasicBlock fail;
         switch (op) {
             case AND:
-                if (left instanceof IntLiteral) {
-                    if (((IntLiteral) left).getVal() == 0) return left;
-                    return visit(node.right());
+                if (outMost) {
+                    currentBasicBlock.pushBack(new MoveInst(dst, ZERO_LITERAL), valTag);
+                    successStack.add(new BasicBlock(function, currentSymbolTable, "and_set_val"));
+                    failStack.add(new BasicBlock(function, currentSymbolTable, "next"));
                 }
-                BasicBlock valTrue = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), "val_true");
-                currentBasicBlock.pushBack(new CondJumpInst(left, valTrue, set));
-                set.pushBack(new MoveInst(dst, ZERO_LITERAL), valTag);
-                set.pushBack(new DirectJumpInst(next));
-                function.pushBack(set);
-                setCurrentEnv(valTrue);
+                success = new BasicBlock(function, currentSymbolTable, "val_true");
+                fail = failStack.peek();
+                successStack.add(success);
+                Operand andLeft = visit(node.left());
+                if (andLeft != null) currentBasicBlock.pushBack(new CondJumpInst(andLeft, success, fail));
+                successStack.pop();
+                setCurrentEnv(success);
+                Operand andRight = visit(node.right());
+                if (andRight != null)
+                    currentBasicBlock.pushBack(new CondJumpInst(andRight, successStack.peek(), failStack.peek()));
+
+                if (outMost) {
+                    setCurrentEnv(successStack.pop());
+                    currentBasicBlock.pushBack(new MoveInst(dst, ONE_LITERAL), valTag);
+                    currentBasicBlock.pushBack(new DirectJumpInst(failStack.peek()));
+                    setCurrentEnv(failStack.pop());
+                    return dst;
+                }
                 break;
             case OR:
-                if (left instanceof IntLiteral) {
-                    if (((IntLiteral) left).getVal() == 1) return left;
-                    return visit(node.right());
+                if (outMost) {
+                    currentBasicBlock.pushBack(new MoveInst(dst, ONE_LITERAL), valTag);
+                    successStack.add(new BasicBlock(function, currentSymbolTable, "next"));
+                    failStack.add(new BasicBlock(function, currentSymbolTable, "set_val"));
+
                 }
-                BasicBlock valFalse = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), "val_false");
-                currentBasicBlock.pushBack(new CondJumpInst(left, set, valFalse));
-                set.pushBack(new MoveInst(dst, ONE_LITERAL), valTag);
-                set.pushBack(new DirectJumpInst(next));
-                setCurrentEnv(valFalse);
-                function.pushBack(set);
+                success = successStack.peek();
+                fail = new BasicBlock(function, currentSymbolTable, "val_false");
+                failStack.add(fail);
+                Operand orLeft = visit(node.left());
+                if (orLeft != null) currentBasicBlock.pushBack(new CondJumpInst(orLeft, success, fail));
+                failStack.pop();
+                setCurrentEnv(fail);
+                Operand orRight = visit(node.right());
+                if (orRight != null)
+                    currentBasicBlock.pushBack(new CondJumpInst(orRight, successStack.peek(), failStack.peek()));
+                if (outMost) {
+                    setCurrentEnv(failStack.pop());
+                    currentBasicBlock.pushBack(new MoveInst(dst, ZERO_LITERAL), valTag);
+                    currentBasicBlock.pushBack(new DirectJumpInst(successStack.peek()));
+                    setCurrentEnv(successStack.pop());
+                    return dst;
+                }
                 break;
         }
-        Operand right = visit(node.right());
-        if (right != dst) currentBasicBlock.pushBack(new MoveInst(dst, right), valTag);
-
-        if (outMost) {
-            currentBasicBlock.pushBack(new DirectJumpInst(next));
-            setCurrentEnv(next);
-//            Var tmp = Var.tmpBuilder("invisible!!!");
-//            currentBasicBlock.pushBack(new MoveInst(tmp, dst),valTag);
-//            dst = tmp;
-            cmpRes = null;
-        }
-        return dst;
+        return null;
     }
 
     @Override
@@ -457,21 +473,20 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     private void visitPrintCall(List<Operand> args, boolean newline) {
         Instruction lastInst = currentBasicBlock.back();
-        String newlineStr = newline ? "\\n" : "";
-        String formatStr = "%s";
+        StringLiteral formatStr = newline ? StringLiteral.stringlnFormat : StringLiteral.stringFormat;
         Operand outputReg;
         if (lastInst instanceof FunctionCallInst) {
             FunctionCallInst lastFunctionCall = (FunctionCallInst) lastInst;
             if (lastFunctionCall.function() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
                 currentBasicBlock.popBack();
                 outputReg = lastFunctionCall.args().get(0);
-                formatStr = "%ld";
+                formatStr = newline ? StringLiteral.intlnFormat : StringLiteral.intFormat;
             } else outputReg = args.get(0);
         } else {
             outputReg = args.get(0);
         }
         List<Operand> printArgs = new ArrayList<>();
-        printArgs.add(stringLiteralBuilder(formatStr + newlineStr));
+        printArgs.add(formatStr);
         printArgs.add(outputReg);
 
         currentBasicBlock.pushBack(new FunctionCallInst(Function.PRINT_INT, printArgs, null), valTag);

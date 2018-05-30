@@ -45,7 +45,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
         assembly.append("\nSECTION .data\talign=8\n");
         for (StringLiteral s : programIR.getStringPool().values()) {
-            assembly.append(s.getLabel()).append(":\n\t\t").append("db ").append("`").append(s.getVal()).append("\\0`").append("\n");
+            assembly.append(s.getLabel()).append(":\n\t\t").append("db ").append(s.hexVal()).append("\n");
         }
         for (Map.Entry<Var, IntLiteral> entry : programIR.getGlobalPool().entrySet()) {
             IntLiteral val = entry.getValue();
@@ -137,7 +137,15 @@ public class CodeGenerator implements IRVisitor<String> {
             if (dst == left) dst = newOperand.first;
             left = newOperand.first;
             right = newOperand.second;
-            if (op == ExprOps.DIV || op == ExprOps.MOD) {
+            if (op == ExprOps.LSFT || op == ExprOps.RSFT) {
+                if (left != RAX) {
+                    append("mov", RAX, left);
+                    left = RAX;
+                }
+                append("mov", RCX, right);
+                append(op.nasmOp(), RAX.nasmName(), RCX.lowByte());
+                append("mov", dst, RAX);
+            } else if (op == ExprOps.DIV || op == ExprOps.MOD) {
                 if (right instanceof IntLiteral) {
                     append("mov", RDI, right);
                     right = RDI;
@@ -294,10 +302,12 @@ public class CodeGenerator implements IRVisitor<String> {
         MutableOperand dst = unaryExprInst.dst();
         Operand src = visitMemory(unaryExprInst.src(), RAX, RSI);
         ExprOps op = unaryExprInst.op();
-        if (src == dst) append(op.nasmOp(), src);
+        String opName = op.nasmOp();
+        if (op == ExprOps.SUB) opName = "neg";
+        if (src == dst) append(opName, src);
         else {
             append("mov", RAX, src);
-            append(op.nasmOp(), RAX);
+            append(opName, RAX);
             append("mov", dst, RAX);
         }
         return null;
