@@ -3,6 +3,7 @@ package mwcompiler;
 import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
 import mwcompiler.backend.CodeGenerator;
+import mwcompiler.backend.FunctionInliner;
 import mwcompiler.backend.NaiveAllocator;
 import mwcompiler.frontend.*;
 import mwcompiler.ir.nodes.ProgramIR;
@@ -45,11 +46,24 @@ public class Mwcc {
         options.compilerArgSolve(args);
         buildAst();
         typeCheck();
+        if (options.dumpAst) {
+            DumpAstVisitor astDumper = new DumpAstVisitor(options);
+            astDumper.apply(programAst);
+//            System.exit(0);
+        }
+
         buildIR();
+        functionInliner();
+        if (options.dumpIR) {
+            DumpIRVisitor irDumper = new DumpIRVisitor(options);
+            irDumper.apply(programIR);
+        }
+
 
         allocate();
         codeGenerate();
     }
+
 
     public ProgramIR getProgramIR() {
         // For test
@@ -82,11 +96,7 @@ public class Mwcc {
             System.exit(1);
         }
 
-        if (options.dumpAst) {
-            DumpAstVisitor astDumper = new DumpAstVisitor(options);
-            astDumper.apply(programAst);
-//            System.exit(0);
-        }
+
     }
 
 
@@ -109,10 +119,7 @@ public class Mwcc {
         IRBuilder irBuilder = new IRBuilder(options);
         programIR = irBuilder.build(programAst);
 
-        if (options.dumpIR) {
-            DumpIRVisitor irDumper = new DumpIRVisitor(options);
-            irDumper.apply(programIR);
-        }
+
     }
 
     private void allocate() {
@@ -123,6 +130,11 @@ public class Mwcc {
     private void codeGenerate() {
         CodeGenerator codeGenerator = new CodeGenerator(options);
         codeGenerator.apply(programIR);
+    }
+
+    private void functionInliner() {
+        FunctionInliner functionInliner = new FunctionInliner(options);
+        functionInliner.apply(programIR);
     }
 
 }

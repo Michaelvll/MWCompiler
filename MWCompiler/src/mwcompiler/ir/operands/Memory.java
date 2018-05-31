@@ -4,6 +4,7 @@ import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Memory extends MutableOperand {
     private Register baseReg;
@@ -16,7 +17,7 @@ public class Memory extends MutableOperand {
         if (indexReg instanceof IntLiteral) {
             this.indexReg = null;
             this.scale = 0;
-            this.displacement = ((IntLiteral) indexReg).getVal() * scale + displacement;
+            this.displacement = ((IntLiteral) indexReg).val() * scale + displacement;
         } else {
             this.indexReg = (Register) indexReg;
             this.scale = scale;
@@ -32,6 +33,11 @@ public class Memory extends MutableOperand {
     @Override
     public PhysicalRegister physicalRegister() {
         return null;
+    }
+
+    @Override
+    public Operand copy(Map<Object, Object> replaceMap) {
+        return new Memory((Register) baseReg.copy(replaceMap), indexReg != null ? indexReg.copy(replaceMap) : null, scale, displacement);
     }
 
     public Register baseReg() {
@@ -73,20 +79,20 @@ public class Memory extends MutableOperand {
         return registers;
     }
 
-    public String irName(){
-        StringBuilder s =new StringBuilder("[");
+    public String irName() {
+        StringBuilder s = new StringBuilder("[");
         if (baseReg != null) s.append(baseReg.irName());
         if (indexReg != null) s.append(" + ").append(indexReg.irName()).append(" * ").append(scale);
-        if (displacement != 0) s.append(displacement > 0? " + ":" - ").append(Math.abs(displacement));
+        if (displacement != 0) s.append(displacement > 0 ? " + " : " - ").append(Math.abs(displacement));
         s.append("]");
         return s.toString();
     }
 
-    public String nasmName(){
-        StringBuilder s =new StringBuilder("[");
+    public String nasmName() {
+        StringBuilder s = new StringBuilder("[");
         if (baseReg != null) s.append(baseReg.nasmName());
         if (indexReg != null) s.append(" + ").append(indexReg.nasmName()).append(" * ").append(scale);
-        if (displacement != 0) s.append(displacement > 0? " + ":" - ").append(Math.abs(displacement));
+        if (displacement != 0) s.append(displacement > 0 ? " + " : " - ").append(Math.abs(displacement));
         s.append("]");
         return s.toString();
     }

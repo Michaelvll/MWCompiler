@@ -4,7 +4,9 @@ import mwcompiler.ir.operands.*;
 import mwcompiler.symbols.FunctionSymbol;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
@@ -41,7 +43,7 @@ public class ProgramIR {
         return stringPool.get(val);
     }
 
-    public Map<FunctionSymbol, Function> getFunctionMap() {
+    public Map<FunctionSymbol, Function> functionMap() {
         return functionMap;
     }
 
@@ -49,4 +51,24 @@ public class ProgramIR {
         return stringPool;
     }
 
+//    public void updateRecursiveCall() {
+//        functionMap.values().forEach(function->function.recursiveCalleeSet().clear());
+//        Set<Function> recursiveCalleeSet = new HashSet<>();
+//        boolean change = true;
+//        while (change) {
+//            change = false;
+//            for (Function function : functionMap().values()) {
+//                if (function.notUserFunc() && function.isMain()) continue;
+//                Set<Function> calleeSet = function.calleeSet();
+//                recursiveCalleeSet.clear();
+//                recursiveCalleeSet.addAll(calleeSet);
+//                calleeSet.forEach(callee -> recursiveCalleeSet.addAll(callee.calleeSet()));
+//                if (!recursiveCalleeSet.equals(function.recursiveCalleeSet())) {
+//                    function.recursiveCalleeSet().clear();
+//                    function.recursiveCalleeSet().addAll(recursiveCalleeSet);
+//                    change = true;
+//                }
+//            }
+//        }
+//    }
 }

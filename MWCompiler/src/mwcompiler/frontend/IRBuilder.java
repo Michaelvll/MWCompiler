@@ -22,6 +22,7 @@ import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.*;
+import mwcompiler.ir.tools.LiteralProcess;
 import mwcompiler.symbols.*;
 import mwcompiler.utility.CompilerOptions;
 import mwcompiler.utility.ExprOps;
@@ -41,7 +42,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     private boolean isGetMutableOperand = false;
     private boolean isParamDecl = false;
     private boolean isGlobal = false;
-    private LinkedList<BasicBlock> globalInitBlocks = new LinkedList<>();
+    private LinkedList<BasicBlock> globalReverseInitBlock = new LinkedList<>();
     private CompilerOptions options;
 
     private int valTag = 0;
@@ -50,10 +51,12 @@ public class IRBuilder implements AstVisitor<Operand> {
         this.options = options;
         PTR_SIZE = new IntLiteral(options.PTR_SIZE);
         LENGTH_SIZE = new IntLiteral(options.LENGTH_SIZE);
+        LiteralProcess.programIR = programIR;
     }
 
     public ProgramIR build(Node node) {
         visit(node);
+//        programIR.updateRecursiveCall();
         return programIR;
     }
 
@@ -88,7 +91,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                 classDeclSymbol = null;
                 classDeclThisReg = null;
             } else if (decl instanceof VariableDeclNode) {
-                setCurrentEnv(globalInitBlocks.getLast());
+                setCurrentEnv(globalReverseInitBlock.getFirst());
                 isGlobal = true;
                 visit(decl);
                 isGlobal = false;
@@ -113,16 +116,19 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(ProgramNode node) {
         newValTag();
+        // Add built in functions into programIR
         Function.builtinFunctions.forEach(programIR::putFunction);
+
         BlockNode block = node.getBlock();
+        Function mainFunction = getFunction(FunctionSymbol.MAIN);
         BasicBlock global = new BasicBlock(null, node.getBlock().getCurrentSymbolTable(), "global");
         setCurrentEnv(global);
         visitGlobalClassVariable(block);
         visitFunction(block);
-        Function mainFunction = programIR.getFunction(FunctionSymbol.MAIN);
-        globalInitBlocks.getLast().pushBack(new DirectJumpInst(mainFunction.basicBlocks().get(0)));
-        mainFunction.basicBlocks().addAll(0, globalInitBlocks);
+        globalReverseInitBlock.getFirst().pushBack(new DirectJumpInst(mainFunction.basicBlocks().get(0)));
+        globalReverseInitBlock.forEach(globalBlock -> mainFunction.basicBlocks().addFirst(globalBlock));
         popValTag();
+
         return null;
     }
 
@@ -210,44 +216,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
 
-    private Literal literalCalc(Operand left, ExprOps op, Operand right) {
-        if (left instanceof IntLiteral) {
-            int x = ((IntLiteral) left).getVal();
-            int y = ((IntLiteral) right).getVal();
-            switch (op) {
-                case ADD: return new IntLiteral(x + y);
-                case SUB: return new IntLiteral(x - y);
-                case MUL: return new IntLiteral(x * y);
-                case DIV: return new IntLiteral(x / y);
-                case MOD: return new IntLiteral(x % y);
-                case EQ: return x == y ? ONE_LITERAL : ZERO_LITERAL;
-                case NEQ: return x != y ? ONE_LITERAL : ZERO_LITERAL;
-                case GTE: return x >= y ? ONE_LITERAL : ZERO_LITERAL;
-                case GT: return x > y ? ONE_LITERAL : ZERO_LITERAL;
-                case LTE: return x <= y ? ONE_LITERAL : ZERO_LITERAL;
-                case LT: return x < y ? ONE_LITERAL : ZERO_LITERAL;
-                case OR: case BITOR: return new IntLiteral(x | y);
-                case AND: case BITAND: return new IntLiteral(x & y);
-                case BITXOR: return new IntLiteral(x ^ y);
-                case LSFT: return new IntLiteral(x << y);
-                case RSFT: return new IntLiteral(x >> y);
-                default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for IntLiteral");
-            }
-        } else {
-            String x = ((StringLiteral) left).stringVal();
-            String y = ((StringLiteral) right).stringVal();
-            switch (op) {
-                case ADD: return stringLiteralBuilder(x + y);
-                case EQ: return x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
-                case NEQ: return !x.equals(y) ? ONE_LITERAL : ZERO_LITERAL;
-                case GTE: return x.compareTo(y) >= 0 ? ONE_LITERAL : ZERO_LITERAL;
-                case GT: return x.compareTo(y) > 0 ? ONE_LITERAL : ZERO_LITERAL;
-                case LTE: return x.compareTo(y) <= 0 ? ONE_LITERAL : ZERO_LITERAL;
-                case LT: return x.compareTo(y) < 0 ? ONE_LITERAL : ZERO_LITERAL;
-                default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for StringLiteral");
-            }
-        }
-    }
+
 
 
     private Operand visitAssign(BinaryExprNode node) {
@@ -263,15 +232,17 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand rightVal = getVal(right);
         if (leftVal instanceof Literal && rightVal instanceof Literal) {
             try {
-                return literalCalc(leftVal, op, rightVal);
+                return LiteralProcess.calc(leftVal, op, rightVal);
             } catch (ArithmeticException e) {
                 System.err.println("IR Building: get arithmetic exception: " + e.getMessage());
             }
         }
-        Var dst = Var.tmpBuilder(op.toString(), op.isCompare());
+        Var dst;
         if (type != BaseTypeSymbol.STRING_TYPE_SYMBOL) {
+             dst = Var.tmpBuilder(op.toString(), op.isCompare());
             return currentBasicBlock.pushBack(new BinaryExprInst(dst, leftVal, op, rightVal), valTag);
         }
+        dst = Var.tmpBuilder(op.toString());
         List<Operand> args = new ArrayList<>(Arrays.asList(leftVal, rightVal));
         if (op == ADD) {
             if (left.equals(EMPTY_STRING)) return right;
@@ -290,11 +261,6 @@ public class IRBuilder implements AstVisitor<Operand> {
             case NEQ: return currentBasicBlock.pushBack(new BinaryExprInst(cmp, dst, NEQ, ZERO_LITERAL), valTag);
             default: throw new RuntimeException("Compiler Bug: (IR building) Unsupported operation for string");
         }
-    }
-
-    private Operand visitLeftLiteralLogicRes(BinaryExprNode node, IntLiteral literal, int val) {
-        if (literal.getVal() == val) return literal;
-        return visit(node.right());
     }
 
     private Stack<BasicBlock> successStack = new Stack<>();
@@ -329,7 +295,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         testMoreStack.pop();
         boolean setTestMore = true;
         if (left instanceof IntLiteral) {
-            int val = ((IntLiteral) left).getVal();
+            int val = ((IntLiteral) left).val();
             int valForTestMore = op == AND ? 1 : 0;
             if (val == valForTestMore) setTestMore = false;
             else {
@@ -390,15 +356,15 @@ public class IRBuilder implements AstVisitor<Operand> {
             case ADD: return visit(node.getExpr());
             case SUB:
                 src = visit(node.getExpr());
-                if (src instanceof IntLiteral) return new IntLiteral(-((IntLiteral) src).getVal());
+                if (src instanceof IntLiteral) return new IntLiteral(-((IntLiteral) src).val());
                 return currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
             case BITNOT:
                 src = visit(node.getExpr());
-                if (src instanceof IntLiteral) return new IntLiteral(~((IntLiteral) src).getVal());
+                if (src instanceof IntLiteral) return new IntLiteral(~((IntLiteral) src).val());
                 return currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src), valTag);
             case NOT:
                 src = visit(node.getExpr());
-                if (src instanceof IntLiteral) return ((IntLiteral) src).getVal() == 1 ? ZERO_LITERAL : ONE_LITERAL;
+                if (src instanceof IntLiteral) return ((IntLiteral) src).val() == 1 ? ZERO_LITERAL : ONE_LITERAL;
                 return currentBasicBlock.pushBack(new BinaryExprInst(dst, src, EQ, ZERO_LITERAL), valTag);
             case DEC: case INC: case DEC_SUFF: case INC_SUFF:
                 src = getMutableOperand(node.getExpr());
@@ -408,7 +374,7 @@ public class IRBuilder implements AstVisitor<Operand> {
                     dst = (Var) src;
                     IntLiteral val = (IntLiteral) ((Register) src).getVal(valTag);
                     if (val != null) {
-                        IntLiteral newVal = new IntLiteral(isINC ? val.getVal() + 1 : val.getVal() - 1);
+                        IntLiteral newVal = new IntLiteral(isINC ? val.val() + 1 : val.val() - 1);
                         currentBasicBlock.pushBack(new MoveInst(dst, newVal), valTag);
                         return isSUF ? val : newVal;
                     }
@@ -522,11 +488,11 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (function == Function.PRINT) visitPrintCall(args, false);
         else if (function == Function.PRINTLN) visitPrintCall(args, true);
         else if (function == Function.GET_INT) {
-            args.add(stringLiteralBuilder("%ld"));
+            args.add(LiteralProcess.stringLiteralBuilder("%ld"));
             Var dst = Var.tmpBuilder("get_int");
             return currentBasicBlock.pushBack(new FunctionCallInst(Function.SCANF_INT, args, dst), valTag);
         } else if (function == Function.PARSE_INT) {
-            args.add(stringLiteralBuilder("%ld"));
+            args.add(LiteralProcess.stringLiteralBuilder("%ld"));
             Var dst = Var.tmpBuilder("parse_int");
             return currentBasicBlock.pushBack(new FunctionCallInst(Function.STR_PARSE_INT, args, dst), valTag);
         } else {
@@ -547,7 +513,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand cond = node.getCondition() == null ? ONE_LITERAL : visit(node.getCondition());
         boolean haveElse = node.getElseNode() != null;
         if (cond instanceof IntLiteral) {
-            if (((IntLiteral) cond).getVal() == 1) visit(node.getBody());
+            if (((IntLiteral) cond).val() == 1) visit(node.getBody());
             else if (haveElse) visit(node.getElseNode());
         } else {
             BasicBlock ifTrue = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), prefix("if_then")); //TODO
@@ -603,7 +569,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (node.getCondition() != null) {
             Operand cond = visit(node.getCondition());
             if (cond instanceof IntLiteral) {
-                if (((IntLiteral) cond).getVal() == 0) return true; // Never go into the loop
+                if (((IntLiteral) cond).val() == 0) return true; // Never go into the loop
                 currentBasicBlock.pushBack(new DirectJumpInst(loopBegin));
             } else currentBasicBlock.pushBack(new CondJumpInst(cond, loopBegin, loopEnd));
         } else currentBasicBlock.pushBack(new DirectJumpInst(loopBegin));
@@ -697,7 +663,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(StringLiteralNode node) {
-        return stringLiteralBuilder(node.getVal());
+        return LiteralProcess.stringLiteralBuilder(node.getVal());
     }
 
     @Override
@@ -755,7 +721,7 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     private void setCurrentEnv(BasicBlock block) {
         if (block.parentFunction() != null) block.parentFunction().pushBack(block);
-        else if (globalInitBlocks.isEmpty() || globalInitBlocks.getLast() != block) globalInitBlocks.add(block);
+        else if (globalReverseInitBlock.isEmpty() || globalReverseInitBlock.getFirst() != block) globalReverseInitBlock.addFirst(block);
         currentSymbolTable = block.getCurrentSymbolTable();
         currentBasicBlock = block;
     }
@@ -778,14 +744,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         } else currentBasicBlock.pushBack(new MoveInst(dst, origin), valTag);
     }
 
-    private StringLiteral stringLiteralBuilder(String val) {
-        StringLiteral search = programIR.getStringLiteral(val);
-        if (search == null) {
-            search = new StringLiteral(val);
-            programIR.putStringLiteral(val, search);
-        }
-        return search;
-    }
+
 
     private String prefix(String name) {
         return currentBasicBlock.parentFunction().name() + "_" + name;

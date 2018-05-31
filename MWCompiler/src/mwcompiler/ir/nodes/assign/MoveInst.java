@@ -8,6 +8,7 @@ import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MoveInst extends AssignInst {
     private Operand val;
@@ -36,5 +37,11 @@ public class MoveInst extends AssignInst {
         appendUsedVar(val, registers);
         if (super.dst() instanceof Memory) registers.addAll(((Memory) super.dst()).usedVar());
         return registers;
+    }
+
+    @Override
+    public AssignInst copy(Map<Object, Object> replaceMap) {
+        return new MoveInst((MutableOperand) dst().copy(replaceMap),
+                val.copy(replaceMap));
     }
 }

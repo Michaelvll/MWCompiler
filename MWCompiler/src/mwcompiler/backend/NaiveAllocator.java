@@ -22,11 +22,11 @@ public class NaiveAllocator {
     }
 
     public void apply(ProgramIR programIR) {
-        programIR.getFunctionMap().values().forEach(this::compileFunction);
+        programIR.functionMap().values().forEach(this::compileFunction);
     }
 
     private void compileFunction(Function function) {
-        if (!function.isUserFunc()) return;
+        if (function.notUserFunc()) return;
 
         Set<Var> vars = function.getVars();
         for (BasicBlock block : function.basicBlocks()) {

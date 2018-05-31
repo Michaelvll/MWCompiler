@@ -41,7 +41,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
         assembly.append("\nSECTION .text\n");
         indent = "\t\t";
-        programIR.getFunctionMap().values().forEach(this::visit);
+        programIR.functionMap().values().forEach(this::visit);
 
         assembly.append("\nSECTION .data\talign=8\n");
         for (StringLiteral s : programIR.getStringPool().values()) {
@@ -51,7 +51,7 @@ public class CodeGenerator implements IRVisitor<String> {
             IntLiteral val = entry.getValue();
             if (val != null)
                 assembly.append(entry.getKey().nasmName()).append(":\n\t\t").append("dq ")
-                        .append(val.getVal()).append("\n");
+                        .append(val.val()).append("\n");
         }
         assembly.append("\nSECTION .bss\talign=8\n");
         for (Map.Entry<Var, IntLiteral> entry : programIR.getGlobalPool().entrySet()) {
@@ -70,7 +70,7 @@ public class CodeGenerator implements IRVisitor<String> {
     @Override
     public String visit(Function function) {
         currentFunction = function;
-        if (!function.isUserFunc()) return null;
+        if (function.notUserFunc()) return null;
         assembly.append(function.nasmName()).append(":\n");
 
         // ====== prologue ==========
@@ -241,7 +241,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
     @Override
     public String visit(ReturnInst inst) {
-        Operand val = inst.getRetVal();
+        Operand val = inst.retVal();
         val = visitMemory(val, RAX, RSI);
         if (val != null) append("mov", RAX, val);
 
@@ -284,7 +284,7 @@ public class CodeGenerator implements IRVisitor<String> {
 
     @Override
     public String visit(IntLiteral intLiteral) {
-        return String.valueOf(intLiteral.getVal());
+        return String.valueOf(intLiteral.val());
     }
 
 

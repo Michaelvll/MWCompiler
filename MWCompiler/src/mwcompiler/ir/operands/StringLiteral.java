@@ -3,6 +3,7 @@ package mwcompiler.ir.operands;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.ir.tools.NameBuilder;
 
+import java.util.Map;
 import java.util.StringJoiner;
 
 public class StringLiteral extends Literal {
@@ -26,6 +27,8 @@ public class StringLiteral extends Literal {
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);
     }
+
+
 
     public String getLabel() {
         return label;

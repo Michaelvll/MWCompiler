@@ -35,4 +35,5 @@ public abstract class AssignInst extends Instruction {
         if (dst instanceof Var) return new ArrayList<>(Collections.singleton((Var) dst));
         return new ArrayList<>();
     }
+
 }

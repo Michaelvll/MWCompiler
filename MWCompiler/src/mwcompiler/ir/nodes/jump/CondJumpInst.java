@@ -1,12 +1,17 @@
 package mwcompiler.ir.nodes.jump;
 
 import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
+import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.operands.IntLiteral;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CondJumpInst extends JumpInst {
     private Operand cond; // if cond != 0 -> ifTrue, else ->ifFalse
@@ -17,6 +22,13 @@ public class CondJumpInst extends JumpInst {
 
     public CondJumpInst(Operand cond, BasicBlock ifTrue, BasicBlock ifFalse) {
         this.cond = cond;
+        this.ifTrue = ifTrue;
+        this.ifFalse = ifFalse;
+    }
+
+    private CondJumpInst(Operand cond, BinaryExprInst cmp, BasicBlock ifTrue, BasicBlock ifFalse) {
+        this.cond = cond;
+        this.cmp = cmp;
         this.ifTrue = ifTrue;
         this.ifFalse = ifFalse;
     }
@@ -64,5 +76,20 @@ public class CondJumpInst extends JumpInst {
         BasicBlock tmp = ifTrue;
         ifTrue = ifFalse;
         ifFalse = tmp;
+    }
+
+    @Override
+    public JumpInst copy(Map<Object, Object> replaceMap) {
+        AssignInst cmpInst = cmp.copy(replaceMap);
+        if (cmpInst instanceof MoveInst) {
+            IntLiteral val = (IntLiteral) ((MoveInst) cmpInst).val();
+            if (val.val() == 1) return new DirectJumpInst(ifTrue.copy(replaceMap));
+            return new DirectJumpInst(ifFalse.copy(replaceMap));
+        }
+        return new CondJumpInst((Operand) replaceMap.getOrDefault(cond, cond),
+                (BinaryExprInst) cmpInst,
+                ifTrue.copy(replaceMap),
+                ifFalse.copy(replaceMap));
+
     }
 }

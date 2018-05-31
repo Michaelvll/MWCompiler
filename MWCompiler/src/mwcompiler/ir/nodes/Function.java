@@ -20,6 +20,7 @@ public class Function {
     private List<Var> paramVars = new ArrayList<>();
     private SymbolTable symbolTable;
 
+
     public enum FuncType {
         USER, EXTERN, LIB, TEMP
     }
@@ -28,10 +29,13 @@ public class Function {
 
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
+    private Set<Function> calleeSet = new HashSet<>();
+//    private Set<Function> recursiveCalleeSet = new HashSet<>();
+
     private LinkedList<BasicBlock> basicBlocks = new LinkedList<>();
 
-    private boolean isInline = false;
-    private static final int INLINE_BOUND = 10;
+    private boolean inlineable = false;
+    public int instNum = 0;
 
     // For allocation
     private Set<Var> vars = new HashSet<>();
@@ -98,6 +102,9 @@ public class Function {
         return basicBlocks;
     }
 
+    public void setBasicBlocks(LinkedList<BasicBlock> basicBlocks) {
+        this.basicBlocks = basicBlocks;
+    }
 
     public void setSymbolTable(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -141,8 +148,10 @@ public class Function {
                     block.pushBack(new DirectJumpInst(condJumpInst.ifTrue()));
                 }
             }
-            if (block.front() != null && (block.front() != block.back() || !(block.back() instanceof DirectJumpInst)))
+            if (block.front() != null && (block.front() != block.back() || !(block.back() instanceof DirectJumpInst))) {
                 newBlocks.addFirst(block);
+                instNum += block.instNum();
+            }
         }
         basicBlocks = newBlocks;
     }
@@ -157,6 +166,29 @@ public class Function {
         return preSearch;
     }
 
+    public void addCallee(Function function) {
+        calleeSet.add(function);
+    }
+
+    public Set<Function> calleeSet() {
+        return calleeSet;
+    }
+
+    public void recalcCalleSet() {
+        calleeSet.clear();
+        for (BasicBlock block : basicBlocks) {
+            for (Instruction inst = block.front(); inst != null; inst = inst.next) {
+                if (inst instanceof FunctionCallInst) {
+                    calleeSet.add(((FunctionCallInst) inst).function());
+                }
+            }
+        }
+    }
+
+//    public Set<Function> recursiveCalleeSet() {
+//        return recursiveCalleeSet;
+//    }
+
     public Set<Var> getVars() {
         return vars;
     }
@@ -169,28 +201,8 @@ public class Function {
         return usedCalleeSaveRegs;
     }
 
-    public void checkInlineable() {
-        // Will be used in the future
-        isInline = true;
-        if (functionSymbol == FunctionSymbol.MAIN) isInline = false;
-        else {
-            int cnt = 0;
-            for (BasicBlock block : basicBlocks) {
-                if (block.name().contains("loop") || cnt > INLINE_BOUND) isInline = false;
-                for (Instruction inst = block.front(); inst != null; inst = inst.next) {
-                    ++cnt;
-                    if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).function() == this) {
-                        isInline = false;
-                        return;
-                    }
-                }
-                if (!isInline) return;
-            }
-        }
-    }
-
-    public boolean isInline() {
-        return isInline;
+    public boolean isInlineable() {
+        return inlineable;
     }
 
 
@@ -223,8 +235,8 @@ public class Function {
         return funcType;
     }
 
-    public boolean isUserFunc() {
-        return funcType == FuncType.USER;
+    public boolean notUserFunc() {
+        return funcType != FuncType.USER;
     }
 
     public int getVarStackSize() {

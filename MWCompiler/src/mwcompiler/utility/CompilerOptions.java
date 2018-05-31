@@ -24,6 +24,9 @@ public class CompilerOptions {
     public PrintStream astOut = System.err;
     public PrintStream irOut = System.err;
     public int warningLevel = 0;
+    // Function inline
+    public final int INLINE_CALLEE_BOUND = 8;
+    public final int INLINE_CALLER_BOUND = 256;
 
 
     public void compilerArgSolve(String[] args) {

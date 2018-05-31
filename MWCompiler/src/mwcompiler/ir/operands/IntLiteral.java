@@ -9,13 +9,13 @@ public class IntLiteral extends Literal {
         this.val = val;
     }
 
-    public int getVal() {
+    public int val() {
         return val;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof IntLiteral && ((IntLiteral) obj).getVal() == val;
+        return obj instanceof IntLiteral && ((IntLiteral) obj).val() == val;
     }
 
     @Override

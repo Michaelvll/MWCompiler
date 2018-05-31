@@ -87,6 +87,11 @@ public class PhysicalRegister extends Register {
         return this;
     }
 
+    @Override
+    public Operand copy(Map<Object, Object> replaceMap) {
+        throw new RuntimeException("??? No copy for physical reg");
+    }
+
     public boolean isCalleeSave() {
         return calleeSave;
     }

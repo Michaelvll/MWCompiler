@@ -35,7 +35,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     public void apply(ProgramIR programIR) {
-        programIR.getFunctionMap().values().forEach(this::visit);
+        programIR.functionMap().values().forEach(this::visit);
         programIR.getStringPool().values().forEach(s -> println(s.getLabel() + " db " + s.stringVal()));
         //TODO
     }
@@ -86,14 +86,14 @@ public class DumpIRVisitor implements IRVisitor<String> {
     @Override
     public String visit(ReturnInst ret) {
         addIndent();
-        iprintln("ret " + (ret.getRetVal() != null ? visit(ret.getRetVal()) : ""));
+        iprintln("ret " + (ret.retVal() != null ? visit(ret.retVal()) : ""));
         subIndent();
         return null;
     }
 
     @Override
     public String visit(Function inst) {
-        if (!inst.isUserFunc()) return null; // output extern func is good for nasm
+        if (inst.notUserFunc()) return null; // output extern func is good for nasm
         println("");
         iprint("func " + inst.name() + " ");
         StringJoiner params = new StringJoiner(" ");
@@ -174,7 +174,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
 
     @Override
     public String visit(IntLiteral intLiteral) {
-        return String.valueOf(intLiteral.getVal());
+        return String.valueOf(intLiteral.val());
     }
 
     @Override

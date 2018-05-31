@@ -3,6 +3,7 @@ package mwcompiler.ir.nodes;
 
 import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
@@ -15,7 +16,6 @@ import mwcompiler.utility.ExprOps;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static mwcompiler.ir.operands.IntLiteral.ZERO_LITERAL;
 
@@ -28,8 +28,7 @@ public class BasicBlock {
 
     public boolean isEnded = false;
 
-    private Set<BasicBlock> fromBasicBlock;
-    private Set<BasicBlock> toBasicBlock;
+    private int instNum = 0;
 
 //    private Map<Register, IntLiteral> regIntMap = new HashMap<>();
 
@@ -51,6 +50,7 @@ public class BasicBlock {
         if (front == null) front = instruction;
         if (end != null) end.addNext(instruction);
         end = instruction;
+        ++instNum;
     }
 
     public Operand pushBack(AssignInst assignInst, int valTag) {
@@ -66,6 +66,7 @@ public class BasicBlock {
             }
             pushBack(assignInst);
         } else {
+
             pushBack(assignInst);
             if (dst instanceof Var)
                 addKnownReg((Var) assignInst.dst(), null, valTag);
@@ -75,23 +76,24 @@ public class BasicBlock {
                 assignInst.setDst(memDst);
                 dst = memDst;
             }
+            if (assignInst instanceof FunctionCallInst && parentFunction != null)
+                parentFunction.addCallee(((FunctionCallInst) assignInst).function());
         }
         return dst;
     }
 
 
     public void pushBack(JumpInst jumpInst) {
-        //TODO for function call
         isEnded = true;
         if (jumpInst instanceof ReturnInst)
             parentFunction.addReturn((ReturnInst) jumpInst);
         if (jumpInst instanceof CondJumpInst) {
             CondJumpInst condJumpInst = (CondJumpInst) jumpInst;
             if (condJumpInst.getCond() instanceof IntLiteral) {
-                if (((IntLiteral) condJumpInst.getCond()).getVal() == 0)
+                if (((IntLiteral) condJumpInst.getCond()).val() == 0)
                     jumpInst = new DirectJumpInst(condJumpInst.ifFalse());
                 else jumpInst = new DirectJumpInst(condJumpInst.ifTrue());
-            } else {
+            } else if (condJumpInst.getCmp() == null) {
                 assert condJumpInst.getCond() instanceof MutableOperand;
                 MutableOperand cond = (MutableOperand) condJumpInst.getCond();
                 Var dst = Var.tmpBuilder("cmp");
@@ -133,7 +135,7 @@ public class BasicBlock {
                     if (latterDef != null && latterDef) delete(inst);
                     else {
                         defineTable.put(dst, true);
-                        if (!assignInst.isCompare() && parentFunction != null) parentFunction.addVar(dst);
+//                        if (!assignInst.isCompare() && parentFunction != null) parentFunction.addVar(dst);
                     }
                 }
                 for (Register reg : assignInst.usedVar()) {
@@ -150,6 +152,7 @@ public class BasicBlock {
         inst.delete();
         if (inst.next == null) end = inst.prev;
         if (inst.prev == null) front = inst.next;
+        --instNum;
         return inst;
     }
 
@@ -189,5 +192,43 @@ public class BasicBlock {
 
     public boolean empty() {
         return front == null;
+    }
+
+    public int instNum() {
+        return instNum;
+    }
+
+    public void setFront(Instruction front) {
+        this.front = front;
+    }
+
+    public void setEnd(Instruction end) {
+        this.end = end;
+    }
+
+    public BasicBlock copy(Map<Object, Object> replaceMap) {
+        BasicBlock search = (BasicBlock) replaceMap.get(this);
+        if (search == null) {
+            search = new BasicBlock((Function) replaceMap.get(parentFunction), currentSymbolTable, ((Function) replaceMap.get(parentFunction)).name() + "_inline_" + name);
+            replaceMap.put(this, search);
+        }
+        return search;
+    }
+
+    public BasicBlock deepCopy(Map<Object, Object> replaceMap) {
+        BasicBlock newBlock = this.copy(replaceMap);
+        for (Instruction inst = front; inst != null; inst = inst.next) {
+            if (inst instanceof AssignInst) newBlock.pushBack(inst.copy(replaceMap));
+            else if (inst instanceof ReturnInst) {
+                if (((ReturnInst) inst).retVal() != null)
+                    newBlock.pushBack(((ReturnInst) inst).copy(replaceMap));
+                newBlock.pushBack(new DirectJumpInst((BasicBlock) replaceMap.get("inline_next")));
+            } else newBlock.pushBack(inst.copy(replaceMap));
+        }
+        return newBlock;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

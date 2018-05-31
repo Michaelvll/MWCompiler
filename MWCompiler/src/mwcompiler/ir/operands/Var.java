@@ -111,6 +111,17 @@ public class Var extends Register {
         return physicalRegister;
     }
 
+    @Override
+    public Operand copy(Map<Object, Object> replaceMap) {
+        if (isGlobal) return this;
+        Operand search = (Operand) replaceMap.get(this);
+        if (search == null){
+            search = Var.tmpBuilder(name, compareTmp);
+            replaceMap.put(this, search);
+        }
+        return search;
+    }
+
     public boolean isCompareTmp() {
         return compareTmp;
     }

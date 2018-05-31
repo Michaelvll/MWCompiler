@@ -1,10 +1,13 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class Instruction {
     public Instruction prev;
@@ -30,9 +33,11 @@ public abstract class Instruction {
         this.next = nextInst;
     }
 
-    void delete() {
+    public void delete() {
         if (prev != null) prev.next = next;
         if (next != null) next.prev = prev;
     }
+
+    public abstract Instruction copy(Map<Object, Object> replaceMap);
 
 }

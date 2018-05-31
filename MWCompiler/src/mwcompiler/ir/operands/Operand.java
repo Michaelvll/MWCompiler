@@ -3,6 +3,8 @@ package mwcompiler.ir.operands;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.SymbolInfo;
 
+import java.util.Map;
+
 public abstract class Operand {
     private SymbolInfo symbolInfo;
 
@@ -17,4 +19,6 @@ public abstract class Operand {
     public abstract <T>T accept(IRVisitor<T> visitor);
 
     public abstract PhysicalRegister physicalRegister();
+
+    public abstract Operand copy(Map<Object, Object> replaceMap);
 }
