@@ -488,14 +488,10 @@ public class IRBuilder implements AstVisitor<Operand> {
             } else outputReg = args.get(0);
         } else outputReg = args.get(0);
         List<Operand> printArgs = new ArrayList<>();
-        if (formatStr == StringLiteral.stringlnFormat) {
-            printArgs.add(outputReg);
-            currentBasicBlock.pushBack(new FunctionCallInst(Function.PUTS, printArgs, null), valTag);
-        } else {
-            printArgs.add(formatStr);
-            printArgs.add(outputReg);
-            currentBasicBlock.pushBack(new FunctionCallInst(Function.PRINTF, printArgs, null), valTag);
-        }
+
+        printArgs.add(formatStr);
+        printArgs.add(outputReg);
+        currentBasicBlock.pushBack(new FunctionCallInst(Function.PRINTF, printArgs, null), valTag);
     }
 
     @Override
