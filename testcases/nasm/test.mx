@@ -45,8 +45,6 @@ int main() {
 	return 0;
 }
 
-
-
 /*!! metadata:
 === comment ===
 optim-515030910645-suyufeng.txt
@@ -66,4 +64,3 @@ optim pretest
 
 
 !!*/
-

@@ -487,12 +487,15 @@ public class IRBuilder implements AstVisitor<Operand> {
                 formatStr = newline ? StringLiteral.intlnFormat : StringLiteral.intFormat;
             } else outputReg = args.get(0);
         } else outputReg = args.get(0);
-
         List<Operand> printArgs = new ArrayList<>();
-        printArgs.add(formatStr);
-        printArgs.add(outputReg);
-
-        currentBasicBlock.pushBack(new FunctionCallInst(Function.PRINT_INT, printArgs, null), valTag);
+        if (formatStr == StringLiteral.stringlnFormat) {
+            printArgs.add(outputReg);
+            currentBasicBlock.pushBack(new FunctionCallInst(Function.PUTS, printArgs, null), valTag);
+        } else {
+            printArgs.add(formatStr);
+            printArgs.add(outputReg);
+            currentBasicBlock.pushBack(new FunctionCallInst(Function.PRINTF, printArgs, null), valTag);
+        }
     }
 
     @Override

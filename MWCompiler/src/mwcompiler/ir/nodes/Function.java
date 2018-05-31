@@ -195,8 +195,6 @@ public class Function {
 
 
     // Language BuiltIn Function
-    public static final Function PRINT_INT = new Function(FunctionSymbol.PRINT_INT, FuncType.EXTERN);
-    public static final Function PRINT_STR = new Function(FunctionSymbol.PRINT_STR, FuncType.EXTERN);
     public static final Function PRINT = new Function(FunctionSymbol.PRINT, FuncType.TEMP);
     public static final Function PRINTLN = new Function(FunctionSymbol.PRINTLN, FuncType.TEMP);
     public static final Function GET_STRING = new Function(FunctionSymbol.GET_STRING, FuncType.LIB);
@@ -208,6 +206,8 @@ public class Function {
     public static final Function PARSE_INT = new Function(FunctionSymbol.PARSE_INT, FuncType.TEMP);
     public static final Function STR_ORD = new Function(FunctionSymbol.ORD, FuncType.LIB);
 
+    public static final Function PRINTF = new Function(FunctionSymbol.PRINTF, FuncType.EXTERN);
+    public static final Function PUTS = new Function(new FunctionSymbol(VOID_TYPE_SYMBOL, "puts", STRING_TYPE_SYMBOL), FuncType.EXTERN);
     public static final Function SCANF_INT = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "scanf", STRING_TYPE_SYMBOL), FuncType.EXTERN);
     // BuiltIn Function for string Operation
     public static final Function STR_ADD = new Function(new FunctionSymbol(STRING_TYPE_SYMBOL, "string_add", STRING_TYPE_SYMBOL, STRING_TYPE_SYMBOL), FuncType.LIB);
@@ -216,7 +216,7 @@ public class Function {
 
     public static final Function MALLOC = new Function(new FunctionSymbol(INT_TYPE_SYMBOL, "malloc", INT_TYPE_SYMBOL), FuncType.EXTERN);
 
-    public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINT_INT, PRINT_STR, PRINT, PRINTLN, GET_STRING, GET_INT,
+    public static final List<Function> builtinFunctions = new ArrayList<>(Arrays.asList(PRINTF, PRINT, PRINTLN, GET_STRING, GET_INT,
             TO_STRING, SIZE, LENGTH, SUBSTRING, PARSE_INT, STR_ORD, STR_ADD, STR_CMP));
 
     public FuncType funcType() {
