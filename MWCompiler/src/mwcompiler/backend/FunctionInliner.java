@@ -47,6 +47,10 @@ public class FunctionInliner {
                 if (change) function.setBasicBlocks(newBlocks);
             }
         }
+        programIR.functionMap().values().forEach(func->{
+            func.cleanUp();
+            func.recalcCalleSet();
+        });
     }
 
     private LinkedList<BasicBlock> inline(Function function, Function callee, BasicBlock currentBlock, FunctionCallInst inst) {
