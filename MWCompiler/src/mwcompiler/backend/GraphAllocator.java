@@ -90,7 +90,7 @@ public class GraphAllocator extends Allocator {
             Var var = graph.varStack.pop();
             var.deleted = false;
             for (Var neighbor : var.neighbors())
-                if (!neighbor.deleted && neighbor.assignedReg()) neighborReg.add(neighbor.physicalRegister());
+                if (!neighbor.deleted && neighbor.isAssigned()) neighborReg.add(neighbor.physicalRegister());
             for (PhysicalRegister preg : registers) {
                 if (!neighborReg.contains(preg)) {
                     var.setPhysicalRegister(preg);
@@ -99,7 +99,7 @@ public class GraphAllocator extends Allocator {
                     break;
                 }
             }
-            if (!var.assignedReg()) {
+            if (!var.isAssigned()) {
                 stackTop = alignStack(stackTop + options.PTR_SIZE, options.PTR_SIZE);
                 var.setStackPos(new Memory(RBP, null, 0, -stackTop));
             }

@@ -71,7 +71,7 @@ public class Memory extends MutableOperand {
     public List<Var> usedVar() {
         List<Var> registers = new ArrayList<>();
         if (baseReg instanceof Var) registers.add((Var) baseReg);
-        if (indexReg instanceof Var) registers.add((Var) baseReg);
+        if (indexReg instanceof Var) registers.add((Var) indexReg);
         return registers;
     }
 

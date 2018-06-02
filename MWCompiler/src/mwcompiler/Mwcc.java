@@ -44,26 +44,15 @@ public class Mwcc {
         options.compilerArgSolve(args);
         buildAst();
         typeCheck();
-        if (options.dumpAst) {
-            DumpAstVisitor astDumper = new DumpAstVisitor(options);
-            astDumper.apply(programAst);
-//            System.exit(0);
-        }
+        if (options.dumpAst) dumpAst();
 
         buildIR();
         if (options.functionInline) functionInliner();
-        if (options.dumpIR) {
-            DumpIRVisitor irDumper = new DumpIRVisitor(options);
-            irDumper.apply(programIR);
-        }
-
         livenessAnalysis();
-
+        if (options.dumpIR) dumpIR();
         allocate();
         codeGenerate();
     }
-
-
 
 
     public ProgramIR getProgramIR() {
@@ -100,6 +89,11 @@ public class Mwcc {
 
     }
 
+    private void dumpAst() {
+        DumpAstVisitor astDumper = new DumpAstVisitor(options);
+        astDumper.apply(programAst);
+    }
+
 
     private void typeCheck() {
         try {
@@ -119,8 +113,11 @@ public class Mwcc {
     private void buildIR() {
         IRBuilder irBuilder = new IRBuilder(options);
         programIR = irBuilder.build(programAst);
+    }
 
-
+    private void dumpIR() {
+        DumpIRVisitor irDumper = new DumpIRVisitor(options);
+        irDumper.apply(programIR);
     }
 
     private void allocate() {

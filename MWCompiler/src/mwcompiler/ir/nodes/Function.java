@@ -34,7 +34,6 @@ public class Function {
 
     private ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
 
-    private boolean notSelfCall = false;
     public int instNum = 0;
 
     // For allocation
@@ -187,6 +186,9 @@ public class Function {
         }
     }
 
+    public boolean isClassFunc() {
+        return functionSymbol.getClassSymbolTable() != null;
+    }
 
 
     public Set<Function> recursiveCalleeSet() {
@@ -205,9 +207,6 @@ public class Function {
         return usedCalleeSaveRegs;
     }
 
-    public boolean isNotSelfCall() {
-        return notSelfCall;
-    }
 
 
     // Language BuiltIn Function

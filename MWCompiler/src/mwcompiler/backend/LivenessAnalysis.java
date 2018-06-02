@@ -8,6 +8,7 @@ import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.Var;
+import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.utility.CompilerOptions;
 
 import java.util.HashSet;
@@ -26,7 +27,6 @@ public class LivenessAnalysis {
         this.programIR = programIR;
 
         programIR.functionMap().values().forEach(this::analysisFunction);
-
     }
 
     private void analysisFunction(Function function) {
@@ -65,7 +65,6 @@ public class LivenessAnalysis {
                     inst.liveOut().addAll(liveOut);
                 }
             }
-
         }
 
     }

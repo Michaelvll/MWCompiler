@@ -16,6 +16,7 @@ import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.CompilerOptions;
 import mwcompiler.utility.ExprOps;
 import mwcompiler.utility.Pair;
+import mwcompiler.utility.StringProcess;
 
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,11 @@ public class CodeGenerator implements IRVisitor<String> {
         // Get params
         List<Var> params = function.paramVars();
         for (int index = 0; index < params.size(); ++index) {
+            if (params.get(index).isUnused()) {
+                System.err.println("Param " + StringProcess.getRefString(params.get(index).irName())
+                        + "is unused in function " + StringProcess.getRefString(function.name()));
+                continue;
+            }
             if (index < paramRegs.size()) {
                 if (params.get(index).physicalRegister() != paramRegs.get(index))
                     append("mov", params.get(index), paramRegs.get(index));
@@ -135,7 +141,7 @@ public class CodeGenerator implements IRVisitor<String> {
             append("movzx", RAX.irName(), RAX.lowByte());
         } else {
             Operand dst = binaryExprInst.dst();
-            Pair<Operand, Operand> newOperand = varToReg(left, right, dst == left);
+            Pair<Operand, Operand> newOperand = varToReg(left, right, dst.varEquals(left));
             if (dst == left) dst = newOperand.first;
             left = newOperand.first;
             right = newOperand.second;
@@ -155,7 +161,7 @@ public class CodeGenerator implements IRVisitor<String> {
                 append("cqo");
                 append("idiv", right);
                 append("mov", dst, (op == ExprOps.DIV) ? RAX : RDX);
-            } else if ((isMem(dst) && left != dst) || dst.varEquals(right)) {
+            } else if ((isMem(dst) && !left.varEquals(dst)) || dst.varEquals(right)) {
                 append("mov", RAX, left);
                 append(op.nasmOp(), RAX, right);
                 append("mov", dst, RAX);

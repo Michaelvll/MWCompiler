@@ -159,7 +159,11 @@ public class Var extends Register {
         this.degree = neighbors.size();
     }
 
-    public boolean assignedReg() {
+    public boolean isAssigned() {
         return physicalRegister != null;
+    }
+
+    public boolean isUnused() {
+        return physicalRegister == null && stackPos == null;
     }
 }

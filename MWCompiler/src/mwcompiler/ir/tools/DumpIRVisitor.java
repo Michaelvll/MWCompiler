@@ -69,7 +69,7 @@ public class DumpIRVisitor implements IRVisitor<String> {
     }
 
     private String visit(Instruction instruction) {
-//        instruction.liveIn().forEach(x -> print(x.irName() + " "));
+        instruction.liveOut().forEach(x -> print(x.irName() + " "));
         return instruction.accept(this);
     }
 

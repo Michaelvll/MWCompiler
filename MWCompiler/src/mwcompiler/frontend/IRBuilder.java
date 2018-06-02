@@ -546,6 +546,14 @@ public class IRBuilder implements AstVisitor<Operand> {
         newValTag();
         BasicBlock loopCond = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), prefix("loop_cond"), valTag);
         BasicBlock loopBegin = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), prefix("loop_begin"), valTag);
+//        if (node.getBody().getStatements().isEmpty()) {
+//            if (node.getVarInit() != null) visit(node.getVarInit());
+//            currentBasicBlock.pushBack(new DirectJumpInst(loopCond));
+//            setCurrentEnv(loopCond);
+//            visitLoopCondition(node, loopBegin, loopEnd);
+//            setCurrentEnv(loopEnd);
+//            return null;
+//        }
         popValTag();
         currentBasicBlock.pushBack(new DirectJumpInst(loopStartCond));
         setCurrentEnv(loopStartCond);
