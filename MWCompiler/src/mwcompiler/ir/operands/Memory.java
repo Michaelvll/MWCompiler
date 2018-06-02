@@ -35,10 +35,6 @@ public class Memory extends MutableOperand {
         return null;
     }
 
-    @Override
-    public Operand copy(Map<Object, Object> replaceMap) {
-        return new Memory((Register) baseReg.copy(replaceMap), indexReg != null ? indexReg.copy(replaceMap) : null, scale, displacement);
-    }
 
     public Register baseReg() {
         return baseReg;
@@ -101,4 +97,15 @@ public class Memory extends MutableOperand {
     public boolean isTmp() {
         return false;
     }
+
+    @Override
+    public Operand dstCopy(Map<Object, Object> replaceMap) {
+        return copy(replaceMap);
+    }
+
+    @Override
+    public Operand copy(Map<Object, Object> replaceMap) {
+        return new Memory((Register) baseReg.copy(replaceMap), indexReg != null ? indexReg.copy(replaceMap) : null, scale, displacement);
+    }
+
 }

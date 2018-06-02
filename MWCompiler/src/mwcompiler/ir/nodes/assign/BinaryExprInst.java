@@ -67,7 +67,7 @@ public class BinaryExprInst extends AssignInst {
 
     @Override
     public AssignInst copy(Map<Object, Object> replaceMap) {
-        return builder((MutableOperand) dst().copy(replaceMap),
+        return builder((MutableOperand) dst().dstCopy(replaceMap),
                 left.copy(replaceMap),
                 op,
                 right.copy(replaceMap));

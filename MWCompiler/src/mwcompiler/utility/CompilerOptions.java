@@ -1,6 +1,5 @@
 package mwcompiler.utility;
 
-import mwcompiler.ir.operands.Operand;
 import org.apache.commons.cli.*;
 
 import java.io.FileInputStream;
@@ -24,9 +23,11 @@ public class CompilerOptions {
     public PrintStream astOut = System.err;
     public PrintStream irOut = System.err;
     public int warningLevel = 0;
+    public boolean graphAllocate = false;
+    public boolean functionInline = true;
     // Function inline
-    public final int INLINE_CALLEE_BOUND = 8;
-    public final int INLINE_CALLER_BOUND = 256;
+    public final int INLINE_CALLEE_BOUND = 1 << 5;
+    public final int INLINE_CALLER_BOUND = 1 << 10;
 
 
     public void compilerArgSolve(String[] args) {
@@ -52,6 +53,11 @@ public class CompilerOptions {
         options.addOption(Option.builder().longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build());
 
         options.addOption(Option.builder().longOpt("nasm-lib-include-cmd").desc("Add include command at the top of nasm output file").hasArg(false).build());
+
+        options.addOption(Option.builder("a").longOpt("allocator").desc("Register allocator [Naive]/Graph").hasArg().build());
+
+        options.addOption(Option.builder("dinline").longOpt("disable-function-inline").hasArg(false).desc("Disable function inline").build());
+
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -99,6 +105,13 @@ public class CompilerOptions {
 
             if (cmd.hasOption("irOutput")) irOutFile = cmd.getOptionValue("irOutput");
             else if (this.dumpIR) System.err.println("No IR output file specified, output redirected to std-err");
+
+            if (cmd.hasOption("a")) {
+                if (cmd.getOptionValue("a").equals("Graph")) graphAllocate = true;
+                else if (cmd.getOptionValue("a").equals("Naive")) graphAllocate = false;
+                else System.err.println("Unsupported allocator, use naive allocator by default");
+            }
+            if (cmd.hasOption("disable-function-inline")) functionInline = false;
 
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());

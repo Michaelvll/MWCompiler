@@ -1,23 +1,48 @@
 package mwcompiler.ir.nodes;
 
-import mwcompiler.ir.nodes.assign.AssignInst;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Instruction {
     public Instruction prev;
     public Instruction next;
 
+    // For liveness analysis
+    private Set<Var> liveIn = new HashSet<>();
+    private Set<Var> liveOut = new HashSet<>();
+
 
     public abstract <T> T accept(IRVisitor<T> visitor);
+
     public abstract List<Var> usedVar();
+
     public abstract List<Var> dstVar();
 
+    public List<Var> usedLocalVar() {
+        List<Var> localVars = new ArrayList<>();
+        for (Var var : usedVar()) {
+            if (!var.isGlobal()) localVars.add(var);
+        }
+        return localVars;
+    }
+
+    public List<Var> dstLocalVar() {
+        List<Var> localVars = new ArrayList<>();
+        for (Var var : dstVar()) {
+            if (!var.isGlobal()) localVars.add(var);
+        }
+        return localVars;
+    }
+
+    public Set<Var> liveIn() {
+        return liveIn;
+    }
+
+    public Set<Var> liveOut() {
+        return liveOut;
+    }
 
     void addPrev(Instruction prevInst) {
         if (this.prev != null) this.prev.next = prevInst;

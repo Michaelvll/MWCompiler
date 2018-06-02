@@ -2,9 +2,7 @@ package mwcompiler;
 
 import mwcompiler.ast.nodes.ProgramNode;
 import mwcompiler.ast.tools.DumpAstVisitor;
-import mwcompiler.backend.CodeGenerator;
-import mwcompiler.backend.FunctionInliner;
-import mwcompiler.backend.NaiveAllocator;
+import mwcompiler.backend.*;
 import mwcompiler.frontend.*;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.tools.DumpIRVisitor;
@@ -53,16 +51,19 @@ public class Mwcc {
         }
 
         buildIR();
-        functionInliner();
+        if (options.functionInline) functionInliner();
         if (options.dumpIR) {
             DumpIRVisitor irDumper = new DumpIRVisitor(options);
             irDumper.apply(programIR);
         }
 
+        livenessAnalysis();
 
         allocate();
         codeGenerate();
     }
+
+
 
 
     public ProgramIR getProgramIR() {
@@ -123,7 +124,9 @@ public class Mwcc {
     }
 
     private void allocate() {
-        NaiveAllocator allocator = new NaiveAllocator(options);
+        Allocator allocator;
+        if (options.graphAllocate) allocator = new GraphAllocator(options);
+        else allocator = new NaiveAllocator(options);
         allocator.apply(programIR);
     }
 
@@ -137,4 +140,8 @@ public class Mwcc {
         functionInliner.apply(programIR);
     }
 
+    private void livenessAnalysis() {
+        LivenessAnalysis livenessAnalysis = new LivenessAnalysis(options);
+        livenessAnalysis.apply(programIR);
+    }
 }

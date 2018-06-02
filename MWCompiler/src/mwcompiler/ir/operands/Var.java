@@ -1,12 +1,12 @@
 package mwcompiler.ir.operands;
 
-import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.SymbolTable;
-import mwcompiler.symbols.TypeSymbol;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Var extends Register {
     private String name;
@@ -20,6 +20,11 @@ public class Var extends Register {
     private PhysicalRegister physicalRegister;
     private int useTime = 0;
     private boolean compareTmp = false;
+
+    // For graph coloring
+    private Set<Var> neighbors = new HashSet<>();
+    public int degree = 0;
+    public boolean deleted = false;
 
     private static final String GLOBAL_PREFIX = "_user_global_";
 
@@ -47,6 +52,7 @@ public class Var extends Register {
         idMap.put(name, newVar.id);
         return newVar;
     }
+
     public static Var tmpBuilder(String preName, boolean compareTmp) {
         Var tmp = tmpBuilder(preName);
         tmp.compareTmp = compareTmp;
@@ -59,7 +65,9 @@ public class Var extends Register {
         return var;
     }
 
-    public String nasmName() {return name;}
+    public String nasmName() {
+        return name;
+    }
 
     @Override
     public String irName() {
@@ -74,6 +82,7 @@ public class Var extends Register {
     public boolean isTmp() {
         return id >= 0;
     }
+
 
     public boolean isGlobal() {
         return isGlobal;
@@ -96,8 +105,13 @@ public class Var extends Register {
         this.stackPos = stackPos;
     }
 
-    public void addUseTime() {++useTime;}
-    public int useTime() {return useTime;}
+    public void addUseTime() {
+        ++useTime;
+    }
+
+    public int useTime() {
+        return useTime;
+    }
 
     public PhysicalRegister getPhysicalRegister() {
         return physicalRegister;
@@ -115,7 +129,18 @@ public class Var extends Register {
     public Operand copy(Map<Object, Object> replaceMap) {
         if (isGlobal) return this;
         Operand search = (Operand) replaceMap.get(this);
-        if (search == null){
+        if (search == null) {
+            search = Var.tmpBuilder(name, compareTmp);
+            replaceMap.put(this, search);
+        }
+        return search;
+    }
+
+    @Override
+    public Operand dstCopy(Map<Object, Object> replaceMap) {
+        if (isGlobal) return this;
+        Operand search = (Operand) replaceMap.get(this);
+        if (search == null || search instanceof IntLiteral) {
             search = Var.tmpBuilder(name, compareTmp);
             replaceMap.put(this, search);
         }
@@ -124,5 +149,17 @@ public class Var extends Register {
 
     public boolean isCompareTmp() {
         return compareTmp;
+    }
+
+    public Set<Var> neighbors() {
+        return neighbors;
+    }
+
+    public void setDegree() {
+        this.degree = neighbors.size();
+    }
+
+    public boolean assignedReg() {
+        return physicalRegister != null;
     }
 }

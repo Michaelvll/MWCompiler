@@ -9,9 +9,7 @@ import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CondJumpInst extends JumpInst {
     private Operand cond; // if cond != 0 -> ifTrue, else ->ifFalse
@@ -40,7 +38,7 @@ public class CondJumpInst extends JumpInst {
 
     @Override
     public List<Var> usedVar() {
-        return new ArrayList<>();
+        return cmp.usedVar();
     }
 
     public BasicBlock ifTrue() {

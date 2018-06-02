@@ -155,7 +155,7 @@ public class CodeGenerator implements IRVisitor<String> {
                 append("cqo");
                 append("idiv", right);
                 append("mov", dst, (op == ExprOps.DIV) ? RAX : RDX);
-            } else if (isMem(dst) && left != dst || dst == right) {
+            } else if ((isMem(dst) && left != dst) || dst.varEquals(right)) {
                 append("mov", RAX, left);
                 append(op.nasmOp(), RAX, right);
                 append("mov", dst, RAX);
@@ -426,6 +426,7 @@ public class CodeGenerator implements IRVisitor<String> {
     private void append(String s, String target) {
         if (s.equals("mov")) {
             String[] dstVal = target.split(", ");
+            if (dstVal[0].equals(dstVal[1])) return;
             if (preMovOp != null && !dstVal[0].contains("[") && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
                 return;
             preMovOp = new Pair<>(dstVal[0], dstVal[1]);

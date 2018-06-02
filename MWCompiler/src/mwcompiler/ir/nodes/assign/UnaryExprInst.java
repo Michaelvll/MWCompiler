@@ -42,7 +42,7 @@ public class UnaryExprInst extends AssignInst {
 
     @Override
     public AssignInst copy(Map<Object, Object> replaceMap) {
-        return new UnaryExprInst((MutableOperand) dst().copy(replaceMap), op,
+        return new UnaryExprInst((MutableOperand) dst().dstCopy(replaceMap), op,
                 src.copy(replaceMap));
     }
 }

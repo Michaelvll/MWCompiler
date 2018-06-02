@@ -29,20 +29,23 @@ public class BasicBlock {
     public boolean isEnded = false;
 
     private int instNum = 0;
+    private int valTag;
 
 //    private Map<Register, IntLiteral> regIntMap = new HashMap<>();
 
-    public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable) {
+    public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable, int valTag) {
         this.parentFunction = parentFunction;
         this.currentSymbolTable = currentSymbolTable;
         this.name = NameBuilder.builder(parentFunction.name());
+        this.valTag = valTag;
 
     }
 
-    public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable, String name) {
+    public BasicBlock(Function parentFunction, SymbolTable currentSymbolTable, String name, int valTag) {
         this.parentFunction = parentFunction;
         this.currentSymbolTable = currentSymbolTable;
         this.name = NameBuilder.builder(name);
+        this.valTag = valTag;
     }
 
 
@@ -53,7 +56,7 @@ public class BasicBlock {
         ++instNum;
     }
 
-    public Operand pushBack(AssignInst assignInst, int valTag) {
+    public Operand pushBack(AssignInst assignInst) {
         MutableOperand dst = assignInst.dst();
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
@@ -64,15 +67,14 @@ public class BasicBlock {
                 pushBack(new MoveInst(memDst, moveInst.val()));
                 moveInst.setVal(memDst);
             }
-            pushBack(assignInst);
+            pushBack((Instruction) assignInst);
         } else {
-
-            pushBack(assignInst);
+            pushBack((Instruction) assignInst);
             if (dst instanceof Var)
                 addKnownReg((Var) assignInst.dst(), null, valTag);
             else if (dst instanceof Memory) {
                 Var memDst = Var.tmpBuilder("mem_dst");
-                pushBack(new MoveInst(dst, memDst), valTag);
+                pushBack(new MoveInst(dst, memDst));
                 assignInst.setDst(memDst);
                 dst = memDst;
             }
@@ -209,7 +211,7 @@ public class BasicBlock {
     public BasicBlock copy(Map<Object, Object> replaceMap) {
         BasicBlock search = (BasicBlock) replaceMap.get(this);
         if (search == null) {
-            search = new BasicBlock((Function) replaceMap.get(parentFunction), currentSymbolTable, ((Function) replaceMap.get(parentFunction)).name() + "_inline_" + name);
+            search = new BasicBlock((Function) replaceMap.get(parentFunction), currentSymbolTable, ((Function) replaceMap.get(parentFunction)).name() + "_inline_" + name, valTag);
             replaceMap.put(this, search);
         }
         return search;
@@ -230,5 +232,9 @@ public class BasicBlock {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int valTag() {
+        return valTag;
     }
 }

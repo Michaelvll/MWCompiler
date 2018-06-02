@@ -14,7 +14,7 @@ import java.util.*;
 
 import static mwcompiler.ir.operands.PhysicalRegister.*;
 
-public class NaiveAllocator {
+public class NaiveAllocator extends Allocator{
     private CompilerOptions options;
 
     public NaiveAllocator(CompilerOptions options) {
@@ -28,7 +28,7 @@ public class NaiveAllocator {
     private void compileFunction(Function function) {
         if (function.notUserFunc()) return;
 
-        Set<Var> vars = function.getVars();
+        Set<Var> vars = function.vars();
         for (BasicBlock block : function.basicBlocks()) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 for (Var var : inst.usedVar()) {
@@ -76,7 +76,7 @@ public class NaiveAllocator {
 
         // locate tmp variables
         int tmpVarStackTop = localVarStackTop;
-        for (Var var : function.getVars()) {
+        for (Var var : function.vars()) {
             if (var.isTmp()) {
                 tmpVarStackTop += options.PTR_SIZE;
                 var.setStackPos(new Memory(RBP, null, 0, -tmpVarStackTop));
@@ -106,7 +106,4 @@ public class NaiveAllocator {
         return maxLen;
     }
 
-    private int alignStack(int length, int alignSize) {
-        return (length + alignSize - 1) / alignSize * alignSize;
-    }
 }

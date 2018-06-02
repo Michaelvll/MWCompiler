@@ -41,7 +41,7 @@ public class MoveInst extends AssignInst {
 
     @Override
     public AssignInst copy(Map<Object, Object> replaceMap) {
-        return new MoveInst((MutableOperand) dst().copy(replaceMap),
+        return new MoveInst((MutableOperand) dst().dstCopy(replaceMap),
                 val.copy(replaceMap));
     }
 }

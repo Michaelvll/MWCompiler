@@ -53,10 +53,10 @@ public class FunctionCallInst extends AssignInst {
     public AssignInst copy(Map<Object, Object> replaceMap) {
         List<Operand> newArgs = new ArrayList<>();
         for (Operand arg : args) {
-            newArgs.add((Operand) replaceMap.getOrDefault(arg, arg));
+            newArgs.add(arg.copy(replaceMap));
         }
         MutableOperand dst = null;
-        if (dst() != null) dst = (MutableOperand) dst().copy(replaceMap);
+        if (dst() != null) dst = (MutableOperand) dst().dstCopy(replaceMap);
         return new FunctionCallInst(function,
                 newArgs,
                 (Register) dst

@@ -30,11 +30,11 @@ public class Function {
     private List<ReturnInst> returnInsts = new ArrayList<>();
 
     private Set<Function> calleeSet = new HashSet<>();
-//    private Set<Function> recursiveCalleeSet = new HashSet<>();
+    private Set<Function> recursiveCalleeSet = new HashSet<>();
 
-    private LinkedList<BasicBlock> basicBlocks = new LinkedList<>();
+    private ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
 
-    private boolean inlineable = false;
+    private boolean notSelfCall = false;
     public int instNum = 0;
 
     // For allocation
@@ -91,19 +91,20 @@ public class Function {
 
 
     public void pushBack(BasicBlock block) {
-        basicBlocks.addLast(block);
+        basicBlocks.add(block);
     }
 
     public void pushFront(BasicBlock block) {
-        basicBlocks.addFirst(block);
+        basicBlocks.add(0, block);
     }
 
-    public LinkedList<BasicBlock> basicBlocks() {
+    public ArrayList<BasicBlock> basicBlocks() {
         return basicBlocks;
     }
 
     public void setBasicBlocks(LinkedList<BasicBlock> basicBlocks) {
-        this.basicBlocks = basicBlocks;
+        this.basicBlocks.clear();
+        this.basicBlocks.addAll(basicBlocks);
     }
 
     public void setSymbolTable(SymbolTable symbolTable) {
@@ -125,6 +126,7 @@ public class Function {
 //        Set<BasicBlock> includeBlocks = new HashSet<>();
         // May need to rearrange the sequence of block
         int size = basicBlocks.size();
+
         for (int i = size - 1; i >= 0; --i) {
             BasicBlock block = basicBlocks.get(i);
             if (block.front() == block.back() && block.back() instanceof DirectJumpInst) {
@@ -153,7 +155,7 @@ public class Function {
                 instNum += block.instNum();
             }
         }
-        basicBlocks = newBlocks;
+        setBasicBlocks(newBlocks);
     }
 
     private BasicBlock searchForNewTarget(Map<BasicBlock, BasicBlock> map, BasicBlock block) {
@@ -174,22 +176,24 @@ public class Function {
         return calleeSet;
     }
 
-    public void recalcCalleSet() {
+    public void reCalcCalleeSet() {
         calleeSet.clear();
         for (BasicBlock block : basicBlocks) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
-                if (inst instanceof FunctionCallInst) {
+                if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).function().notUserFunc()) {
                     calleeSet.add(((FunctionCallInst) inst).function());
                 }
             }
         }
     }
 
-//    public Set<Function> recursiveCalleeSet() {
-//        return recursiveCalleeSet;
-//    }
 
-    public Set<Var> getVars() {
+
+    public Set<Function> recursiveCalleeSet() {
+        return recursiveCalleeSet;
+    }
+
+    public Set<Var> vars() {
         return vars;
     }
 
@@ -201,8 +205,8 @@ public class Function {
         return usedCalleeSaveRegs;
     }
 
-    public boolean isInlineable() {
-        return inlineable;
+    public boolean isNotSelfCall() {
+        return notSelfCall;
     }
 
 

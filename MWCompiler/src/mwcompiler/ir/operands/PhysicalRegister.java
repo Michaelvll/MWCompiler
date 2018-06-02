@@ -83,6 +83,12 @@ public class PhysicalRegister extends Register {
         throw new RuntimeException("Compiler Bug: Physical register do not have isTmp()");
     }
 
+    @Override
+    public Operand dstCopy(Map<Object, Object> replaceMap) {
+        throw new RuntimeException("??? No dstCopy for physical reg");
+
+    }
+
     public PhysicalRegister physicalRegister() {
         return this;
     }
