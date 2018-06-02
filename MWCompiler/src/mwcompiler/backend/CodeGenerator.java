@@ -62,6 +62,7 @@ public class CodeGenerator implements IRVisitor<String> {
                         .append(1).append("\n");
         }
         options.out.print(assembly.toString());
+        System.err.print(assembly.toString());
     }
 
 
@@ -161,7 +162,7 @@ public class CodeGenerator implements IRVisitor<String> {
                 append("cqo");
                 append("idiv", right);
                 append("mov", dst, (op == ExprOps.DIV) ? RAX : RDX);
-            } else if ((isMem(dst) && !left.varEquals(dst)) || dst.varEquals(right)) {
+            } else if ((isMem(dst) && left != dst) || dst.varEquals(right)) {
                 append("mov", RAX, left);
                 append(op.nasmOp(), RAX, right);
                 append("mov", dst, RAX);
