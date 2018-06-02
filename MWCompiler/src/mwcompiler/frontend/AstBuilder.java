@@ -251,6 +251,8 @@ public class AstBuilder extends MxBaseVisitor<Node> {
                 node = new IntLiteralNode(val, literalPos);
                 break;
             case MxParser.StringLiteral:
+                val = val.replaceFirst("^\"", "");
+                val = val.replaceFirst("\"$", "");
                 node = new StringLiteralNode(val, literalPos);
                 break;
             case MxParser.NULL:

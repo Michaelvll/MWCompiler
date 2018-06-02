@@ -13,8 +13,7 @@ public class StringLiteral extends Literal {
 
     public StringLiteral(String val) {
         label = NameBuilder.builder("__str_literal_");
-        val = val.replaceFirst("^\"", "");
-        val = val.replaceFirst("\"$", "");
+//        val = val.replaceFirst("\"$", "");
         val = val.replaceAll("\\\\" + "n", "\n");
         val = val.replaceAll("\\\\" + "t", "\t");
         val = val.replaceAll("\\\\" + "\"", "\"");

@@ -95,7 +95,7 @@ public class GraphAllocator extends Allocator {
                 if (!neighborReg.contains(preg)) {
                     var.setPhysicalRegister(preg);
                     usedRegs.add(preg);
-//                    System.err.println("set var: " + var.irName() + " -> " + preg.nasmName());
+                    System.err.println("set var: " + var.irName() + " -> " + preg.nasmName());
                     break;
                 }
             }
