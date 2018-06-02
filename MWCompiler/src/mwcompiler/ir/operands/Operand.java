@@ -23,8 +23,7 @@ public abstract class Operand {
     public abstract Operand copy(Map<Object, Object> replaceMap);
 
     public boolean varEquals(Operand operand) {
-        if (this instanceof Register && operand instanceof Register) return this == operand
-                || (this.physicalRegister() != null && this.physicalRegister() == operand.physicalRegister());
+        if (this instanceof Register && operand instanceof Register) return this.physicalRegister() != null && this.physicalRegister() == operand.physicalRegister();
         if (operand instanceof Memory) return varEquals(((Memory) operand).baseReg()) || varEquals(((Memory) operand).indexReg());
         return this == operand;
     }
