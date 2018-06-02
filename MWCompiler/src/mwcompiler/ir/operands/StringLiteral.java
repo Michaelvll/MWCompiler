@@ -13,12 +13,7 @@ public class StringLiteral extends Literal {
 
     public StringLiteral(String val) {
         label = NameBuilder.builder("__str_literal_");
-//        val = val.replaceFirst("\"$", "");
-        val = val.replaceAll("\\\\" + "n", "\n");
-        val = val.replaceAll("\\\\" + "t", "\t");
-        val = val.replaceAll("\\\\" + "\"", "\"");
-        val = val.replaceAll("\\\\" + "\'", "\'");
-        val = val.replaceAll("\\\\" + "\\\\", "\\\\");
+
         this.val = val;
     }
 
@@ -38,6 +33,12 @@ public class StringLiteral extends Literal {
     }
 
     public String hexVal() {
+        String val = this.val;
+        val = val.replaceAll("\\\\" + "n", "\n");
+        val = val.replaceAll("\\\\" + "t", "\t");
+        val = val.replaceAll("\\\\" + "\"", "\"");
+        val = val.replaceAll("\\\\" + "\'", "\'");
+        val = val.replaceAll("\\\\" + "\\\\", "\\\\");
         StringJoiner str = new StringJoiner(", ");
         for (byte b : val.getBytes()) {
             str.add(String.format("%02X", b) + "H");
