@@ -408,9 +408,10 @@ public class IRBuilder implements AstVisitor<Operand> {
 
 
         boolean terminal = index == node.getDimArgs().size() - 1;
-        boolean createClass = !node.getCreateType().isPrimitiveTypeBase() && node.getEmptyDim() == 0;
+//        boolean createClass = !node.getCreateType().isPrimitiveTypeBase() && node.getEmptyDim() == 0;
         // iterate for each subscript
-        if (!terminal || createClass) {
+//        if (!terminal || createClass) {
+        if (!terminal) { // Not create class for array in new Instruction as the requirement of the M* changed
             Var indexReg = Var.tmpBuilder("index");
             currentBasicBlock.pushBack(new MoveInst(indexReg, ZERO_LITERAL));
             newValTag();
@@ -541,11 +542,13 @@ public class IRBuilder implements AstVisitor<Operand> {
     public Operand visit(LoopNode node) {
         Function function = currentBasicBlock.parentFunction();
         BasicBlock loopEnd = new BasicBlock(function, currentSymbolTable, prefix("loop_end"), valTag);
+        BasicBlock loopStartCond = new BasicBlock(function,currentSymbolTable,prefix("loop_start_cond"), valTag);
         newValTag();
-
         BasicBlock loopCond = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), prefix("loop_cond"), valTag);
         BasicBlock loopBegin = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), prefix("loop_begin"), valTag);
         popValTag();
+        currentBasicBlock.pushBack(new DirectJumpInst(loopStartCond));
+        setCurrentEnv(loopStartCond);
         if (node.getVarInit() != null) visit(node.getVarInit());
         if (visitLoopCondition(node, loopBegin, loopEnd)) return null; // Never go into the loop
 
