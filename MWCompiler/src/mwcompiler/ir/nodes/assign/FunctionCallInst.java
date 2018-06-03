@@ -1,6 +1,7 @@
 package mwcompiler.ir.nodes.assign;
 
 import mwcompiler.ir.nodes.Function;
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Register;
@@ -61,5 +62,10 @@ public class FunctionCallInst extends AssignInst {
                 newArgs,
                 (Register) dst
         );
+    }
+
+    @Override
+    public AssignInst sameCopy() {
+        return new FunctionCallInst(function, args, (Register) dst());
     }
 }

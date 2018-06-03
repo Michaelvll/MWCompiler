@@ -7,6 +7,7 @@ import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.utility.CompilerOptions;
@@ -37,8 +38,8 @@ public class LivenessAnalysis {
         List<BasicBlock> blocks = function.basicBlocks();
         while (change) {
             change = false;
-            Set<Var> liveIn = new HashSet<>();
-            Set<Var> liveOut = new HashSet<>();
+            Set<Register> liveIn = new HashSet<>();
+            Set<Register> liveOut = new HashSet<>();
             for (int index = blocks.size() - 1; index >= 0; --index) {
                 for (Instruction inst = blocks.get(index).back(); inst != null; inst = inst.prev) {
                     liveIn.clear();

@@ -61,7 +61,7 @@ public class NaiveAllocator extends Allocator{
 
 
         // locate params
-        int paramStackTop =  function.usedPRegs().size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save + return address
+        int paramStackTop =  function.usedCalleeRegs().size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save + return address
         List<Var> params = function.paramVars();
         for (int index = 0; index < params.size(); ++index) {
             if (index >= PhysicalRegister.paramRegs.size()) {

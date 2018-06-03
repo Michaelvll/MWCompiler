@@ -8,6 +8,7 @@ import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.PhysicalRegister;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.utility.CompilerOptions;
 
@@ -20,7 +21,7 @@ public class GraphAllocator extends Allocator {
     private CompilerOptions options;
 
     private List<PhysicalRegister> registers = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
-    private Set<PhysicalRegister> usedRegs = new HashSet<>();
+    private Set<PhysicalRegister> usedCalleeRegs = new HashSet<>();
     private InterfereGraph graph = new InterfereGraph();
     private int stackTop;
 
@@ -33,7 +34,7 @@ public class GraphAllocator extends Allocator {
 
         for (Function function : programIR.functionMap().values()) {
             if (function.notUserFunc()) continue;
-            usedRegs.clear();
+            usedCalleeRegs.clear();
             stackTop = 0;
             graph.init(function);
             buildGraph(function);
@@ -41,21 +42,19 @@ public class GraphAllocator extends Allocator {
             assignRegister();
 
             allocateParamStack(function);
-            function.usedPRegs().addAll(usedRegs);
-            function.usedPRegs().add(RBP);
+            function.usedCalleeRegs().addAll(usedCalleeRegs);
+            function.usedCalleeRegs().add(RBP);
             function.setVarStackSize(stackTop);
         }
     }
 
     private void allocateParamStack(Function function) {
-        int paramStackTop = usedRegs.size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save + return address
+        int paramStackTop = usedCalleeRegs.size() * options.PTR_SIZE + options.PTR_SIZE; // callee-save + return address
         List<Var> params = function.paramVars();
         for (int index = PhysicalRegister.paramRegs.size(); index < params.size(); ++index) {
             params.get(index).setStackPos(new Memory(RBP, null, 0, paramStackTop));
             paramStackTop += options.PTR_SIZE;
         }
-
-
     }
 
     private void buildGraph(Function function) {
@@ -87,21 +86,21 @@ public class GraphAllocator extends Allocator {
         Set<PhysicalRegister> neighborReg = new HashSet<>();
         while (!graph.varStack.isEmpty()) {
             neighborReg.clear();
-            Var var = graph.varStack.pop();
-            var.deleted = false;
-            for (Var neighbor : var.neighbors())
+            Register reg = graph.varStack.pop();
+            reg.deleted = false;
+            for (Register neighbor : reg.neighbors())
                 if (!neighbor.deleted && neighbor.isAssigned()) neighborReg.add(neighbor.physicalRegister());
             for (PhysicalRegister preg : registers) {
                 if (!neighborReg.contains(preg)) {
-                    var.setPhysicalRegister(preg);
-                    usedRegs.add(preg);
+                    reg.setPhysicalRegister(preg);
+                    usedCalleeRegs.add(preg);
 //                    System.err.println("set var: " + var.irName() + " -> " + preg.nasmName());
                     break;
                 }
             }
-            if (!var.isAssigned()) {
+            if (!reg.isAssigned()) {
                 stackTop = alignStack(stackTop + options.PTR_SIZE, options.PTR_SIZE);
-                var.setStackPos(new Memory(RBP, null, 0, -stackTop));
+                ((Var) reg).setStackPos(new Memory(RBP, null, 0, -stackTop));
             }
 
         }
@@ -111,9 +110,9 @@ public class GraphAllocator extends Allocator {
     private class InterfereGraph {
         private Set<Var> varGraph = new HashSet<>();
         private Set<Var> toDeleteVars = new HashSet<>();
-        private Stack<Var> varStack = new Stack<>();
+        private Stack<Register> varStack = new Stack<>();
 
-        private void addEdge(Var a, Var b) {
+        private void addEdge(Register a, Register b) {
             if (a == b) return;
             a.neighbors().add(b);
             b.neighbors().add(a);
@@ -121,9 +120,9 @@ public class GraphAllocator extends Allocator {
         }
 
         private void setDegree() {
-            for (Var var : varGraph) {
-                var.setDegree();
-                if (var.degree < registers.size()) toDeleteVars.add(var);
+            for (Register reg : varGraph) {
+                reg.setDegree();
+                if (reg.degree < registers.size() && reg instanceof Var) toDeleteVars.add((Var) reg);
             }
         }
 
@@ -140,9 +139,9 @@ public class GraphAllocator extends Allocator {
 
         private void removeVar(Var var) {
             var.neighbors().forEach(neighbor -> {
-                if (!neighbor.deleted) {
+                if (!neighbor.deleted && neighbor instanceof Var) {
                     --neighbor.degree;
-                    if (neighbor.degree < registers.size()) toDeleteVars.add(neighbor);
+                    if (neighbor.degree < registers.size()) toDeleteVars.add((Var) neighbor);
                 }
             });
             var.deleted = true;
@@ -158,13 +157,12 @@ public class GraphAllocator extends Allocator {
                     removeVar(var);
                     toDeleteVars.remove(var);
                 }
-                if (varGraph.isEmpty()) break;
-
                 Iterator<Var> it = varGraph.iterator();
-                Var var = it.next();
-                removeVar(var);
+                if (it.hasNext()) removeVar(it.next());
+                else break;
             }
         }
+
     }
 
 

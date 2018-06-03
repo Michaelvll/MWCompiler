@@ -203,7 +203,7 @@ public class Function {
         usedCalleeSaveRegs.add(register);
     }
 
-    public List<PhysicalRegister> usedPRegs() {
+    public List<PhysicalRegister> usedCalleeRegs() {
         return usedCalleeSaveRegs;
     }
 

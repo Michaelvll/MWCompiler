@@ -208,6 +208,7 @@ public class BasicBlock {
         this.end = end;
     }
 
+
     public BasicBlock copy(Map<Object, Object> replaceMap) {
         BasicBlock search = (BasicBlock) replaceMap.get(this);
         if (search == null) {
@@ -220,15 +221,25 @@ public class BasicBlock {
     public BasicBlock deepCopy(Map<Object, Object> replaceMap) {
         BasicBlock newBlock = this.copy(replaceMap);
         for (Instruction inst = front; inst != null; inst = inst.next) {
-            if (inst instanceof AssignInst) newBlock.pushBack(inst.copy(replaceMap));
-            else if (inst instanceof ReturnInst) {
+            if (inst instanceof ReturnInst) {
                 if (((ReturnInst) inst).retVal() != null)
                     newBlock.pushBack(((ReturnInst) inst).copy(replaceMap));
                 newBlock.pushBack(new DirectJumpInst((BasicBlock) replaceMap.get("inline_next")));
-            } else newBlock.pushBack(inst.copy(replaceMap));
+            } else if (inst instanceof AssignInst)
+                newBlock.pushBack((AssignInst) inst.copy(replaceMap));
+            else newBlock.pushBack((JumpInst) inst.copy(replaceMap));
         }
         return newBlock;
     }
+
+//    public BasicBlock sameCopy(Map<Object, Object> replaceMap) {
+//        BasicBlock newBlock = new BasicBlock(parentFunction, currentSymbolTable, name, valTag);
+//        for (Instruction inst = front; inst != null; inst = inst.next) {
+//            if (inst instanceof AssignInst) newBlock.pushBack((AssignInst) inst.sameCopy());
+//            else newBlock.pushBack((JumpInst) inst.sameCopy());
+//        }
+//        return newBlock;
+//    }
 
     public void setName(String name) {
         this.name = name;

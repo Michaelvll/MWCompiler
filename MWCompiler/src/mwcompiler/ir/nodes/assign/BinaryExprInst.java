@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.Literal;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
@@ -73,4 +74,8 @@ public class BinaryExprInst extends AssignInst {
                 right.copy(replaceMap));
     }
 
+    @Override
+    public Instruction sameCopy() {
+        return new BinaryExprInst(dst(), left, op, right);
+    }
 }

@@ -1,5 +1,7 @@
 package mwcompiler.ir.nodes;
 
+import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
@@ -10,8 +12,8 @@ public abstract class Instruction {
     public Instruction next;
 
     // For liveness analysis
-    private Set<Var> liveIn = new HashSet<>();
-    private Set<Var> liveOut = new HashSet<>();
+    private Set<Register> liveIn = new HashSet<>();
+    private Set<Register> liveOut = new HashSet<>();
 
 
     public abstract <T> T accept(IRVisitor<T> visitor);
@@ -36,11 +38,11 @@ public abstract class Instruction {
         return localVars;
     }
 
-    public Set<Var> liveIn() {
+    public Set<Register> liveIn() {
         return liveIn;
     }
 
-    public Set<Var> liveOut() {
+    public Set<Register> liveOut() {
         return liveOut;
     }
 
@@ -65,4 +67,5 @@ public abstract class Instruction {
 
     public abstract Instruction copy(Map<Object, Object> replaceMap);
 
+    public abstract Instruction sameCopy();
 }

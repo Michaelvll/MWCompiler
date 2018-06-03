@@ -2,9 +2,17 @@ package mwcompiler.ir.operands;
 
 import mwcompiler.ir.tools.IRVisitor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class Register extends MutableOperand {
     private Literal val;
     private Integer valTag;
+
+    // for coloring
+    private Set<Register> neighbors = new HashSet<>();
+    public int degree = 0;
+    public boolean deleted = false;
 
     public Literal getVal(Integer valTag) {
         if (valTag.equals(this.valTag))
@@ -18,6 +26,17 @@ public abstract class Register extends MutableOperand {
             this.valTag = valTag;
     }
 
+    public Set<Register> neighbors() {
+        return neighbors;
+    }
+
+    public abstract boolean isAssigned();
+
+    public void setDegree() {
+        this.degree = neighbors.size();
+    }
+
+
     public <T> T accept(IRVisitor<T> visitor) {
         return visitor.visit(this);
     }
@@ -28,4 +47,6 @@ public abstract class Register extends MutableOperand {
 
 
     public abstract boolean isGlobal();
+
+    public abstract void setPhysicalRegister(PhysicalRegister preg);
 }

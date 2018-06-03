@@ -101,4 +101,14 @@ public class PhysicalRegister extends Register {
     public boolean isCalleeSave() {
         return calleeSave;
     }
+
+    @Override
+    public boolean isAssigned() {
+        return true;
+    }
+
+    @Override
+    public void setPhysicalRegister(PhysicalRegister preg) {
+        throw new RuntimeException("Can not assign physical register physical register.");
+    }
 }
