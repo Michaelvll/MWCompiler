@@ -4,12 +4,12 @@ import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
+import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
-import mwcompiler.symbols.BaseTypeSymbol;
 import mwcompiler.utility.CompilerOptions;
 
 import java.util.HashSet;
@@ -27,6 +27,8 @@ public class LivenessAnalysis {
     public void apply(ProgramIR programIR) {
         this.programIR = programIR;
 
+        programIR.functionMap().values().forEach(this::analysisFunction);
+        programIR.functionMap().values().forEach(this::eliminate);
         programIR.functionMap().values().forEach(this::analysisFunction);
     }
 
@@ -67,7 +69,6 @@ public class LivenessAnalysis {
                 }
             }
         }
-
     }
 
     private void resetInOut(Function function) {
@@ -79,4 +80,16 @@ public class LivenessAnalysis {
         }
     }
 
+    private void eliminate(Function function) {
+        List<BasicBlock> blocks = function.basicBlocks();
+        for (int index = blocks.size() - 1; index >= 0; --index) {
+            for (Instruction inst = blocks.get(index).back(); inst != null; inst = inst.prev) {
+                if (inst instanceof AssignInst) {
+                    for (Var dst : inst.dstLocalVar()) {
+                        if (!inst.liveOut().contains(dst)) blocks.get(index).delete(inst);
+                    }
+                }
+            }
+        }
+    }
 }

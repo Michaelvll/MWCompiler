@@ -36,6 +36,7 @@ public class ReturnInst extends JumpInst {
 
     @Override
     public MoveInst copy(Map<Object, Object> replaceMap) {
+        if (retVal == null) return null;
         return new MoveInst((MutableOperand) replaceMap.get("retDst"),
                 retVal.copy(replaceMap));
     }

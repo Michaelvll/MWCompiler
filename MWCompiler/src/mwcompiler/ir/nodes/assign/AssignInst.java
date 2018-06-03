@@ -1,6 +1,7 @@
 package mwcompiler.ir.nodes.assign;
 
 
+import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.*;
 
@@ -35,5 +36,7 @@ public abstract class AssignInst extends Instruction {
         if (dst instanceof Var) return new ArrayList<>(Collections.singleton((Var) dst));
         return new ArrayList<>();
     }
+
+    public abstract AssignInst processKnownReg(BasicBlock basicBlock);
 
 }
