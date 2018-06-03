@@ -1,11 +1,8 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.Function;
-import mwcompiler.ir.nodes.Instruction;
-import mwcompiler.ir.operands.MutableOperand;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Register;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.symbols.BaseTypeSymbol;
 
@@ -67,5 +64,16 @@ public class FunctionCallInst extends AssignInst {
     @Override
     public AssignInst sameCopy() {
         return new FunctionCallInst(function, args, (Register) dst());
+    }
+
+    @Override
+    public AssignInst processKnownReg(BasicBlock basicBlock) {
+        for (int index = 0; index < args.size(); ++index) {
+            if (args.get(index) instanceof Register) {
+                Literal argLiteral = basicBlock.getKnownReg((Register) args.get(index));
+                if (argLiteral != null) args.set(index, argLiteral);
+            }
+        }
+        return this;
     }
 }

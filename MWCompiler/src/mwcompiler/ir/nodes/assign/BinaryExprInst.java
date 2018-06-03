@@ -1,10 +1,8 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.Instruction;
-import mwcompiler.ir.operands.Literal;
-import mwcompiler.ir.operands.MutableOperand;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.ir.tools.LiteralProcess;
 import mwcompiler.utility.ExprOps;
@@ -68,6 +66,17 @@ public class BinaryExprInst extends AssignInst {
 
     @Override
     public AssignInst copy(Map<Object, Object> replaceMap) {
+//        Operand left = left().copy(replaceMap);
+//        Operand right = right().copy(replaceMap);
+//        if (left instanceof Literal && right instanceof Literal) {
+//            try {
+//                replaceMap.put(dst(), LiteralProcess.calc(left, op, right));
+//
+//            } catch (ArithmeticException e) {
+//                System.err.println("Warning: Get arithmetic exception when inlining: " + e.getMessage());
+//            }
+//            return null;
+//        }
         return builder((MutableOperand) dst().dstCopy(replaceMap),
                 left.copy(replaceMap),
                 op,
@@ -77,5 +86,19 @@ public class BinaryExprInst extends AssignInst {
     @Override
     public Instruction sameCopy() {
         return new BinaryExprInst(dst(), left, op, right);
+    }
+
+    @Override
+    public AssignInst processKnownReg(BasicBlock basicBlock) {
+        if (left instanceof Register) {
+            Literal leftLiteral = basicBlock.getKnownReg((Register) left);
+            if (leftLiteral != null) left = leftLiteral;
+        }
+        if (right instanceof Register) {
+            Literal rightLiteral = basicBlock.getKnownReg((Register) right);
+            if (rightLiteral != null) right = rightLiteral;
+        }
+        if (left instanceof Literal && right instanceof Literal) return builder(dst(), left, op, right);
+        return this;
     }
 }

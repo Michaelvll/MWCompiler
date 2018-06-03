@@ -1,10 +1,8 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.BasicBlock;
 import mwcompiler.ir.nodes.Instruction;
-import mwcompiler.ir.operands.Memory;
-import mwcompiler.ir.operands.MutableOperand;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.LinkedList;
@@ -42,6 +40,12 @@ public class MoveInst extends AssignInst {
 
     @Override
     public AssignInst copy(Map<Object, Object> replaceMap) {
+//        Operand newDst = dst().copy(replaceMap);
+//        Operand newVal = val.copy(replaceMap);
+//        if (newDst instanceof Literal || newVal instanceof Literal) {
+//            replaceMap.put(dst(), val.copy(replaceMap));
+//            return null;
+//        }
         return new MoveInst((MutableOperand) dst().dstCopy(replaceMap),
                 val.copy(replaceMap));
     }
@@ -49,5 +53,14 @@ public class MoveInst extends AssignInst {
     @Override
     public AssignInst sameCopy() {
         return new MoveInst(dst(), val);
+    }
+
+    @Override
+    public AssignInst processKnownReg(BasicBlock basicBlock) {
+        if (val instanceof Register) {
+            Literal valLiteral = basicBlock.getKnownReg((Register) val);
+            if (valLiteral != null) val = valLiteral;
+        }
+        return this;
     }
 }

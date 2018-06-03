@@ -1,9 +1,7 @@
 package mwcompiler.ir.nodes.assign;
 
-import mwcompiler.ir.nodes.Instruction;
-import mwcompiler.ir.operands.MutableOperand;
-import mwcompiler.ir.operands.Operand;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.IRVisitor;
 import mwcompiler.utility.ExprOps;
 
@@ -50,5 +48,14 @@ public class UnaryExprInst extends AssignInst {
     @Override
     public AssignInst sameCopy() {
         return new UnaryExprInst(dst(), op, src);
+    }
+
+    @Override
+    public AssignInst processKnownReg(BasicBlock basicBlock) {
+        if (src instanceof Register) {
+            Literal srcVal = basicBlock.getKnownReg((Register) src);
+            if (srcVal != null) src = srcVal;
+        }
+        return this;
     }
 }

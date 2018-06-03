@@ -62,7 +62,7 @@ public class CodeGenerator implements IRVisitor<String> {
                         .append(1).append("\n");
         }
         options.out.print(assembly.toString());
-        System.err.print(assembly.toString());
+//        System.err.print(assembly.toString());
     }
 
 
@@ -121,6 +121,7 @@ public class CodeGenerator implements IRVisitor<String> {
             BasicBlock block = basicBlocks.get(index);
             // Merge jump
             assembly.append(block.name()).append(":\n");
+            append("","");
 
             if (index < blockSize - 1) nextBlock = basicBlocks.get(index + 1);
             visit(block);
@@ -434,10 +435,14 @@ public class CodeGenerator implements IRVisitor<String> {
         if (s.equals("mov")) {
             String[] dstVal = target.split(", ");
             if (dstVal[0].equals(dstVal[1])) return;
+            if (preMovOp != null && preMovOp.first.equals(dstVal[0]) && preMovOp.second.equals(dstVal[1]))
+                return;
             if (preMovOp != null && !dstVal[0].contains("[") && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
                 return;
             preMovOp = new Pair<>(dstVal[0], dstVal[1]);
-        } else preMovOp = null;
+        } else {
+            preMovOp = null;
+        }
         if (s.equals("lea")) target = target.replaceAll("qword ", "");
 
         String delimiter = "\t\t";

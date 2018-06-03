@@ -5,10 +5,12 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
-import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
-import mwcompiler.ir.operands.MutableOperand;
+import mwcompiler.ir.operands.Operand;
+import mwcompiler.ir.operands.Var;
+import mwcompiler.symbols.FunctionSymbol;
 import mwcompiler.utility.CompilerOptions;
+import mwcompiler.utility.Pair;
 
 import java.util.*;
 
@@ -27,37 +29,54 @@ public class FunctionInliner {
         int iter = 0;
 
         boolean change = true;
+        Function mainFunc = programIR.functionMap().get(FunctionSymbol.MAIN);
+        while (change) {
+            LinkedList<BasicBlock> newBlocks = new LinkedList<>();
+            change = processInline(iter, false, mainFunc, newBlocks);
+            if (change) mainFunc.setBasicBlocks(newBlocks);
+            ++iter;
+        }
+        updateRecursiveCalleeSet();
+        change = true;
         while (change) {
             change = false;
             for (Function function : programIR.functionMap().values()) {
-                if (function.notUserFunc()) continue;
+                if (function.notUserFunc() || function.isMain() || !mainFunc.recursiveCalleeSet().contains(function))
+                    continue;
 //            Function function = programIR.getFunction(FunctionSymbol.MAIN);
                 LinkedList<BasicBlock> newBlocks = new LinkedList<>();
-                for (BasicBlock block : function.basicBlocks()) {
-                    newBlocks.add(block);
-                    for (Instruction inst = block.front(); inst != null; inst = inst.next) {
-                        if (inst instanceof FunctionCallInst) {
-                            FunctionCallInst functionCallInst = (FunctionCallInst) inst;
-                            Function callee = functionCallInst.function();
-                            if (callee.notUserFunc() || callee.isMain() || callee == function ||
-                                    (iter >= options.INLINE_RECURSIVE_LEVEL && callee.recursiveCalleeSet().contains(callee)))
-                                continue;
-                            if (callee.instNum <= options.INLINE_CALLEE_BOUND && function.instNum <= options.INLINE_CALLER_BOUND) {
-                                newBlocks.addAll(inline(function, callee, newBlocks.getLast(), functionCallInst));
-                                change = true;
-                                function.instNum += callee.instNum;
-                            }
-                        }
-                    }
-                }
+                change = processInline(iter, change, function, newBlocks);
                 if (change) function.setBasicBlocks(newBlocks);
             }
             ++iter;
         }
         programIR.functionMap().values().forEach(func -> {
-            func.cleanUp();
-            func.reCalcCalleeSet();
+            if (!func.notUserFunc()) {
+                func.cleanUp();
+                func.reCalcCalleeSet();
+            }
         });
+    }
+
+    private boolean processInline(int iterate, boolean change, Function function, LinkedList<BasicBlock> newBlocks) {
+        for (BasicBlock block : function.basicBlocks()) {
+            newBlocks.add(block);
+            for (Instruction inst = block.front(); inst != null; inst = inst.next) {
+                if (inst instanceof FunctionCallInst) {
+                    FunctionCallInst functionCallInst = (FunctionCallInst) inst;
+                    Function callee = functionCallInst.function();
+                    if (callee.notUserFunc() || callee.isMain() || callee == function ||
+                            (iterate >= options.INLINE_RECURSIVE_LEVEL && callee.recursiveCalleeSet().contains(callee)))
+                        continue;
+                    if (callee.instNum <= options.INLINE_CALLEE_BOUND && function.instNum <= options.INLINE_CALLER_BOUND) {
+                        newBlocks.addAll(inline(function, callee, newBlocks.getLast(), functionCallInst));
+                        change = true;
+                        function.instNum += callee.instNum;
+                    }
+                }
+            }
+        }
+        return change;
     }
 
     private LinkedList<BasicBlock> inline(Function function, Function callee, BasicBlock currentBlock, FunctionCallInst inst) {
@@ -79,25 +98,32 @@ public class FunctionInliner {
         if (inst.dst() != null) replaceMap.put("retDst", inst.dst());
         replaceMap.put("inline_next", afterInlineBlock);
 
-        BasicBlock argSet = new BasicBlock(function, currentBlock.getCurrentSymbolTable(), function.name() + "_inline_arg_set", currentBlock.valTag());
+        List<Pair<Var, Operand>> argSet = new ArrayList<>();
         for (int index = 0; index < callee.paramVars().size(); ++index) {
 //            replaceMap.put(callee.paramVars().get(index), inst.args().get(index));
-            argSet.pushBack(new MoveInst((MutableOperand) callee.paramVars().get(index).dstCopy(replaceMap), inst.args().get(index)));
+            argSet.add(new Pair<>(callee.paramVars().get(index), inst.args().get(index)));
         }
-        currentBlock.pushBack(new DirectJumpInst(argSet));
+//        currentBlock.pushBack(new DirectJumpInst(argSet));
 
-        for (BasicBlock block : callee.basicBlocks()) {
-            newBlocks.addLast(block.deepCopy(replaceMap));
+        List<BasicBlock> calleeBlocks = callee.basicBlocks();
+
+        for (int index = 0; index < calleeBlocks.size(); ++index) {
+            if (index == 0) calleeBlocks.get(index).deepCopy(replaceMap, argSet, currentBlock);
+            else newBlocks.addLast(calleeBlocks.get(index).deepCopy(replaceMap));
+//            newBlocks.addLast(calleeBlocks.get(index).deepCopy(replaceMap));
         }
+//        for (BasicBlock block : callee.basicBlocks()) {
+//            newBlocks.addLast(block.deepCopy(replaceMap));
+//        }
         newBlocks.addLast(afterInlineBlock);
-        argSet.pushBack(new DirectJumpInst(newBlocks.getFirst()));
-        newBlocks.addFirst(argSet);
+//        argSet.pushBack(new DirectJumpInst(newBlocks.getFirst()));
+//        newBlocks.addFirst(argSet);
         return newBlocks;
     }
 
     private void updateRecursiveCalleeSet() {
         programIR.functionMap().values().forEach(func -> {
-            func.recursiveCalleeSet();
+            func.reCalcCalleeSet();
             func.recursiveCalleeSet().clear();
             func.recursiveCalleeSet().addAll(func.calleeSet());
         });

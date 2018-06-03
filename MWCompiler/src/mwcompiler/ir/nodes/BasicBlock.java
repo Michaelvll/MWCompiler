@@ -13,8 +13,10 @@ import mwcompiler.ir.operands.*;
 import mwcompiler.ir.tools.NameBuilder;
 import mwcompiler.symbols.SymbolTable;
 import mwcompiler.utility.ExprOps;
+import mwcompiler.utility.Pair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static mwcompiler.ir.operands.IntLiteral.ZERO_LITERAL;
@@ -58,15 +60,16 @@ public class BasicBlock {
 
     public Operand pushBack(AssignInst assignInst) {
         MutableOperand dst = assignInst.dst();
+        assignInst = assignInst.processKnownReg(this);
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
-            if (dst instanceof Var)
-                addKnownReg((Var) dst, moveInst.val(), valTag);
-            else if (moveInst.val() instanceof Memory) {
+            if (moveInst.val() instanceof Memory) {
                 Var memDst = Var.tmpBuilder("mem_dst");
-                pushBack(new MoveInst(memDst, moveInst.val()));
+                pushBack((Instruction) new MoveInst(memDst, moveInst.val()));
                 moveInst.setVal(memDst);
             }
+            if (dst instanceof Var)
+                addKnownReg((Var) dst, moveInst.val(), valTag);
             pushBack((Instruction) assignInst);
         } else {
             pushBack((Instruction) assignInst);
@@ -74,7 +77,7 @@ public class BasicBlock {
                 addKnownReg((Var) assignInst.dst(), null, valTag);
             else if (dst instanceof Memory) {
                 Var memDst = Var.tmpBuilder("mem_dst");
-                pushBack(new MoveInst(dst, memDst));
+                pushBack((Instruction) new MoveInst(dst, memDst));
                 assignInst.setDst(memDst);
                 dst = memDst;
             }
@@ -110,6 +113,8 @@ public class BasicBlock {
         assignTable.clear();
         eliminateAssignInst(); // eliminate the unused assignInst
     }
+
+
 
     public Instruction popBack() {
         return delete(end);
@@ -172,7 +177,7 @@ public class BasicBlock {
         reg.setVal(null, valTag);
     }
 
-    public Literal getKnownReg(Register reg, int valTag) {
+    public Literal getKnownReg(Register reg) {
         Literal val = assignTable.get(reg);
         if (val != null) return val;
         return reg.getVal(valTag);
@@ -221,16 +226,29 @@ public class BasicBlock {
     public BasicBlock deepCopy(Map<Object, Object> replaceMap) {
         BasicBlock newBlock = this.copy(replaceMap);
         for (Instruction inst = front; inst != null; inst = inst.next) {
+            Instruction copyInst = inst.copy(replaceMap);
             if (inst instanceof ReturnInst) {
-                if (((ReturnInst) inst).retVal() != null)
-                    newBlock.pushBack(((ReturnInst) inst).copy(replaceMap));
+                if (copyInst != null) newBlock.pushBack(copyInst);
                 newBlock.pushBack(new DirectJumpInst((BasicBlock) replaceMap.get("inline_next")));
-            } else if (inst instanceof AssignInst)
-                newBlock.pushBack((AssignInst) inst.copy(replaceMap));
-            else newBlock.pushBack((JumpInst) inst.copy(replaceMap));
+                continue;
+            }
+            if (copyInst != null) {
+                if (inst instanceof AssignInst)
+                    newBlock.pushBack((AssignInst) inst.copy(replaceMap));
+                else newBlock.pushBack((JumpInst) inst.copy(replaceMap));
+            }
         }
         return newBlock;
     }
+
+    public BasicBlock deepCopy(Map<Object, Object> replaceMap, List<Pair<Var, Operand>> argSet, BasicBlock block) {
+        replaceMap.put(this, block);
+        for (Pair<Var, Operand> pair : argSet) {
+            block.pushBack(new MoveInst((MutableOperand) pair.first.dstCopy(replaceMap), pair.second));
+        }
+        return deepCopy(replaceMap);
+    }
+
 
 //    public BasicBlock sameCopy(Map<Object, Object> replaceMap) {
 //        BasicBlock newBlock = new BasicBlock(parentFunction, currentSymbolTable, name, valTag);

@@ -714,7 +714,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     private Operand getVal(Operand reg) {
         if (reg instanceof MutableOperand) {
             Literal val = null;
-            if (reg instanceof Register) val = currentBasicBlock.getKnownReg((Register) reg, valTag);
+            if (reg instanceof Register) val = currentBasicBlock.getKnownReg((Register) reg);
             return (isGetMutableOperand || val == null) ? reg : val;
         }
         return reg;

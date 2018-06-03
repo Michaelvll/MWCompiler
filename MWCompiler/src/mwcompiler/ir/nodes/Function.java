@@ -149,10 +149,10 @@ public class Function {
                     block.pushBack(new DirectJumpInst(condJumpInst.ifTrue()));
                 }
             }
-            if (block.front() != null && (block.front() != block.back() || !(block.back() instanceof DirectJumpInst))) {
-                newBlocks.addFirst(block);
-                instNum += block.instNum();
-            }
+            if (block.front() == null || (block.front() == block.back() && block.back() instanceof DirectJumpInst && i != 0))
+                continue;
+            newBlocks.addFirst(block);
+            instNum += block.instNum();
         }
         setBasicBlocks(newBlocks);
     }
@@ -179,7 +179,7 @@ public class Function {
         calleeSet.clear();
         for (BasicBlock block : basicBlocks) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
-                if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).function().notUserFunc()) {
+                if (inst instanceof FunctionCallInst && !((FunctionCallInst) inst).function().notUserFunc()) {
                     calleeSet.add(((FunctionCallInst) inst).function());
                 }
             }
@@ -206,7 +206,6 @@ public class Function {
     public List<PhysicalRegister> usedCalleeRegs() {
         return usedCalleeSaveRegs;
     }
-
 
 
     // Language BuiltIn Function
