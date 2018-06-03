@@ -5,7 +5,6 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
-import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.symbols.FunctionSymbol;
@@ -37,6 +36,7 @@ public class FunctionInliner {
             ++iter;
         }
         updateRecursiveCalleeSet();
+        iter = 0;
         change = true;
         while (change) {
             change = false;

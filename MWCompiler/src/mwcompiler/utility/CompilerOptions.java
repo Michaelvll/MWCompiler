@@ -28,7 +28,7 @@ public class CompilerOptions {
     // Function inline
     public final int INLINE_CALLEE_BOUND = 1 << 6;
     public final int INLINE_CALLER_BOUND = 1 << 10;
-    public Integer INLINE_RECURSIVE_LEVEL = 2;
+    public Integer INLINE_RECURSIVE_LEVEL = 5;
 
 
     public void compilerArgSolve(String[] args) {
