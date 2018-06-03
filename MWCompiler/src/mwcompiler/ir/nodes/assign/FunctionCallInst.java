@@ -27,6 +27,8 @@ public class FunctionCallInst extends AssignInst {
         for (Operand operand : args) {
             appendUsedVar(operand, registers);
         }
+        if (dst() instanceof Memory) appendUsedVar(dst(), registers);
+
         return registers;
     }
 

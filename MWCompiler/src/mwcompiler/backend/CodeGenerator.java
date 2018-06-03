@@ -435,7 +435,7 @@ public class CodeGenerator implements IRVisitor<String> {
         if (s.equals("mov")) {
             String[] dstVal = target.split(", ");
             if (dstVal[0].equals(dstVal[1])) return;
-            if (preMovOp != null && preMovOp.first.equals(dstVal[0]) && preMovOp.second.equals(dstVal[1]))
+            if (preMovOp != null && !dstVal[1].contains("[") && preMovOp.first.equals(dstVal[0]) && preMovOp.second.equals(dstVal[1]))
                 return;
             if (preMovOp != null && !dstVal[0].contains("[") && preMovOp.first.equals(dstVal[1]) && preMovOp.second.equals(dstVal[0]))
                 return;

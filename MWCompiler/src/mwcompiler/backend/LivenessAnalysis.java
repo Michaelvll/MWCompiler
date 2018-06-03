@@ -5,6 +5,7 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
@@ -86,7 +87,9 @@ public class LivenessAnalysis {
             for (Instruction inst = blocks.get(index).back(); inst != null; inst = inst.prev) {
                 if (inst instanceof AssignInst) {
                     for (Var dst : inst.dstLocalVar()) {
-                        if (!inst.liveOut().contains(dst)) blocks.get(index).delete(inst);
+                        if (!inst.liveOut().contains(dst) && !(inst instanceof FunctionCallInst)) {
+                            blocks.get(index).delete(inst);
+                        }
                     }
                 }
             }

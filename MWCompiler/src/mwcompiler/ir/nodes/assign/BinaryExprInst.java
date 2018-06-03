@@ -61,6 +61,7 @@ public class BinaryExprInst extends AssignInst {
         LinkedList<Var> registers = new LinkedList<>();
         appendUsedVar(left, registers);
         appendUsedVar(right, registers);
+        if (dst() instanceof Memory) appendUsedVar(dst(), registers);
         return registers;
     }
 

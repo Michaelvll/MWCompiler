@@ -36,6 +36,7 @@ public class UnaryExprInst extends AssignInst {
     public List<Var> usedVar() {
         LinkedList<Var> registers = new LinkedList<>();
         appendUsedVar(src, registers);
+        if (dst() instanceof Memory) appendUsedVar(dst(), registers);
         return registers;
     }
 

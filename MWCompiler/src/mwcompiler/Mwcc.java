@@ -48,8 +48,8 @@ public class Mwcc {
 
         buildIR();
         if (options.functionInline) functionInliner();
-        if (options.dumpIR) dumpIR();
         livenessAnalysis();
+        if (options.dumpIR) dumpIR();
         allocate();
         codeGenerate();
     }
