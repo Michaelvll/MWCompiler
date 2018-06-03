@@ -2,6 +2,7 @@ package mwcompiler.ir.nodes.jump;
 
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.assign.MoveInst;
+import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Var;
@@ -31,6 +32,7 @@ public class ReturnInst extends JumpInst {
     public List<Var> usedVar() {
         List<Var> regs = new ArrayList<>();
         if (retVal instanceof Var) regs.add((Var) retVal);
+        else if (retVal instanceof Memory) regs.addAll(((Memory) retVal).usedVar());
         return regs;
     }
 

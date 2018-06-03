@@ -63,13 +63,14 @@ public class BasicBlock {
         assignInst = assignInst.processKnownReg(this);
         if (assignInst instanceof MoveInst) {
             MoveInst moveInst = (MoveInst) assignInst;
-            if (moveInst.val() instanceof Memory) {
-                Var memDst = Var.tmpBuilder("mem_dst");
-                pushBack((Instruction) new MoveInst(memDst, moveInst.val()));
-                moveInst.setVal(memDst);
-            }
+
             if (dst instanceof Var)
                 addKnownReg((Var) dst, moveInst.val(), valTag);
+            else if (moveInst.val() instanceof Memory) {
+                Var memDst = Var.tmpBuilder("mem_dst");
+                pushBack((Instruction) new MoveInst(memDst, moveInst.val()));
+                moveInst.setSrc(memDst);
+            }
             pushBack((Instruction) assignInst);
         } else {
             pushBack((Instruction) assignInst);
