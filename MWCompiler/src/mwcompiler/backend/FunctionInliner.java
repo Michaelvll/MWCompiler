@@ -24,6 +24,8 @@ public class FunctionInliner {
         this.programIR = programIR;
         updateRecursiveCalleeSet();
 
+        int iter = 0;
+
         boolean change = true;
         while (change) {
             change = false;
@@ -37,7 +39,8 @@ public class FunctionInliner {
                         if (inst instanceof FunctionCallInst) {
                             FunctionCallInst functionCallInst = (FunctionCallInst) inst;
                             Function callee = functionCallInst.function();
-                            if (callee.notUserFunc() || callee.isMain() || callee == function || callee.recursiveCalleeSet().contains(callee))
+                            if (callee.notUserFunc() || callee.isMain() || callee == function ||
+                                    (iter >= options.INLINE_RECURSIVE_LEVEL && callee.recursiveCalleeSet().contains(callee)))
                                 continue;
                             if (callee.instNum <= options.INLINE_CALLEE_BOUND && function.instNum <= options.INLINE_CALLER_BOUND) {
                                 newBlocks.addAll(inline(function, callee, newBlocks.getLast(), functionCallInst));
@@ -49,6 +52,7 @@ public class FunctionInliner {
                 }
                 if (change) function.setBasicBlocks(newBlocks);
             }
+            ++iter;
         }
         programIR.functionMap().values().forEach(func -> {
             func.cleanUp();

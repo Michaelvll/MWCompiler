@@ -1,6 +1,7 @@
 package mwcompiler.ir.nodes.jump;
 
 import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.ir.tools.IRVisitor;
 
@@ -36,5 +37,10 @@ public class DirectJumpInst extends JumpInst {
     @Override
     public JumpInst copy(Map<Object, Object> replaceMap) {
         return new DirectJumpInst(target.copy(replaceMap));
+    }
+
+    @Override
+    public JumpInst sameCopy() {
+        return new DirectJumpInst(target);
     }
 }

@@ -26,8 +26,9 @@ public class CompilerOptions {
     public boolean graphAllocate = false;
     public boolean functionInline = true;
     // Function inline
-    public final int INLINE_CALLEE_BOUND = 1 << 5;
+    public final int INLINE_CALLEE_BOUND = 1 << 6;
     public final int INLINE_CALLER_BOUND = 1 << 10;
+    public Integer INLINE_RECURSIVE_LEVEL = 2;
 
 
     public void compilerArgSolve(String[] args) {
@@ -58,6 +59,7 @@ public class CompilerOptions {
 
         options.addOption(Option.builder("dinline").longOpt("disable-function-inline").hasArg(false).desc("Disable function inline").build());
 
+        options.addOption(Option.builder().longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive function inline level[default 1]").build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -112,6 +114,8 @@ public class CompilerOptions {
                 else System.err.println("Unsupported allocator, use naive allocator by default");
             }
             if (cmd.hasOption("disable-function-inline")) functionInline = false;
+
+            if (cmd.hasOption("recursive-inline-level")) INLINE_RECURSIVE_LEVEL = Integer.valueOf(cmd.getOptionValue("recursive-inline-level"));
 
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());

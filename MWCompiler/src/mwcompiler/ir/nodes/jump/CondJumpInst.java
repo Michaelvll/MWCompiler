@@ -1,6 +1,7 @@
 package mwcompiler.ir.nodes.jump;
 
 import mwcompiler.ir.nodes.BasicBlock;
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
@@ -84,10 +85,15 @@ public class CondJumpInst extends JumpInst {
             if (val.val() == 1) return new DirectJumpInst(ifTrue.copy(replaceMap));
             return new DirectJumpInst(ifFalse.copy(replaceMap));
         }
-        return new CondJumpInst((Operand) replaceMap.getOrDefault(cond, cond),
+        return new CondJumpInst(cond.copy(replaceMap),
                 (BinaryExprInst) cmpInst,
                 ifTrue.copy(replaceMap),
                 ifFalse.copy(replaceMap));
 
+    }
+
+    @Override
+    public Instruction sameCopy() {
+        return new CondJumpInst(cond, (BinaryExprInst) cmp.sameCopy(), ifTrue, ifFalse);
     }
 }

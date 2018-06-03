@@ -542,7 +542,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     public Operand visit(LoopNode node) {
         Function function = currentBasicBlock.parentFunction();
         BasicBlock loopEnd = new BasicBlock(function, currentSymbolTable, prefix("loop_end"), valTag);
-        BasicBlock loopStartCond = new BasicBlock(function,currentSymbolTable,prefix("loop_start_cond"), valTag);
+        BasicBlock loopStartCond = new BasicBlock(function, currentSymbolTable, prefix("loop_start_cond"), valTag);
         newValTag();
         BasicBlock loopCond = new BasicBlock(function, SymbolTable.builder(currentSymbolTable), prefix("loop_cond"), valTag);
         BasicBlock loopBegin = new BasicBlock(function, node.getBody().getCurrentSymbolTable(), prefix("loop_begin"), valTag);

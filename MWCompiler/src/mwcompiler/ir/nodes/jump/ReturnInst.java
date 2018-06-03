@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes.jump;
 
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
@@ -37,5 +38,10 @@ public class ReturnInst extends JumpInst {
     public MoveInst copy(Map<Object, Object> replaceMap) {
         return new MoveInst((MutableOperand) replaceMap.get("retDst"),
                 retVal.copy(replaceMap));
+    }
+
+    @Override
+    public Instruction sameCopy() {
+        return new ReturnInst(retVal);
     }
 }

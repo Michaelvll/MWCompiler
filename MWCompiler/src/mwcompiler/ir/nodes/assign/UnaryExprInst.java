@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
 import mwcompiler.ir.operands.Var;
@@ -44,5 +45,10 @@ public class UnaryExprInst extends AssignInst {
     public AssignInst copy(Map<Object, Object> replaceMap) {
         return new UnaryExprInst((MutableOperand) dst().dstCopy(replaceMap), op,
                 src.copy(replaceMap));
+    }
+
+    @Override
+    public AssignInst sameCopy() {
+        return new UnaryExprInst(dst(), op, src);
     }
 }

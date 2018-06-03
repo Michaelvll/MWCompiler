@@ -1,5 +1,6 @@
 package mwcompiler.ir.nodes.assign;
 
+import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Operand;
@@ -43,5 +44,10 @@ public class MoveInst extends AssignInst {
     public AssignInst copy(Map<Object, Object> replaceMap) {
         return new MoveInst((MutableOperand) dst().dstCopy(replaceMap),
                 val.copy(replaceMap));
+    }
+
+    @Override
+    public AssignInst sameCopy() {
+        return new MoveInst(dst(), val);
     }
 }

@@ -22,9 +22,7 @@ public class Var extends Register {
     private boolean compareTmp = false;
 
     // For graph coloring
-    private Set<Var> neighbors = new HashSet<>();
-    public int degree = 0;
-    public boolean deleted = false;
+
 
     private static final String GLOBAL_PREFIX = "_user_global_";
 
@@ -151,14 +149,7 @@ public class Var extends Register {
         return compareTmp;
     }
 
-    public Set<Var> neighbors() {
-        return neighbors;
-    }
-
-    public void setDegree() {
-        this.degree = neighbors.size();
-    }
-
+    @Override
     public boolean isAssigned() {
         return physicalRegister != null;
     }

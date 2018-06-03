@@ -90,7 +90,7 @@ public class CodeGenerator implements IRVisitor<String> {
          */
         if (!function.isMain()) {
             // Save used callee-save registers
-            for (PhysicalRegister reg : function.usedPRegs()) {
+            for (PhysicalRegister reg : function.usedCalleeRegs()) {
                 if (calleeSaveRegs.contains(reg)) {
                     append("push", reg);
                 }
@@ -256,7 +256,7 @@ public class CodeGenerator implements IRVisitor<String> {
         if (!currentFunction.isMain()) {
             assembly.append("\n");
             append("mov", RSP, RBP);
-            List<PhysicalRegister> usedRegs = currentFunction.usedPRegs();
+            List<PhysicalRegister> usedRegs = currentFunction.usedCalleeRegs();
             for (int index = usedRegs.size() - 1; index >= 0; --index) {
                 PhysicalRegister reg = usedRegs.get(index);
                 if (calleeSaveRegs.contains(reg)) append("pop", reg);
