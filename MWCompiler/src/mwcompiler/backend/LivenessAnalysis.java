@@ -43,7 +43,11 @@ public class LivenessAnalysis {
             System.err.println("eliminate for " + String.valueOf(++iterate));
             if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 15) break;
         } while (eliminateChange);
-        programIR.functionMap().values().forEach(this::loopEliminate);
+        try {
+            programIR.functionMap().values().forEach(this::loopEliminate);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     private void analysisFunction(Function function) {
