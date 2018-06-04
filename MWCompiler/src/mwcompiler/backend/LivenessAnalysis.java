@@ -16,6 +16,7 @@ import mwcompiler.utility.CompilerOptions;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class LivenessAnalysis {
     private ProgramIR programIR;
@@ -25,12 +26,19 @@ public class LivenessAnalysis {
         this.options = options;
     }
 
+    private boolean eliminateChange = false;
     public void apply(ProgramIR programIR) {
         this.programIR = programIR;
-
+        int iterate = 0;
+        long oldTime = System.nanoTime();
         programIR.functionMap().values().forEach(this::analysisFunction);
-        programIR.functionMap().values().forEach(this::eliminate);
-        programIR.functionMap().values().forEach(this::analysisFunction);
+        do {
+            eliminateChange = false;
+            programIR.functionMap().values().forEach(this::eliminate);
+            programIR.functionMap().values().forEach(this::analysisFunction);
+            System.err.println("eliminate for "+String.valueOf(++iterate));
+            if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 15) break;
+        } while (eliminateChange);
     }
 
     private void analysisFunction(Function function) {
@@ -89,6 +97,7 @@ public class LivenessAnalysis {
                     for (Var dst : inst.dstLocalVar()) {
                         if (!inst.liveOut().contains(dst) && !(inst instanceof FunctionCallInst)) {
                             blocks.get(index).delete(inst);
+                            eliminateChange = true;
                         }
                     }
                 }
