@@ -5,6 +5,7 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.operands.Memory;
 import mwcompiler.ir.operands.PhysicalRegister;
@@ -21,6 +22,7 @@ public class GraphAllocator extends Allocator {
     private CompilerOptions options;
 
     private List<PhysicalRegister> registers = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
+    private List<PhysicalRegister> callerSave = new ArrayList<>(Arrays.asList(R8, R9, R10, R11));
     private Set<PhysicalRegister> usedCalleeRegs = new HashSet<>();
     private InterfereGraph graph = new InterfereGraph();
     private int stackTop;
@@ -68,9 +70,16 @@ public class GraphAllocator extends Allocator {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 if (!(inst instanceof AssignInst)) continue;
                 AssignInst assignInst = (AssignInst) inst;
+                if (assignInst instanceof FunctionCallInst) {
+                    for (PhysicalRegister preg : callerSave) {
+                        assignInst.liveOut().forEach(var -> graph.addEdge(var, preg));
+//                        if (assignInst.dst() != null) graph.addEdge((Register) assignInst.dst(), preg);
+                    }
+                }
                 if (assignInst.dst() instanceof Memory || assignInst.dst() == null) continue;
                 Var dst = (Var) assignInst.dst();
                 if (dst.isGlobal()) continue;
+
                 if (assignInst instanceof MoveInst) {
                     assignInst.liveOut().forEach(var -> {
                         if (var != ((MoveInst) assignInst).val()) graph.addEdge(dst, var);
@@ -90,6 +99,14 @@ public class GraphAllocator extends Allocator {
             reg.deleted = false;
             for (Register neighbor : reg.neighbors())
                 if (!neighbor.deleted && neighbor.isAssigned()) neighborReg.add(neighbor.physicalRegister());
+            for (PhysicalRegister preg : callerSave) {
+                if (!neighborReg.contains(preg)) {
+                    reg.setPhysicalRegister(preg);
+                    System.err.println("set var: " + reg.irName() + " -> " + preg.nasmName());
+
+                    break;
+                }
+            }
             for (PhysicalRegister preg : registers) {
                 if (!neighborReg.contains(preg)) {
                     reg.setPhysicalRegister(preg);
