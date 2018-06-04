@@ -148,7 +148,7 @@ public class GraphAllocator extends Allocator {
 
     private class InterfereGraph {
         private Set<Var> varGraph = new HashSet<>();
-        private Set<Var> toDeleteVars = new HashSet<>();
+        private Set<Var> deletionWorkList = new HashSet<>();
         private Stack<Register> varStack = new Stack<>();
 
         private void addEdge(Register a, Register b) {
@@ -167,7 +167,7 @@ public class GraphAllocator extends Allocator {
         private void setDegree() {
             for (Register reg : varGraph) {
                 reg.setDegree();
-                if (reg.degree < registers.size() && reg instanceof Var) toDeleteVars.add((Var) reg);
+                if (reg.degree < registers.size() && reg instanceof Var) deletionWorkList.add((Var) reg);
             }
         }
 
@@ -186,7 +186,7 @@ public class GraphAllocator extends Allocator {
             var.neighbors().forEach(neighbor -> {
                 if (!neighbor.deleted && neighbor instanceof Var) {
                     --neighbor.degree;
-                    if (neighbor.degree < registers.size()) toDeleteVars.add((Var) neighbor);
+                    if (neighbor.degree < registers.size()) deletionWorkList.add((Var) neighbor);
                 }
             });
             var.deleted = true;
@@ -196,11 +196,11 @@ public class GraphAllocator extends Allocator {
 
         private void simplify() {
             while (!varGraph.isEmpty()) {
-                while (!toDeleteVars.isEmpty()) {
-                    Iterator<Var> it = toDeleteVars.iterator();
+                while (!deletionWorkList.isEmpty()) {
+                    Iterator<Var> it = deletionWorkList.iterator();
                     Var var = it.next();
                     removeVar(var);
-                    toDeleteVars.remove(var);
+                    deletionWorkList.remove(var);
                 }
                 Iterator<Var> it = varGraph.iterator();
                 if (it.hasNext()) removeVar(it.next());

@@ -9,10 +9,14 @@ import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
+import mwcompiler.ir.operands.Memory;
+import mwcompiler.ir.operands.MutableOperand;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.utility.CompilerOptions;
+import mwcompiler.utility.Pair;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,18 +31,19 @@ public class LivenessAnalysis {
     }
 
     private boolean eliminateChange = false;
+
     public void apply(ProgramIR programIR) {
         this.programIR = programIR;
         int iterate = 0;
         long oldTime = System.nanoTime();
-        programIR.functionMap().values().forEach(this::analysisFunction);
         do {
             eliminateChange = false;
-            programIR.functionMap().values().forEach(this::eliminate);
             programIR.functionMap().values().forEach(this::analysisFunction);
-            System.err.println("eliminate for "+String.valueOf(++iterate));
+            programIR.functionMap().values().forEach(this::eliminate);
+            System.err.println("eliminate for " + String.valueOf(++iterate));
             if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 15) break;
         } while (eliminateChange);
+        programIR.functionMap().values().forEach(this::loopEliminate);
     }
 
     private void analysisFunction(Function function) {
@@ -101,6 +106,61 @@ public class LivenessAnalysis {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void loopEliminate(Function function) {
+        if (function.notUserFunc()) return;
+        List<List<BasicBlock>> loopBlocks = new ArrayList<>();
+        List<Pair<Integer, Integer>> loopIndex = new ArrayList<>();
+        Set<BasicBlock> vistedBlock = new HashSet<>();
+        List<BasicBlock> functionBlocks = function.basicBlocks();
+        for (BasicBlock block : functionBlocks) {
+            vistedBlock.add(block);
+            if (block.back() instanceof CondJumpInst) {
+                CondJumpInst condJumpInst = (CondJumpInst) block.back();
+                Integer start = null;
+                if (vistedBlock.contains(condJumpInst.ifTrue()))
+                    start = functionBlocks.indexOf(condJumpInst.ifTrue());
+                else if (vistedBlock.contains(condJumpInst.ifFalse()))
+                    start = functionBlocks.indexOf(condJumpInst.ifFalse());
+                if (start != null && start != 0) {
+                    int end = functionBlocks.indexOf(block);
+                    if (end - start <= 1) {
+                        loopBlocks.add(functionBlocks.subList(start, end));
+                        loopIndex.add(new Pair<>(start, end));
+                    }
+                }
+            }
+        }
+        Set<Register> out;
+        for (int index = 0; index < loopBlocks.size(); ++index) {
+            int end = loopIndex.get(index).second;
+            out = functionBlocks.get(end + 1).front().liveIn();
+            boolean delete = true;
+            for (BasicBlock block : loopBlocks.get(index)) {
+                for (Instruction inst = block.front(); inst != null; inst = inst.next) {
+                    if (inst instanceof ReturnInst || inst instanceof FunctionCallInst) {
+                        delete = false;
+                        break;
+                    }
+                    if (inst instanceof AssignInst) {
+                        MutableOperand dst = ((AssignInst) inst).dst();
+                        if (dst instanceof Memory || (dst instanceof Var && (((Var) dst).isGlobal() || out.contains(dst)))) {
+                            delete = false;
+                            break;
+                        }
+                    }
+                }
+                if (!delete) break;
+            }
+            if (delete) {
+                BasicBlock currentBlock = loopBlocks.get(index).get(0);
+                BasicBlock nextBlock = functionBlocks.get(end + 1);
+                currentBlock.setFront(null);
+                currentBlock.setEnd(null);
+                currentBlock.pushBack(new DirectJumpInst(nextBlock));
             }
         }
     }
