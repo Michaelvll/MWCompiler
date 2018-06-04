@@ -13,6 +13,7 @@ public abstract class Register extends MutableOperand {
     private Set<Register> neighbors = new HashSet<>();
     public int degree = 0;
     public boolean deleted = false;
+    private Set<Register> movNeighors = new HashSet<>();
 
     public Literal getVal(Integer valTag) {
         if (valTag.equals(this.valTag))
@@ -29,6 +30,8 @@ public abstract class Register extends MutableOperand {
     public Set<Register> neighbors() {
         return neighbors;
     }
+
+    public Set<Register> movNeighors() {return movNeighors;}
 
     public abstract boolean isAssigned();
 
