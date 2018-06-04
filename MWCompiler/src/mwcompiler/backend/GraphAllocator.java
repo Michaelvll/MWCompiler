@@ -5,6 +5,7 @@ import mwcompiler.ir.nodes.Function;
 import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.AssignInst;
+import mwcompiler.ir.nodes.assign.BinaryExprInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
 import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.operands.Memory;
@@ -12,6 +13,7 @@ import mwcompiler.ir.operands.PhysicalRegister;
 import mwcompiler.ir.operands.Register;
 import mwcompiler.ir.operands.Var;
 import mwcompiler.utility.CompilerOptions;
+import mwcompiler.utility.ExprOps;
 
 import java.util.*;
 
@@ -22,7 +24,7 @@ public class GraphAllocator extends Allocator {
     private CompilerOptions options;
 
     private List<PhysicalRegister> registers = new ArrayList<>(Arrays.asList(RBX, R12, R13, R14, R15));
-    private List<PhysicalRegister> callerSave = new ArrayList<>(Arrays.asList(R8, R9, R10, R11));
+    private List<PhysicalRegister> callerSave = new ArrayList<>(Arrays.asList(RDX, R8, R9, R10, R11));
     private Set<PhysicalRegister> usedCalleeRegs = new HashSet<>();
     private InterfereGraph graph = new InterfereGraph();
     private int stackTop;
@@ -74,6 +76,11 @@ public class GraphAllocator extends Allocator {
                     for (PhysicalRegister preg : callerSave) {
                         assignInst.liveOut().forEach(var -> graph.addEdge(var, preg));
 //                        if (assignInst.dst() != null) graph.addEdge((Register) assignInst.dst(), preg);
+                    }
+                } else if(assignInst instanceof BinaryExprInst) {
+                    if (((BinaryExprInst) assignInst).op() == ExprOps.MOD) {
+                        assignInst.liveOut().forEach(var -> graph.addEdge(var, RDX));
+                        assignInst.usedLocalVar().forEach(var->graph.addEdge(var, RDX));
                     }
                 }
                 if (assignInst.dst() instanceof Memory || assignInst.dst() == null) continue;
