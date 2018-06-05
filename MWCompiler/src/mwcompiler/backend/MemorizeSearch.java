@@ -49,7 +49,7 @@ public class MemorizeSearch {
         Function mainFunc = programIR.getFunction(FunctionSymbol.MAIN);
         BasicBlock mainFirstBlock = mainFunc.basicBlocks().get(0);
         BasicBlock memorizeSearchInit = new BasicBlock(mainFunc, mainFirstBlock.getCurrentSymbolTable(), "memorizeSearchInit", mainFirstBlock.valTag());
-        memorizeSearchInit.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(new IntLiteral(options.MEMORIZE_SEARCH_LEVEL))), function.memorizeSearchMemBase()));
+        memorizeSearchInit.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(new IntLiteral(options.MEMORIZE_SEARCH_LEVEL * options.PTR_SIZE))), function.memorizeSearchMemBase()));
         memorizeSearchInit.pushBack(new DirectJumpInst(mainFirstBlock));
         LinkedList<BasicBlock> newBlocks = new LinkedList<>(mainFunc.basicBlocks());
         newBlocks.addFirst(memorizeSearchInit);
