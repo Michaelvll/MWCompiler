@@ -21,6 +21,8 @@ public class Function {
     private SymbolTable symbolTable;
 
 
+
+
     public enum FuncType {
         USER, EXTERN, LIB, TEMP
     }
@@ -41,10 +43,15 @@ public class Function {
     private List<PhysicalRegister> usedCalleeSaveRegs = new ArrayList<>();
     private int varStackSize = 0;
 
+    // For memorize search
+    private boolean memorizeable = false;
+    private Var memorizeSearchMemBase;
+
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
         this.funcType = FuncType.USER;
     }
+
 
     private Function(FunctionSymbol functionSymbol, FuncType funcType) {
         this.functionSymbol = functionSymbol;
@@ -251,5 +258,21 @@ public class Function {
 
     public boolean isMain() {
         return functionSymbol == FunctionSymbol.MAIN;
+    }
+
+    public boolean memorizeable() {
+        return memorizeable;
+    }
+
+    public void setMemorizeable(boolean memorizeable) {
+        this.memorizeable = memorizeable;
+    }
+
+    public Var memorizeSearchMemBase() {
+        return memorizeSearchMemBase;
+    }
+
+    public void setMemorizeSearchMemBase(Var memorizeSearchMemBase) {
+        this.memorizeSearchMemBase = memorizeSearchMemBase;
     }
 }

@@ -74,6 +74,9 @@ public class GraphAllocator extends Allocator {
                         assignInst.liveOut().forEach(var -> graph.addEdge(var, preg));
 //                        if (assignInst.dst() != null) graph.addEdge((Register) assignInst.dst(), preg);
                     }
+                    FunctionCallInst functionCallInst = (FunctionCallInst) assignInst;
+                    setArgSuggestReg(functionCallInst.args());
+
                 } else if (assignInst instanceof BinaryExprInst) {
                     ExprOps op = ((BinaryExprInst) assignInst).op();
                     if (op == ExprOps.MOD || op == ExprOps.DIV) {
@@ -98,6 +101,21 @@ public class GraphAllocator extends Allocator {
         graph.setDegree();
     }
 
+    private void setArgSuggestReg(List<Operand> args) {
+        if (args.size() >= 3)
+            if (args.get(2) instanceof Register)
+                graph.addMovNeighbor((Register) args.get(2), RDX);
+
+        if (args.size() >= 5)
+            if (args.get(4) instanceof Register)
+                graph.addMovNeighbor((Register) args.get(4), R8);
+
+        if (args.size() >= 6)
+            if (args.get(5) instanceof Register)
+                graph.addMovNeighbor((Register) args.get(5), R9);
+
+    }
+
     private void assignRegister() {
         Set<PhysicalRegister> neighborReg = new HashSet<>();
         while (!graph.varStack.isEmpty()) {
@@ -112,6 +130,7 @@ public class GraphAllocator extends Allocator {
                 for (Register movNeighbor : reg.movNeighors()) {
                     if (movNeighbor.isAssigned() && !neighborReg.contains(movNeighbor.physicalRegister())) {
                         reg.setPhysicalRegister(movNeighbor.physicalRegister());
+//                        System.err.println("Allocate suggested register for var: " + reg.irName() + " -> " + movNeighbor.physicalRegister().nasmName());
                         break;
                     }
                 }
@@ -121,7 +140,7 @@ public class GraphAllocator extends Allocator {
                 for (PhysicalRegister preg : callerSave) {
                     if (!neighborReg.contains(preg)) {
                         reg.setPhysicalRegister(preg);
-                        System.err.println("set var: " + reg.irName() + " -> " + preg.nasmName());
+//                        System.err.println("set var: " + reg.irName() + " -> " + preg.nasmName());
                         break;
                     }
                 }
@@ -140,6 +159,7 @@ public class GraphAllocator extends Allocator {
             if (!reg.isAssigned()) {
                 stackTop = alignStack(stackTop + options.PTR_SIZE, options.PTR_SIZE);
                 ((Var) reg).setStackPos(new Memory(RBP, null, 0, -stackTop));
+                System.err.println("set var: " + reg.irName() + " -> stackTop: " + stackTop);
             }
 
         }

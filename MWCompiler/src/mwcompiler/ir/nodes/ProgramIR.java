@@ -3,10 +3,7 @@ package mwcompiler.ir.nodes;
 import mwcompiler.ir.operands.*;
 import mwcompiler.symbols.FunctionSymbol;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ProgramIR {
     private Map<FunctionSymbol, Function> functionMap = new HashMap<>();
@@ -22,6 +19,8 @@ public class ProgramIR {
         if (init instanceof IntLiteral) globalPool.put(var, (IntLiteral) init);
         else globalPool.put(var, null);
     }
+
+
 
     public Map<Var, IntLiteral> getGlobalPool() {
         return globalPool;

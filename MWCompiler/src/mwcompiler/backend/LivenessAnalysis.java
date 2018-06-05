@@ -16,10 +16,7 @@ import mwcompiler.ir.operands.Var;
 import mwcompiler.utility.CompilerOptions;
 import mwcompiler.utility.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class LivenessAnalysis {
@@ -34,28 +31,28 @@ public class LivenessAnalysis {
 
     public void apply(ProgramIR programIR) {
         this.programIR = programIR;
-        int iterate = 0;
         long oldTime = System.nanoTime();
+        int iterate = 0;
+        programIR.functionMap().values().forEach(this::analysisFunction);
         do {
             eliminateChange = false;
-            programIR.functionMap().values().forEach(this::analysisFunction);
-            programIR.functionMap().values().forEach(this::eliminate);
+            programIR.functionMap().values().forEach(func -> {
+                if (!func.notUserFunc()) {
+                    eliminate(func);
+                    loopEliminate(func);
+                    func.cleanUp();
+                    analysisFunction(func);
+                }
+            });
             System.err.println("eliminate for " + String.valueOf(++iterate));
             if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 15) break;
         } while (eliminateChange);
-        try {
-            programIR.functionMap().values().forEach(this::loopEliminate);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
     }
 
     private void analysisFunction(Function function) {
-        if (function.notUserFunc()) return;
         resetInOut(function);
-
-        boolean change = true;
         List<BasicBlock> blocks = function.basicBlocks();
+        boolean change = true;
         while (change) {
             change = false;
             Set<Register> liveIn = new HashSet<>();
@@ -118,16 +115,15 @@ public class LivenessAnalysis {
         if (function.notUserFunc()) return;
         List<List<BasicBlock>> loopBlocks = new ArrayList<>();
         List<Pair<Integer, Integer>> loopIndex = new ArrayList<>();
-        Set<BasicBlock> vistedBlock = new HashSet<>();
+        Set<BasicBlock> visitedBlock = new HashSet<>();
         List<BasicBlock> functionBlocks = function.basicBlocks();
         for (BasicBlock block : functionBlocks) {
-            vistedBlock.add(block);
             if (block.back() instanceof CondJumpInst) {
                 CondJumpInst condJumpInst = (CondJumpInst) block.back();
                 Integer start = null;
-                if (vistedBlock.contains(condJumpInst.ifTrue()))
+                if (visitedBlock.contains(condJumpInst.ifTrue()))
                     start = functionBlocks.indexOf(condJumpInst.ifTrue());
-                else if (vistedBlock.contains(condJumpInst.ifFalse()))
+                else if (visitedBlock.contains(condJumpInst.ifFalse()))
                     start = functionBlocks.indexOf(condJumpInst.ifFalse());
                 if (start != null && start != 0) {
                     int end = functionBlocks.indexOf(block);
@@ -137,9 +133,12 @@ public class LivenessAnalysis {
                     }
                 }
             }
+            visitedBlock.add(block);
         }
         Set<Register> out;
+        Set<Integer> deleteIndex = new HashSet<>();
         for (int index = 0; index < loopBlocks.size(); ++index) {
+            int start = loopIndex.get(index).first;
             int end = loopIndex.get(index).second;
             out = functionBlocks.get(end + 1).front().liveIn();
             boolean delete = true;
@@ -160,12 +159,22 @@ public class LivenessAnalysis {
                 if (!delete) break;
             }
             if (delete) {
+                System.err.println("Delete irrelevant loop: " + loopBlocks.get(index).get(0).name());
                 BasicBlock currentBlock = loopBlocks.get(index).get(0);
                 BasicBlock nextBlock = functionBlocks.get(end + 1);
                 currentBlock.setFront(null);
                 currentBlock.setEnd(null);
                 currentBlock.pushBack(new DirectJumpInst(nextBlock));
+                for (int i = start + 1; i <= end; ++i) deleteIndex.add(i);
             }
         }
+        int index = 0;
+        LinkedList<BasicBlock> newFuncBlocks = new LinkedList<>();
+        if (deleteIndex.isEmpty()) return;
+        for (BasicBlock block : functionBlocks) {
+            if (!deleteIndex.contains(index)) newFuncBlocks.add(block);
+            ++index;
+        }
+        function.setBasicBlocks(newFuncBlocks);
     }
 }
