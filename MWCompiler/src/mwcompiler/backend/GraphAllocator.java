@@ -113,7 +113,6 @@ public class GraphAllocator extends Allocator {
         if (args.size() >= 6)
             if (args.get(5) instanceof Register)
                 graph.addMovNeighbor((Register) args.get(5), R9);
-
     }
 
     private void assignRegister() {

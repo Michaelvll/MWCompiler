@@ -3,6 +3,7 @@ package mwcompiler.ir.operands;
 import mwcompiler.ir.tools.IRVisitor;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public abstract class Register extends MutableOperand {
@@ -13,7 +14,7 @@ public abstract class Register extends MutableOperand {
     private Set<Register> neighbors = new HashSet<>();
     public int degree = 0;
     public boolean deleted = false;
-    private Set<Register> movNeighors = new HashSet<>();
+    private Set<Register> movNeighors = new LinkedHashSet<>();
 
     public Literal getVal(Integer valTag) {
         if (valTag.equals(this.valTag))
