@@ -84,14 +84,14 @@ public class MemorizeSearch {
 
                 // Result fetch
                 Var res = Var.tmpBuilder("memorize_res");
-                getRes.pushBack(new MoveInst(res, new Memory(function.memorizeSearchMemBase(), arg, 1, 0)));
+                getRes.pushBack(new MoveInst(res, new Memory(function.memorizeSearchMemBase(), arg, options.PTR_SIZE, 0)));
                 Var validCmpRes = Var.tmpBuilder("memorize_valid", true);
                 BinaryExprInst validCmp = new BinaryExprInst(validCmpRes, res, ExprOps.NEQ, IntLiteral.ZERO_LITERAL);
                 getRes.pushBack(new CondJumpInst(validCmpRes, validCmp, setRes, callSetBlock)); // Result validation test
 
                 // call and set
                 callSetBlock.pushBack(new FunctionCallInst(function, functionCallInst.args(), (Register) functionCallInst.dst()));
-                callBlock.pushBack(new MoveInst(new Memory(function.memorizeSearchMemBase(), arg, 1, 0), functionCallInst.dst()));
+                callSetBlock.pushBack(new MoveInst(new Memory(function.memorizeSearchMemBase(), arg, options.PTR_SIZE, 0), functionCallInst.dst()));
                 callSetBlock.pushBack(new DirectJumpInst(nextBlock));
 
                 // Result set
@@ -99,7 +99,7 @@ public class MemorizeSearch {
                 setRes.pushBack(new DirectJumpInst(nextBlock));
 
                 // Normal call
-                callBlock.pushBack(functionCallInst);
+                callBlock.pushBack(new FunctionCallInst(function, functionCallInst.args(), (Register) functionCallInst.dst()));
                 callBlock.pushBack(new DirectJumpInst(nextBlock));
 
                 newBlocks.addAll(processInsts(nextBlock));
