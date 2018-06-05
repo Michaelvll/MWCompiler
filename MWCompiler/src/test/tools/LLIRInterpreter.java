@@ -202,7 +202,7 @@ public class LLIRInterpreter {
         curFunc.name = words.get(1);
         curFunc.args = words.subList(2, words.size() - 1);
         if (functions.containsKey(curFunc.name))
-            throw new SemanticError("function `" + curFunc.name + "` has already been defined");
+            throw new SemanticError("callee `" + curFunc.name + "` has already been defined");
         functions.put(curFunc.name, curFunc);
 
         allowPhi = isSSAMode;
@@ -285,7 +285,7 @@ public class LLIRInterpreter {
     private void jump(String name) throws RuntimeError {
         BasicBlock BB = curFunc.blocks.get(name);
         if (BB == null)
-            throw new RuntimeError("cannot resolve block `" + name + "` in function `" + curFunc.name + "`");
+            throw new RuntimeError("cannot resolve block `" + name + "` in callee `" + curFunc.name + "`");
         lastBB = curBB;
         curBB = BB;
     }
@@ -336,9 +336,9 @@ public class LLIRInterpreter {
             case "call":
                 Function func = functions.get(curInst.op1);
                 if (func == null)
-                    throw new RuntimeError("cannot resolve function `" + curInst.op1 + "`");
+                    throw new RuntimeError("cannot resolve callee `" + curInst.op1 + "`");
                 if (curInst.dest != null && !func.hasReturnValue)
-                    throw new RuntimeError("function `" + func.name + "` has not return value");
+                    throw new RuntimeError("callee `" + func.name + "` has not return value");
                 Map<String, Register> regs = new HashMap<>();
                 if (curInst.args.size() != func.args.size())
                     throw new RuntimeError("argument size cannot match");
@@ -445,7 +445,7 @@ public class LLIRInterpreter {
         curFunc = func;
         curBB = func.entry;
         if (curBB == null)
-            throw new RuntimeError("no entry block for function `" + func.name + "`");
+            throw new RuntimeError("no entry block for callee `" + func.name + "`");
 
         while (true) {
             BasicBlock BB = curBB;
@@ -531,7 +531,7 @@ public class LLIRInterpreter {
                 throw new RuntimeException("not ready");
             Function main = functions.get("main");
             if (main == null)
-                throw new RuntimeError("cannot find `main` function");
+                throw new RuntimeError("cannot find `main` callee");
             registers = new HashMap<>();
             runFunction(main);
             exitcode = retValue;

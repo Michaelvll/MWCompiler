@@ -194,7 +194,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
                 body.add(visit(declarator));
                 if (functionDeclNode.getInstance() == Instance.CONSTRUCTOR
                         && !(functionDeclNode.getFunctionSymbol().getReturnType().getName().equals(declClass))) {
-                    throw new CompileError(stage, "Creator function must have the same name as the class"
+                    throw new CompileError(stage, "Creator callee must have the same name as the class"
                             , new Location(declarator));
                 }
             } else {
@@ -409,7 +409,7 @@ public class AstBuilder extends MxBaseVisitor<Node> {
             }
         }
 
-        // For normal function
+        // For normal callee
         ExprNode caller = (ExprNode) visit(ctx.expr());
         return new FunctionCallNode(caller, args, new Location(ctx));
     }

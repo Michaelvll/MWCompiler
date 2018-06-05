@@ -25,7 +25,7 @@ public class CondJumpInst extends JumpInst {
         this.ifFalse = ifFalse;
     }
 
-    private CondJumpInst(Operand cond, BinaryExprInst cmp, BasicBlock ifTrue, BasicBlock ifFalse) {
+    public CondJumpInst(Operand cond, BinaryExprInst cmp, BasicBlock ifTrue, BasicBlock ifFalse) {
         this.cond = cond;
         this.cmp = cmp;
         this.ifTrue = ifTrue;

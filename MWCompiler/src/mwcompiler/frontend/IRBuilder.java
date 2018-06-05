@@ -447,7 +447,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         Operand outputReg;
         if (lastInst instanceof FunctionCallInst) {
             FunctionCallInst lastFunctionCall = (FunctionCallInst) lastInst;
-            if (lastFunctionCall.function() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
+            if (lastFunctionCall.callee() == Function.TO_STRING && lastFunctionCall.dst() == args.get(0)) {
                 currentBasicBlock.popBack();
                 outputReg = lastFunctionCall.args().get(0);
                 formatStr = newline ? StringLiteral.intlnFormat : StringLiteral.intFormat;
@@ -615,7 +615,7 @@ public class IRBuilder implements AstVisitor<Operand> {
             currentFunctionSymbol = (FunctionSymbol) memberInfo.getSymbol();
             return container;
         }
-        // For array (size function)
+        // For array (size callee)
         currentFunctionSymbol = FunctionSymbol.SIZE;
         return container;
     }

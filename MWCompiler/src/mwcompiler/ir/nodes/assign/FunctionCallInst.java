@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 public class FunctionCallInst extends AssignInst {
-    private Function function;
+    private Function callee;
     private List<Operand> args;
 
-    public FunctionCallInst(Function function, List<Operand> args, Register dst) {
-        super((function.getFunctionSymbol().getReturnType() != BaseTypeSymbol.VOID_TYPE_SYMBOL) ? dst : null);
-        this.function = function;
+    public FunctionCallInst(Function callee, List<Operand> args, Register dst) {
+        super((callee.getFunctionSymbol().getReturnType() != BaseTypeSymbol.VOID_TYPE_SYMBOL) ? dst : null);
+        this.callee = callee;
         this.args = args;
     }
 
@@ -37,12 +37,12 @@ public class FunctionCallInst extends AssignInst {
         return visitor.visit(this);
     }
 
-    public Function function() {
-        return function;
+    public Function callee() {
+        return callee;
     }
 
     public String functionName() {
-        return function.name();
+        return callee.name();
     }
 
     public List<Operand> args() {
@@ -57,7 +57,7 @@ public class FunctionCallInst extends AssignInst {
         }
         MutableOperand dst = null;
         if (dst() != null) dst = (MutableOperand) dst().dstCopy(replaceMap);
-        return new FunctionCallInst(function,
+        return new FunctionCallInst(callee,
                 newArgs,
                 (Register) dst
         );
@@ -65,7 +65,7 @@ public class FunctionCallInst extends AssignInst {
 
     @Override
     public AssignInst sameCopy() {
-        return new FunctionCallInst(function, args, (Register) dst());
+        return new FunctionCallInst(callee, args, (Register) dst());
     }
 
     @Override

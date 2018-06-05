@@ -30,6 +30,10 @@ public class CompilerOptions {
     public final int INLINE_CALLER_BOUND = 1 << 10;
     public Integer INLINE_RECURSIVE_LEVEL = 5;
 
+    // Function memorize search
+    public final int MEMORIZE_SEARCH_LEVEL = 1 << 8;
+    public boolean memorizeSearch = false;
+
 
     public void compilerArgSolve(String[] args) {
         Options options = new Options();
@@ -57,9 +61,11 @@ public class CompilerOptions {
 
         options.addOption(Option.builder("a").longOpt("allocator").desc("Register allocator [Naive]/Graph").hasArg().build());
 
-        options.addOption(Option.builder("dinline").longOpt("disable-function-inline").hasArg(false).desc("Disable function inline").build());
+        options.addOption(Option.builder("dinline").longOpt("disable-callee-inline").hasArg(false).desc("Disable callee inline").build());
 
-        options.addOption(Option.builder().longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive function inline level[default 1]").build());
+        options.addOption(Option.builder().longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive callee inline level[default 1]").build());
+
+        options.addOption(Option.builder().longOpt("memorize-search").hasArg(false).desc("Enable memorize search optimization").build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -113,9 +119,13 @@ public class CompilerOptions {
                 else if (cmd.getOptionValue("a").equals("Naive")) graphAllocate = false;
                 else System.err.println("Unsupported allocator, use naive allocator by default");
             }
-            if (cmd.hasOption("disable-function-inline")) functionInline = false;
+            if (cmd.hasOption("disable-callee-inline")) functionInline = false;
 
-            if (cmd.hasOption("recursive-inline-level")) INLINE_RECURSIVE_LEVEL = Integer.valueOf(cmd.getOptionValue("recursive-inline-level"));
+            if (cmd.hasOption("recursive-inline-level"))
+                INLINE_RECURSIVE_LEVEL = Integer.valueOf(cmd.getOptionValue("recursive-inline-level"));
+
+            if (cmd.hasOption("memorize-search"))
+                memorizeSearch = true;
 
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());

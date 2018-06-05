@@ -43,7 +43,7 @@ public class FunctionInliner {
             for (Function function : programIR.functionMap().values()) {
                 if (function.notUserFunc() || function.isMain() || !mainFunc.recursiveCalleeSet().contains(function))
                     continue;
-//            Function function = programIR.getFunction(FunctionSymbol.MAIN);
+//            Function callee = programIR.getFunction(FunctionSymbol.MAIN);
                 LinkedList<BasicBlock> newBlocks = new LinkedList<>();
                 change = processInline(iter, change, function, newBlocks);
                 if (change) function.setBasicBlocks(newBlocks);
@@ -64,7 +64,7 @@ public class FunctionInliner {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
                 if (inst instanceof FunctionCallInst) {
                     FunctionCallInst functionCallInst = (FunctionCallInst) inst;
-                    Function callee = functionCallInst.function();
+                    Function callee = functionCallInst.callee();
                     if (callee.notUserFunc() || callee.isMain() || callee == function ||
                             (iterate >= options.INLINE_RECURSIVE_LEVEL && callee.recursiveCalleeSet().contains(callee)))
                         continue;

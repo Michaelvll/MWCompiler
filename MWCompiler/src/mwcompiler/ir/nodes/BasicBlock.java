@@ -83,7 +83,7 @@ public class BasicBlock {
                 dst = memDst;
             }
             if (assignInst instanceof FunctionCallInst && parentFunction != null)
-                parentFunction.addCallee(((FunctionCallInst) assignInst).function());
+                parentFunction.addCallee(((FunctionCallInst) assignInst).callee());
         }
         return dst;
     }
@@ -114,7 +114,6 @@ public class BasicBlock {
         assignTable.clear();
         eliminateAssignInst(); // eliminate the unused assignInst
     }
-
 
 
     public Instruction popBack() {

@@ -186,8 +186,8 @@ public class Function {
         calleeSet.clear();
         for (BasicBlock block : basicBlocks) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
-                if (inst instanceof FunctionCallInst && !((FunctionCallInst) inst).function().notUserFunc()) {
-                    calleeSet.add(((FunctionCallInst) inst).function());
+                if (inst instanceof FunctionCallInst && !((FunctionCallInst) inst).callee().notUserFunc()) {
+                    calleeSet.add(((FunctionCallInst) inst).callee());
                 }
             }
         }

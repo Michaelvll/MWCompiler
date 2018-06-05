@@ -46,7 +46,7 @@ public abstract class Instruction {
         return liveOut;
     }
 
-    void addPrev(Instruction prevInst) {
+    public void addPrev(Instruction prevInst) {
         if (this.prev != null) this.prev.next = prevInst;
         prevInst.next = this;
         prevInst.prev = this.prev;

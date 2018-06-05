@@ -6,7 +6,7 @@ import java.util.List;
 
 import static mwcompiler.symbols.BaseTypeSymbol.*;
 
-// Each function has exactly one FunctionSymbol
+// Each callee has exactly one FunctionSymbol
 public class FunctionSymbol extends Symbol {
     private String funcName;
     private TypeSymbol returnType;

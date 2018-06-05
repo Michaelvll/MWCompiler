@@ -48,6 +48,7 @@ public class Mwcc {
 
         buildIR();
         if (options.functionInline) functionInliner();
+        if (options.memorizeSearch) memorizeSearch();
         livenessAnalysis();
         if (options.dumpIR) dumpIR();
         allocate();
@@ -140,5 +141,10 @@ public class Mwcc {
     private void livenessAnalysis() {
         LivenessAnalysis livenessAnalysis = new LivenessAnalysis(options);
         livenessAnalysis.apply(programIR);
+    }
+
+    private void memorizeSearch() {
+        MemorizeSearch memorizeSearch = new MemorizeSearch(options);
+        memorizeSearch.apply(programIR);
     }
 }

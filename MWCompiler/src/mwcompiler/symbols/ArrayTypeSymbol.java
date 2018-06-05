@@ -37,7 +37,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
         if (instance == Instance.SIZE) {
             return new SymbolInfo(FunctionSymbol.SIZE);
         }
-        throw new RuntimeException("Array type only has <size> function, <" + instance.getName() + ">");
+        throw new RuntimeException("Array type only has <size> callee, <" + instance.getName() + ">");
     }
 
 

@@ -51,20 +51,20 @@ public class ProgramIR {
     }
 
 //    public void updateRecursiveCall() {
-//        functionMap.values().forEach(function->function.recursiveCalleeSet().clear());
+//        functionMap.values().forEach(callee->callee.recursiveCalleeSet().clear());
 //        Set<Function> recursiveCalleeSet = new HashSet<>();
 //        boolean change = true;
 //        while (change) {
 //            change = false;
-//            for (Function function : functionMap().values()) {
-//                if (function.notUserFunc() && function.isMain()) continue;
-//                Set<Function> calleeSet = function.calleeSet();
+//            for (Function callee : functionMap().values()) {
+//                if (callee.notUserFunc() && callee.isMain()) continue;
+//                Set<Function> calleeSet = callee.calleeSet();
 //                recursiveCalleeSet.clear();
 //                recursiveCalleeSet.addAll(calleeSet);
 //                calleeSet.forEach(callee -> recursiveCalleeSet.addAll(callee.calleeSet()));
-//                if (!recursiveCalleeSet.equals(function.recursiveCalleeSet())) {
-//                    function.recursiveCalleeSet().clear();
-//                    function.recursiveCalleeSet().addAll(recursiveCalleeSet);
+//                if (!recursiveCalleeSet.equals(callee.recursiveCalleeSet())) {
+//                    callee.recursiveCalleeSet().clear();
+//                    callee.recursiveCalleeSet().addAll(recursiveCalleeSet);
 //                    change = true;
 //                }
 //            }

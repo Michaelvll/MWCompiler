@@ -82,11 +82,11 @@ public class NaiveAllocator extends Allocator{
                 var.setStackPos(new Memory(RBP, null, 0, -tmpVarStackTop));
             }
         }
-//        if (function.isMain()) tmpVarStackTop = alignStack(tmpVarStackTop, options.FUNC_CALL_STACK_ALIGN_SIZE);
+//        if (callee.isMain()) tmpVarStackTop = alignStack(tmpVarStackTop, options.FUNC_CALL_STACK_ALIGN_SIZE);
 //        else if (tmpVarStackTop % 16 == 0) tmpVarStackTop += options.FUNC_CALL_STACK_ALIGN_SIZE - options.PTR_SIZE;
 //        if (tmpVarStackTop % 16 == 0) tmpVarStackTop += options.FUNC_CALL_STACK_ALIGN_SIZE - options.PTR_SIZE;
         // TODO : rsp and -0x10 may be helpful
-        // align stack to 16 for function call (align size - address point)
+        // align stack to 16 for callee call (align size - address point)
         function.setVarStackSize(tmpVarStackTop);
     }
 

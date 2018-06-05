@@ -93,7 +93,7 @@ public class GraphAllocator extends Allocator {
                     assignInst.liveOut().forEach(var -> {
                         if (var != val) graph.addEdge(dst, var);
                     });
-                    if (val instanceof Register) graph.addMovNeighbor(dst, (Register) val);
+                    if (val instanceof Register) graph.addMoveNeighbor(dst, (Register) val);
                 } else assignInst.liveOut().forEach(var -> graph.addEdge(dst, var));
 
             }
@@ -104,15 +104,15 @@ public class GraphAllocator extends Allocator {
     private void setArgSuggestReg(List<Operand> args) {
         if (args.size() >= 3)
             if (args.get(2) instanceof Register)
-                graph.addMovNeighbor((Register) args.get(2), RDX);
+                graph.addMoveNeighbor((Register) args.get(2), RDX);
 
         if (args.size() >= 5)
             if (args.get(4) instanceof Register)
-                graph.addMovNeighbor((Register) args.get(4), R8);
+                graph.addMoveNeighbor((Register) args.get(4), R8);
 
         if (args.size() >= 6)
             if (args.get(5) instanceof Register)
-                graph.addMovNeighbor((Register) args.get(5), R9);
+                graph.addMoveNeighbor((Register) args.get(5), R9);
     }
 
     private void assignRegister() {
@@ -125,14 +125,17 @@ public class GraphAllocator extends Allocator {
                 if (neighbor.isAssigned()) neighborReg.add(neighbor.physicalRegister());
 
             // try to assign same register for mov
-            if (!reg.isAssigned())
-                for (Register movNeighbor : reg.movNeighors()) {
+            if (!reg.isAssigned()) {
+                LinkedList<Register> moveNeighbor = new LinkedList<>(reg.moveNeighors());
+                Collections.reverse(moveNeighbor);
+                for (Register movNeighbor : moveNeighbor) {
                     if (movNeighbor.isAssigned() && !neighborReg.contains(movNeighbor.physicalRegister())) {
                         reg.setPhysicalRegister(movNeighbor.physicalRegister());
 //                        System.err.println("Allocate suggested register for var: " + reg.irName() + " -> " + movNeighbor.physicalRegister().nasmName());
                         break;
                     }
                 }
+            }
 
             // try to assign caller save registers
             if (!reg.isAssigned())
@@ -177,10 +180,10 @@ public class GraphAllocator extends Allocator {
 //            System.err.println(a.irName() + "<->" + b.irName());
         }
 
-        private void addMovNeighbor(Register a, Register b) {
+        private void addMoveNeighbor(Register a, Register b) {
             if (a == b) return;
-            a.movNeighors().add(b);
-            b.movNeighors().add(a);
+            a.moveNeighors().add(b);
+            b.moveNeighors().add(a);
         }
 
         private void setDegree() {

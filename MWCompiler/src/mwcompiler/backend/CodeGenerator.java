@@ -78,7 +78,7 @@ public class CodeGenerator implements IRVisitor<String> {
         // ====== prologue ==========
         /* stack frame
          * ---------
-         * function stack
+         * callee stack
          * --------- rbp
          * origin rbp
          * callee-save regs
@@ -86,7 +86,7 @@ public class CodeGenerator implements IRVisitor<String> {
          * param n
          * param n-1
          * ... param 7
-         * former function stack
+         * former callee stack
          */
         if (!function.isMain()) {
             // Save used callee-save registers
@@ -104,7 +104,7 @@ public class CodeGenerator implements IRVisitor<String> {
         for (int index = 0; index < params.size(); ++index) {
             if (params.get(index).isUnused()) {
                 System.err.println("Param " + StringProcess.getRefString(params.get(index).irName())
-                        + "is unused in function " + StringProcess.getRefString(function.name()));
+                        + "is unused in callee " + StringProcess.getRefString(function.name()));
                 continue;
             }
             if (index < paramRegs.size()) {
@@ -221,15 +221,15 @@ public class CodeGenerator implements IRVisitor<String> {
             arg = visitMemory(arg, RAX, RCX);
             append("push", arg);
         }
-        if (inst.function() == Function.SCANF_INT) {
+        if (inst.callee() == Function.SCANF_INT) {
             visitScanfInt(inst, RSI);
             return null;
         }
-        if (inst.function() == Function.STR_PARSE_INT) {
+        if (inst.callee() == Function.STR_PARSE_INT) {
             visitScanfInt(inst, RDX);
             return null;
         }
-        if (inst.function() == Function.STR_ORD) {
+        if (inst.callee() == Function.STR_ORD) {
             Operand dst = inst.dst();
             if (isMem(dst)) dst = RAX;
             append("movsx", visit(dst), "byte [" + RSI.nasmName() + " + " + RDI.nasmName() + "]");
@@ -237,9 +237,9 @@ public class CodeGenerator implements IRVisitor<String> {
             return null;
         }
 
-        //        if (inst.function() == Function.PRINTF || inst.function() == Function.PRINT_STR) append("xor", RAX, RAX);
+        //        if (inst.callee() == Function.PRINTF || inst.callee() == Function.PRINT_STR) append("xor", RAX, RAX);
         // TODO: Align stack to 16
-        append("call", inst.function().nasmName());
+        append("call", inst.callee().nasmName());
         if (inst.dst() != null)
             append("mov", inst.dst(), RAX); // dst must be register(Var) which is guaranteed by the basic block push back
         if (argStackSize > 0) append("add", RSP, argStackSize);

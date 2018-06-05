@@ -51,12 +51,12 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
         SymbolInfo mainSymbolInfo = currentSymbolTable
                 .findIn(Instance.builder("main"));
         if (mainSymbolInfo == null) {
-            throw new CompileError(stage, "Main function is needed.", mainLocation);
+            throw new CompileError(stage, "Main callee is needed.", mainLocation);
         } else {
             FunctionSymbol mainSymbol = (FunctionSymbol) mainSymbolInfo.getSymbol();
             if (mainSymbol.getReturnType() != BaseTypeSymbol.INT_TYPE_SYMBOL
                     || mainSymbol.getParams().size() != 0) {
-                throw new CompileError(stage, "Main function must return int and have no parameters.", mainLocation);
+                throw new CompileError(stage, "Main callee must return int and have no parameters.", mainLocation);
             }
             FunctionSymbol.MAIN = mainSymbol;
         }
@@ -122,7 +122,7 @@ public class ForwardRefPreprocessAstVisitor extends AstBaseVisitor<Void> {
     @Override
     public Void visit(FunctionDeclNode node) {
         if (currentSymbolTable.findIn(node.getInstance()) != null) {
-            throw new CompileError(stage, "Redeclare function "
+            throw new CompileError(stage, "Redeclare callee "
                     + StringProcess.getRefString(node.getInstance().getName()) + "in the same scope ",
                     node.location());
         }

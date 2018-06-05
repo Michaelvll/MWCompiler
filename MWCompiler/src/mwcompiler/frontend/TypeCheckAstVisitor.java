@@ -340,7 +340,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     private void checkArgs(List<ExprNode> args, List<TypeSymbol> params, Location location) {
         if (args.size() != params.size()) {
             throw new CompileError(stage,
-                    "Number of arguments in function caller " + "does not match the declaration. ", location);
+                    "Number of arguments in callee caller " + "does not match the declaration. ", location);
         }
         for (int index = 0; index < args.size(); ++index) {
             ExprType argType = visit(args.get(index));
@@ -360,7 +360,7 @@ public class TypeCheckAstVisitor implements AstVisitor<ExprType> {
     public ExprType visit(FunctionCallNode node) {
         ExprType callerType = visit(node.getCaller());
         if (!(callerType.symbol instanceof FunctionSymbol)) {
-            throw new CompileError(stage, "A non function name "
+            throw new CompileError(stage, "A non callee name "
                     + StringProcess.getRefString(callerType.symbol.getName()) + "is not callable ",
                     node.location());
         }
