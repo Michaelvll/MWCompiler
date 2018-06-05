@@ -47,8 +47,8 @@ public class Mwcc {
         if (options.dumpAst) dumpAst();
 
         buildIR();
-        if (options.functionInline) functionInliner();
         if (options.memorizeSearch) memorizeSearch();
+        if (options.functionInline) functionInliner();
         livenessAnalysis();
         if (options.dumpIR) dumpIR();
         allocate();
