@@ -6,13 +6,11 @@ import mwcompiler.ir.nodes.Instruction;
 import mwcompiler.ir.nodes.ProgramIR;
 import mwcompiler.ir.nodes.assign.AssignInst;
 import mwcompiler.ir.nodes.assign.FunctionCallInst;
+import mwcompiler.ir.nodes.assign.MoveInst;
 import mwcompiler.ir.nodes.jump.CondJumpInst;
 import mwcompiler.ir.nodes.jump.DirectJumpInst;
 import mwcompiler.ir.nodes.jump.ReturnInst;
-import mwcompiler.ir.operands.Memory;
-import mwcompiler.ir.operands.MutableOperand;
-import mwcompiler.ir.operands.Register;
-import mwcompiler.ir.operands.Var;
+import mwcompiler.ir.operands.*;
 import mwcompiler.utility.CompilerOptions;
 import mwcompiler.utility.Pair;
 
@@ -74,6 +72,18 @@ public class LivenessAnalysis {
                     } else if (!(inst instanceof ReturnInst)) {
                         liveOut.addAll(inst.next.liveIn());
                     }
+                    if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).callee() == Function.MALLOC) {
+                        Var memBase = (Var) ((FunctionCallInst) inst).dst();
+                        if (!memBase.isGlobal() && inst.next instanceof MoveInst) {
+                            MoveInst next = (MoveInst) inst.next;
+                            if (next.dst() instanceof Memory && !next.liveOut().contains(memBase)) {
+                                Memory dst = (Memory) next.dst();
+                                if (dst.baseReg() == memBase && dst.indexReg() == null && next.val() instanceof IntLiteral) {
+                                    liveOut.remove(memBase);
+                                }
+                            }
+                        }
+                    }
 
                     if (liveIn.equals(inst.liveIn()) && liveOut.equals(inst.liveOut())) continue;
                     change = true;
@@ -102,6 +112,13 @@ public class LivenessAnalysis {
                 if (inst instanceof AssignInst) {
                     for (Var dst : inst.dstLocalVar()) {
                         if (!inst.liveOut().contains(dst) && !(inst instanceof FunctionCallInst)) {
+                            blocks.get(index).delete(inst);
+                            eliminateChange = true;
+                        }
+                        if (inst instanceof FunctionCallInst && ((FunctionCallInst) inst).callee() == Function.MALLOC) {
+                            Var memBase = (Var) ((FunctionCallInst) inst).dst();
+                            if (inst.liveOut().contains(memBase) || memBase.isGlobal()) continue;
+                            blocks.get(index).delete(inst.next);
                             blocks.get(index).delete(inst);
                             eliminateChange = true;
                         }

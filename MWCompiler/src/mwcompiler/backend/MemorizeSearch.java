@@ -75,7 +75,7 @@ public class MemorizeSearch {
                 nextBlock.setFront(inst.next);
                 nextBlock.setEnd(block.back());
                 block.setEnd(inst.prev);
-                inst.prev.next = null;
+                if (inst.prev != null) inst.prev.next = null;
 
                 // Index validation test
                 Var cmpRes = Var.tmpBuilder("memorize_cmp", true);
@@ -110,7 +110,7 @@ public class MemorizeSearch {
 
     private void identifyMemorizeSearch(Function function) {
         if (function.notUserFunc()) return;
-        boolean needMemorize = false;
+        Boolean needMemorize = null;
         if (function.paramVars().size() != 1 || !function.needReturn()) return;
         for (BasicBlock block : function.basicBlocks()) {
             for (Instruction inst = block.front(); inst != null; inst = inst.next) {
@@ -134,10 +134,12 @@ public class MemorizeSearch {
                         break;
                     }
                 }
+                if (needMemorize != null && !needMemorize) break;
             }
+            if (needMemorize != null && !needMemorize) break;
         }
-        function.setMemorizeable(needMemorize);
-        if (needMemorize) {
+        function.setMemorizeable(needMemorize != null && needMemorize);
+        if (needMemorize != null && needMemorize) {
             Var memBase = Var.tmpBuilder(function.name() + "_mem_search_base");
             memBase.setGlobal();
             programIR.addGlobal(memBase, null);
