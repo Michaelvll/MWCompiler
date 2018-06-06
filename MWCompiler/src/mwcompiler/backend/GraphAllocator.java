@@ -161,7 +161,7 @@ public class GraphAllocator extends Allocator {
             if (!reg.isAssigned()) {
                 stackTop = alignStack(stackTop + options.PTR_SIZE, options.PTR_SIZE);
                 ((Var) reg).setStackPos(new Memory(RBP, null, 0, -stackTop));
-                System.err.println("set var: " + reg.irName() + " -> stackTop: " + stackTop);
+//                System.err.println("set var: " + reg.irName() + " -> stackTop: " + stackTop);
             }
 
         }
