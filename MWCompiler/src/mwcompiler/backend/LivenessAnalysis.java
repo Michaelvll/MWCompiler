@@ -130,11 +130,11 @@ public class LivenessAnalysis {
 
     private void loopEliminate(Function function) {
         if (function.notUserFunc()) return;
-        List<List<BasicBlock>> loopBlocks = new ArrayList<>();
         List<Pair<Integer, Integer>> loopIndex = new ArrayList<>();
         Set<BasicBlock> visitedBlock = new HashSet<>();
         List<BasicBlock> functionBlocks = function.basicBlocks();
         for (BasicBlock block : functionBlocks) {
+            visitedBlock.add(block);
             if (block.back() instanceof CondJumpInst) {
                 CondJumpInst condJumpInst = (CondJumpInst) block.back();
                 Integer start = null;
@@ -145,22 +145,20 @@ public class LivenessAnalysis {
                 if (start != null && start != 0) {
                     int end = functionBlocks.indexOf(block);
                     if (end - start <= 1) {
-                        loopBlocks.add(functionBlocks.subList(start, end));
                         loopIndex.add(new Pair<>(start, end));
                     }
                 }
             }
-            visitedBlock.add(block);
         }
         Set<Register> out;
         Set<Integer> deleteIndex = new HashSet<>();
-        for (int index = 0; index < loopBlocks.size(); ++index) {
-            int start = loopIndex.get(index).first;
-            int end = loopIndex.get(index).second;
+        for (Pair<Integer, Integer> aLoopIndex : loopIndex) {
+            int start = aLoopIndex.first;
+            int end = aLoopIndex.second;
             out = functionBlocks.get(end + 1).front().liveIn();
             boolean delete = true;
-            for (BasicBlock block : loopBlocks.get(index)) {
-                for (Instruction inst = block.front(); inst != null; inst = inst.next) {
+            for (int sub = start; sub <= end; ++sub) {
+                for (Instruction inst = functionBlocks.get(sub).front(); inst != null; inst = inst.next) {
                     if (inst instanceof ReturnInst || inst instanceof FunctionCallInst) {
                         delete = false;
                         break;
@@ -176,11 +174,11 @@ public class LivenessAnalysis {
                 if (!delete) break;
             }
             if (delete) {
-                System.err.println("Delete irrelevant loop: " + loopBlocks.get(index).get(0).name());
-                BasicBlock currentBlock = loopBlocks.get(index).get(0);
-                BasicBlock nextBlock = functionBlocks.get(end + 1);
+                System.err.println("Delete irrelevant loop: " + functionBlocks.get(start).name());
+                BasicBlock currentBlock = functionBlocks.get(start);
                 currentBlock.setFront(null);
                 currentBlock.setEnd(null);
+                BasicBlock nextBlock = functionBlocks.get(end + 1);
                 currentBlock.pushBack(new DirectJumpInst(nextBlock));
                 for (int i = start + 1; i <= end; ++i) deleteIndex.add(i);
             }
