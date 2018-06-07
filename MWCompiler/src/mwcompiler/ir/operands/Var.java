@@ -3,10 +3,7 @@ package mwcompiler.ir.operands;
 import mwcompiler.symbols.Instance;
 import mwcompiler.symbols.SymbolTable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Var extends Register {
     private String name;
@@ -21,8 +18,8 @@ public class Var extends Register {
     private int useTime = 0;
     private boolean compareTmp = false;
 
-    // For graph coloring
-
+    // only on left
+    private boolean onlyOnLeft = false;
 
     private static final String GLOBAL_PREFIX = "_user_global_";
 
@@ -157,4 +154,14 @@ public class Var extends Register {
     public boolean isUnused() {
         return physicalRegister == null && stackPos == null;
     }
+
+    public boolean isOnlyOnLeft() {
+        return onlyOnLeft;
+    }
+
+    public void setOnlyOnLeft() {
+        this.onlyOnLeft = true;
+    }
+
+    public List<Var> usedVar() {return new ArrayList<>(Collections.singleton(this));}
 }

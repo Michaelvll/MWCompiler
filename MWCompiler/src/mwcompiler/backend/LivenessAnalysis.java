@@ -123,6 +123,21 @@ public class LivenessAnalysis {
                             eliminateChange = true;
                         }
                     }
+                    for (Var var : inst.usedLocalVar()) {
+                        if (var.isOnlyOnLeft()) {
+                            MutableOperand dst = ((AssignInst) inst).dst();
+                            if (dst != null) {
+                                if (dst instanceof Var) ((Var) dst).setOnlyOnLeft();
+                                else if (dst instanceof Memory) {
+                                    Var base = (Var) ((Memory) dst).baseReg();
+                                    base.setOnlyOnLeft();
+                                }
+                            }
+                            System.err.println("Delete only on left inst: " + var.irName());
+                            blocks.get(index).delete(inst);
+                            eliminateChange = true;
+                        }
+                    }
                 }
             }
         }

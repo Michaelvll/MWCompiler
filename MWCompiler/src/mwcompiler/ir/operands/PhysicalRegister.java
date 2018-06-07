@@ -111,4 +111,9 @@ public class PhysicalRegister extends Register {
     public void setPhysicalRegister(PhysicalRegister preg) {
         throw new RuntimeException("Can not assign physical register physical register.");
     }
+
+    @Override
+    public List<Var> usedVar() {
+        return new ArrayList<>();
+    }
 }

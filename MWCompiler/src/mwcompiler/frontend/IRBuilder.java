@@ -47,6 +47,10 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     private int valTag = 0;
 
+    private Set<Var> onlyOnLeft = new HashSet<>();
+    private Set<Var> removedLeft = new HashSet<>();
+    boolean def = false;
+
     public IRBuilder(CompilerOptions options) {
         this.options = options;
         PTR_SIZE = new IntLiteral(options.PTR_SIZE);
@@ -128,7 +132,7 @@ public class IRBuilder implements AstVisitor<Operand> {
         globalReverseInitBlock.getFirst().pushBack(new DirectJumpInst(mainFunction.basicBlocks().get(0)));
         globalReverseInitBlock.forEach(mainFunction::pushFront);
         popValTag();
-
+        onlyOnLeft.forEach(Var::setOnlyOnLeft);
         return null;
     }
 
@@ -217,7 +221,9 @@ public class IRBuilder implements AstVisitor<Operand> {
 
 
     private Operand visitAssign(BinaryExprNode node) {
+        if (node.right().type() instanceof BaseTypeSymbol) def = true;
         MutableOperand left = getMutableOperand(node.left());
+        def = false;
         Operand right = visit(node.right());
 //        System.err.println(node.location().irName());
         resetCurrentBasicBlockBackDst(left, right, node.left().type());
@@ -225,8 +231,11 @@ public class IRBuilder implements AstVisitor<Operand> {
     }
 
     private Operand visitArithComp(Operand left, ExprOps op, Operand right, TypeSymbol type) {
+        boolean originDef = def;
+        def = false;
         Operand leftVal = getVal(left);
         Operand rightVal = getVal(right);
+        def = originDef;
         if (leftVal instanceof Literal && rightVal instanceof Literal) {
             try {
                 return LiteralProcess.calc(leftVal, op, rightVal);
@@ -334,6 +343,7 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(BinaryExprNode node) {
         ExprOps op = node.op();
+
         switch (op) {
             case ASSIGN: return visitAssign(node);
             case ADD: case SUB: case MUL: case DIV: case MOD: case EQ: case NEQ: case GT: case GTE: case LT:
@@ -347,23 +357,30 @@ public class IRBuilder implements AstVisitor<Operand> {
 
     @Override
     public Operand visit(UnaryExprNode node) {
+        boolean originDef = def;
+        def = false;
         ExprOps op = node.getOp();
         Operand src;
+        Operand ret;
         Var dst = Var.tmpBuilder(op.toString());
         switch (op) {
-            case ADD: return visit(node.getExpr());
+            case ADD: ret = visit(node.getExpr());
+                break;
             case SUB:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return new IntLiteral(-((IntLiteral) src).val());
-                return currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                ret = currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                break;
             case BITNOT:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return new IntLiteral(~((IntLiteral) src).val());
-                return currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                ret = currentBasicBlock.pushBack(new UnaryExprInst(dst, op, src));
+                break;
             case NOT:
                 src = visit(node.getExpr());
                 if (src instanceof IntLiteral) return ((IntLiteral) src).val() == 1 ? ZERO_LITERAL : ONE_LITERAL;
-                return currentBasicBlock.pushBack(new BinaryExprInst(dst, src, EQ, ZERO_LITERAL));
+                ret = currentBasicBlock.pushBack(new BinaryExprInst(dst, src, EQ, ZERO_LITERAL));
+                break;
             case DEC: case INC: case DEC_SUFF: case INC_SUFF:
                 src = getMutableOperand(node.getExpr());
                 boolean isINC = op == INC || op == INC_SUFF;
@@ -374,16 +391,19 @@ public class IRBuilder implements AstVisitor<Operand> {
                     if (val != null) {
                         IntLiteral newVal = new IntLiteral(isINC ? val.val() + 1 : val.val() - 1);
                         currentBasicBlock.pushBack(new MoveInst(dst, newVal));
+                        def = originDef;
                         return isSUF ? val : newVal;
                     }
                 }
                 MutableOperand sufTmpReg = Var.tmpBuilder("SUF");
                 if (isSUF) currentBasicBlock.pushBack(new MoveInst(sufTmpReg, src));
-                Operand ret = currentBasicBlock.pushBack(new BinaryExprInst((MutableOperand) src, src, isINC ? ADD : SUB, ONE_LITERAL));
-                return isSUF ? sufTmpReg : ret;
+                Operand tmpRet = currentBasicBlock.pushBack(new BinaryExprInst((MutableOperand) src, src, isINC ? ADD : SUB, ONE_LITERAL));
+                ret =  isSUF ? sufTmpReg : tmpRet;
+                break;
             default: throw new RuntimeException("Compiler Bug: (IR building) Undefined operation for unary expression");
         }
-
+        def = originDef;
+        return ret;
     }
 
     private Operand visitCreateClass(BaseTypeSymbol classType) {
@@ -623,7 +643,10 @@ public class IRBuilder implements AstVisitor<Operand> {
     @Override
     public Operand visit(BrackMemberNode node) {
         Operand container = getParamForMem(visit(node.getContainer()), "array_base");
+        boolean originDef = def;
+        def = false;
         Operand subscript = getParamForMem(visit(node.getSubscript()), "array_val");
+        def = originDef;
         return new Memory((Register) container, subscript, options.PTR_SIZE, options.LENGTH_SIZE);
     }
 
@@ -666,6 +689,13 @@ public class IRBuilder implements AstVisitor<Operand> {
         if (symbolInfo.isClassMember())
             return new Memory(classDeclThisReg, null, 0, symbolInfo.getOffset());
         MutableOperand reg = symbolInfo.getOperand();
+        if (reg instanceof Var) {
+            if (def && !removedLeft.contains(reg)) onlyOnLeft.add((Var) reg);
+            else if (!def) {
+                onlyOnLeft.remove(reg);
+                removedLeft.add((Var) reg);
+            }
+        }
         return getVal(reg);
     }
 
