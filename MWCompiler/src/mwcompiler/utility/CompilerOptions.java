@@ -53,19 +53,19 @@ public class CompilerOptions {
 
         options.addOption(Option.builder("h").longOpt("help").hasArg(false).desc("Print help message (this message)").build());
 
-        options.addOption(Option.builder().longOpt("dump-ast").desc("Dump dumpAst for source code").hasArg(false).build());
+        options.addOption(Option.builder("dumpAst").longOpt("dump-ast").desc("Dump dumpAst for source code").hasArg(false).build());
 
-        options.addOption(Option.builder().longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build());
+        options.addOption(Option.builder("dumpIR").longOpt("dump-ir").desc("Dump dumpIR for source code").hasArg(false).build());
 
-        options.addOption(Option.builder().longOpt("nasm-lib-include-cmd").desc("Add include command at the top of nasm output file").hasArg(false).build());
+        options.addOption(Option.builder("nasmLibIncludeCmd").longOpt("nasm-lib-include-cmd").desc("Add include command at the top of nasm output file").hasArg(false).build());
 
         options.addOption(Option.builder("a").longOpt("allocator").desc("Register allocator [Naive]/Graph").hasArg().build());
 
         options.addOption(Option.builder("dinline").longOpt("disable-callee-inline").hasArg(false).desc("Disable callee inline").build());
 
-        options.addOption(Option.builder().longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive callee inline level[default 1]").build());
+        options.addOption(Option.builder("recursiveInlineLevel").longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive callee inline level[default 1]").build());
 
-        options.addOption(Option.builder().longOpt("memorize-search").hasArg(false).desc("Enable memorize search optimization").build());
+        options.addOption(Option.builder("memorizeSearch").longOpt("memorize-search").hasArg(false).desc("Enable memorize search optimization").build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
