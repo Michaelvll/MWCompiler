@@ -4,9 +4,8 @@ A Compiler for Mx language @ACM Class 2016, SJTU. Written in 2018.
 
 ## Target
 
-This Compiler is aimed for translating *Mx* program into x64-nasm code, which can be linked by gcc and executed on linux.
-
-The language feature of *Mx* is shown in the [M_language_manual](./MxDescribe/M_language_manual.pdf). And the compiler is for this specific language.
+* This compiler is aimed for translating *Mx* program into x64-nasm code, which can be linked by gcc and executed on linux.
+* The language feature of *Mx* is shown in the [M_language_manual](./MxDescribe/M_language_manual.pdf). And the compiler is for this specific language.
 
 ## Prerequest
 
