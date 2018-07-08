@@ -19,7 +19,7 @@ A Compiler for Mx language @ACM Class 2016, SJTU. Written in 2018.
 
 Arguments that can be passed into the MWCompiler are shown below.
 
-    usage: MWcc [options] <File>
+    usage: Mwcc [Options] <File>
     -a,--allocator <arg>                                   Register allocator [Naive]/Graph
     -astOutput <Ast Output File>                           Path to the output file for ast
     -dinline,--disable-callee-inline                       Disable callee inline
@@ -28,11 +28,11 @@ Arguments that can be passed into the MWCompiler are shown below.
     -h,--help                                              Print help message (this message)
     -i,--input <Input File>                                Path to the input file
     -irOutput <IR Output File>                             Path to the output file for ir
-    -memorizeSearch,--memorize-search                      Enable memorize search optimization
+    -memoizedSearch,--memoized-search                      Enable memoized search optimization 
     -nasmLibIncludeCmd,--nasm-lib-include-cmd              Add include command at the top of nasm output file
     -o,--output <Output File>                              Path to the output file
     -recursiveInlineLevel,--recursive-inline-level <arg>   Recursive callee inline level[default 1]
-    -Wall                                                  Print warnings to stderr
+    -Wall                                                  Print warnings to stderr  
 
 ## Compontents of MWCompiler
 

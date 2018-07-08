@@ -45,7 +45,7 @@ public class Function {
 
     // For memorize search
     private boolean memorizeable = false;
-    private Var memorizeSearchMemBase;
+    private Var memoizedSearchMemBase;
 
     public Function(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
@@ -268,11 +268,11 @@ public class Function {
         this.memorizeable = memorizeable;
     }
 
-    public Var memorizeSearchMemBase() {
-        return memorizeSearchMemBase;
+    public Var memoizedSearchMemBase() {
+        return memoizedSearchMemBase;
     }
 
-    public void setMemorizeSearchMemBase(Var memorizeSearchMemBase) {
-        this.memorizeSearchMemBase = memorizeSearchMemBase;
+    public void setmemoizedSearchMemBase(Var memoizedSearchMemBase) {
+        this.memoizedSearchMemBase = memoizedSearchMemBase;
     }
 }

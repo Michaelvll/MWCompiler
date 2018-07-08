@@ -32,7 +32,7 @@ public class CompilerOptions {
 
     // Function memorize search
     public final int MEMORIZE_SEARCH_LEVEL = 1 << 8;
-    public boolean memorizeSearch = false;
+    public boolean memoizedSearch = false;
 
 
     public void compilerArgSolve(String[] args) {
@@ -65,7 +65,7 @@ public class CompilerOptions {
 
         options.addOption(Option.builder("recursiveInlineLevel").longOpt("recursive-inline-level").hasArg(true).type(Integer.TYPE).desc("Recursive callee inline level[default 1]").build());
 
-        options.addOption(Option.builder("memorizeSearch").longOpt("memorize-search").hasArg(false).desc("Enable memorize search optimization").build());
+        options.addOption(Option.builder("memoizedSearch").longOpt("memoized-search").hasArg(false).desc("Enable memoized search optimization").build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -125,7 +125,7 @@ public class CompilerOptions {
                 INLINE_RECURSIVE_LEVEL = Integer.valueOf(cmd.getOptionValue("recursive-inline-level"));
 
             if (cmd.hasOption("memorize-search"))
-                memorizeSearch = true;
+                memoizedSearch = true;
 
         } catch (ParseException e) {
             System.err.println("Unexpected exception: " + e.getMessage());

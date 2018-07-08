@@ -19,11 +19,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
-public class MemorizeSearch {
+public class Memoization {
     private ProgramIR programIR;
     private CompilerOptions options;
 
-    public MemorizeSearch(CompilerOptions options) {
+    public Memoization(CompilerOptions options) {
         this.options = options;
     }
 
@@ -32,7 +32,7 @@ public class MemorizeSearch {
 
         for (Function function : programIR.functionMap().values()) {
             if (function.notUserFunc()) continue;
-            identifyMemorizeSearch(function);
+            identifymemoizedSearch(function);
             if (function.memorizeable()) {
                 initBase(function);
                 LinkedList<BasicBlock> newBlocks = new LinkedList<>();
@@ -48,11 +48,11 @@ public class MemorizeSearch {
     private void initBase(Function function) {
         Function mainFunc = programIR.getFunction(FunctionSymbol.MAIN);
         BasicBlock mainFirstBlock = mainFunc.basicBlocks().get(0);
-        BasicBlock memorizeSearchInit = new BasicBlock(mainFunc, mainFirstBlock.getCurrentSymbolTable(), "memorizeSearchInit", mainFirstBlock.valTag());
-        memorizeSearchInit.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(new IntLiteral(options.MEMORIZE_SEARCH_LEVEL * options.PTR_SIZE))), function.memorizeSearchMemBase()));
-        memorizeSearchInit.pushBack(new DirectJumpInst(mainFirstBlock));
+        BasicBlock memoizedSearchInit = new BasicBlock(mainFunc, mainFirstBlock.getCurrentSymbolTable(), "memoizedSearchInit", mainFirstBlock.valTag());
+        memoizedSearchInit.pushBack(new FunctionCallInst(Function.MALLOC, new ArrayList<>(Collections.singleton(new IntLiteral(options.MEMORIZE_SEARCH_LEVEL * options.PTR_SIZE))), function.memoizedSearchMemBase()));
+        memoizedSearchInit.pushBack(new DirectJumpInst(mainFirstBlock));
         LinkedList<BasicBlock> newBlocks = new LinkedList<>(mainFunc.basicBlocks());
-        newBlocks.addFirst(memorizeSearchInit);
+        newBlocks.addFirst(memoizedSearchInit);
         mainFunc.setBasicBlocks(newBlocks);
     }
 
@@ -84,14 +84,14 @@ public class MemorizeSearch {
 
                 // Result fetch
                 Var res = Var.tmpBuilder("memorize_res");
-                getRes.pushBack(new MoveInst(res, new Memory(function.memorizeSearchMemBase(), arg, options.PTR_SIZE, 0)));
+                getRes.pushBack(new MoveInst(res, new Memory(function.memoizedSearchMemBase(), arg, options.PTR_SIZE, 0)));
                 Var validCmpRes = Var.tmpBuilder("memorize_valid", true);
                 BinaryExprInst validCmp = new BinaryExprInst(validCmpRes, res, ExprOps.NEQ, IntLiteral.ZERO_LITERAL);
                 getRes.pushBack(new CondJumpInst(validCmpRes, validCmp, setRes, callSetBlock)); // Result validation test
 
                 // call and set
                 callSetBlock.pushBack(new FunctionCallInst(function, functionCallInst.args(), (Register) functionCallInst.dst()));
-                callSetBlock.pushBack(new MoveInst(new Memory(function.memorizeSearchMemBase(), arg, options.PTR_SIZE, 0), functionCallInst.dst()));
+                callSetBlock.pushBack(new MoveInst(new Memory(function.memoizedSearchMemBase(), arg, options.PTR_SIZE, 0), functionCallInst.dst()));
                 callSetBlock.pushBack(new DirectJumpInst(nextBlock));
 
                 // Result set
@@ -108,7 +108,7 @@ public class MemorizeSearch {
         return newBlocks;
     }
 
-    private void identifyMemorizeSearch(Function function) {
+    private void identifymemoizedSearch(Function function) {
         if (function.notUserFunc()) return;
         Boolean needMemorize = null;
         if (function.paramVars().size() != 1 || !function.needReturn()) return;
@@ -143,7 +143,7 @@ public class MemorizeSearch {
             Var memBase = Var.tmpBuilder(function.name() + "_mem_search_base");
             memBase.setGlobal();
             programIR.addGlobal(memBase, null);
-            function.setMemorizeSearchMemBase(memBase);
+            function.setmemoizedSearchMemBase(memBase);
         }
     }
 
