@@ -1,6 +1,6 @@
 # MWCompiler
 
-A Compiler for Mx language @ACM Class 2016, SJTU. Written in 2018.
+This project is a Compiler for Mx language, a course project for Compiler 2018(MS208), ACM Class 2016, SJTU. Written in 2018.
 
 ## Target
 
