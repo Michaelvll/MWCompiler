@@ -43,7 +43,7 @@ public class LivenessAnalysis {
                 }
             });
             System.err.println("eliminate for " + String.valueOf(++iterate));
-            if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 10) break;
+            if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - oldTime) > 12) break;
         } while (eliminateChange);
     }
 
