@@ -26,9 +26,9 @@ public class CompilerOptions {
     public boolean graphAllocate = false;
     public boolean functionInline = true;
     // Function inline
-    public final int INLINE_CALLEE_BOUND = 1 << 6;
+    public final int INLINE_CALLEE_BOUND = 1 << 7;
     public final int INLINE_CALLER_BOUND = 1 << 10;
-    public Integer INLINE_RECURSIVE_LEVEL = 5;
+    public Integer INLINE_RECURSIVE_LEVEL = 8;
 
     // Function memorize search
     public final int MEMORIZE_SEARCH_LEVEL = 1 << 8;
